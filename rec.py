@@ -1,77 +1,72 @@
-import matplotlib.pyplot as plt
-import cv2
+from cam_utils import get_img_dimensions, get_img_framerate, get_img_dtype, FJWriter
+import tkinter as tk
+import queue
+import threading
 from simple_pyspin import Camera
-import time, threading, queue, os
+import time
+from PIL import Image, ImageTk
 
-from datetime import datetime
-import numpy as np
-import skvideo
-import skvideo.io
+if __name__ == '__main__':
+    with Camera() as cam:
+        # Set a custom Video Mode
+        cam.VideoMode = "Mode0"
+        cam.Width = cam.SensorWidth // 2
+        cam.Height = cam.SensorHeight // 2
+        cam.OffsetX = cam.SensorWidth // 4
+        cam.OffsetY = cam.SensorHeight // 4
+        cam.ExposureMode = 'Timed'
+        cam.ExposureAuto = 'Continuous'
+        # cam.StrobeEnabled = 'On'
 
-movie_name='/home/baccuslab/testvids/3.avi'
-numImages=10
+        window = tk.Tk()
+        window.title("camera acquisition")
+        window.geometry('1000x1000')
 
-fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-writer=cv2.VideoWriter(savepath,fourcc,30,(50,50))
-
-
-def save_img(image_queue,i): #function to save video frames from the queue in a separate thread
-    while True:
-        if image_queue.empty():
-            print('empty')
-            break
-        else:
-            img = image_queue.get()
-            print(img.shape)
-            print(len(imgs))
-            imgs.append(img)
-            print(len(imgs))
-            # writer.writeFrame(img) 
-            image_queue.task_done()
-
-
-
-image_queue = queue.Queue() #create queue in memory to store images while asynchronously written to disk
-fps = 60
-#crfOut = 21 #controls tradeoff between quality and storage, see https://trac.ffmpeg.org/wiki/Encode/H.264 
-#ffmpegThreads = 4 #this controls tradeoff between CPU usage and memory usage; video writes can take a long time if this value is low
-##crfOut = 18 #this should look nearly lossless
-##writer = skvideo.io.FFmpegWriter(movieName, outputdict={'-r': str(FRAME_RATE_OUT), '-vcodec': 'libx264', '-crf': str(crfOut)}) # with frame rate
-#writer = skvideo.io.FFmpegWriter(movie_name, outputdict={'-vcodec': 'libx264', '-crf': str(crfOut), '-threads': str(ffmpegThreads)})
-crf = 17
-with Camera() as cam:
-    cam.start()
-    array = cam.get_array()
-    cam.stop()
-
-width = array.shape[1]
-height = array.shape[0]
-
-writer = skvideo.io.FFmpegWriter(movie_name, 
-            outputdict={'-r': str(fps), '-c:v': 'libx264', '-crf': str(crf), '-preset': 'ultrafast', '-pix_fmt': 'yuv444p'}
-)
-
-save_thread = threading.Thread(target=save_img, args=(image_queue,i))
-save_thread.start()  
-
-with Camera() as cam:
-    cam.start()
-    
-
-    t_start = time.time()
-
-    for i in range(numImages):
-        image = cam.get_array() #get pointer to next image in camera buffer; blocks until image arrives via USB; timeout=INF
-        print('ha')
-        print(image.shape)
-        image_queue.put(image) #put next image in queue
+        textlbl = tk.Label(window, text="elapsed time: ")
+        textlbl.grid(column=0, row=0)
+        imglabel = tk.Label(window) # make Label widget to hold image
+        imglabel.place(x=10, y=20) #pixels from top-left
+        window.update() #update TCL tasks to make window appear
+        #cam.Binning
+        cam.start()
         
-        if i%5 == 0: #update screen every 10 frames 
-            timeElapsed = str(time.time() - t_start)
-            timeElapsedStr = "elapsed time: " + timeElapsed[0:5] + " sec"
-            
-    cam.stop()
+        # Width and height throttle framerate
+        cam.AcquisitionFrameRateEnabled = True
+        cam.AcquisitionFrameRateAuto= 'Off'
+        cam.AcquisitionFrameRate=30
 
-# writer.close()
-# image_queue.join()
-print(len(imgs))
+        width,height = get_img_dimensions()
+        framerate = get_img_framerate()    
+        dtype = get_img_dtype()
+        
+        assert dtype[-1] == '8', 'Data should be in proper bit depth'
+
+        savepath= '/home/baccuslab/queuedUp.mp4'
+        fjw = FJWriter(savepath,framerate,(width,height))
+        tStart = time.time()
+        
+
+        for i in range(int(framerate)*60):
+            frame = cam.get_array()
+            fjw.image_queue.put(frame)
+            
+            if i==int(framerate)*5:
+                expt = cam.__getattr__('ExposureTime')
+                # print(expt)
+                # cam.ExposureTime = expt/4
+                print('exposured')
+            if i%(framerate/10) == 0: #update screen every 10 frames 
+                timeElapsed = str(time.time() - tStart)
+                timeElapsedStr = "elapsed time: " + timeElapsed[0:5] + " sec"
+                textlbl.configure(text=timeElapsedStr)
+                I = ImageTk.PhotoImage(Image.fromarray(frame))
+                imglabel.configure(image=I)
+                imglabel.image = I #keep reference to image
+                window.update() #update on screen (this must be called from main thread)
+
+        fjw.kill=True
+
+
+    fjw.image_queue.join()#
+    fjw.write_thread.join()
+    window.destroy()
