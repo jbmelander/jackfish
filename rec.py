@@ -6,12 +6,14 @@ import time, threading, queue, os
 from datetime import datetime
 import numpy as np
 import skvideo
-
-# skvideo.setFFmpegPath('/usr/bin/ffmpeg') #set path to ffmpeg installation before importing io
-numImages=10
 import skvideo.io
+
 movie_name='/home/baccuslab/testvids/3.avi'
-i = 0
+numImages=10
+
+fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+writer=cv2.VideoWriter(savepath,fourcc,30,(50,50))
+
 
 def save_img(image_queue,i): #function to save video frames from the queue in a separate thread
     while True:
@@ -71,5 +73,5 @@ with Camera() as cam:
     cam.stop()
 
 # writer.close()
-image_queue.join()
+# image_queue.join()
 print(len(imgs))
