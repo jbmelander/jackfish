@@ -1,3 +1,5 @@
+import numpy as np
+import matplotlib.pyplot as plt
 """
 Demonstrates how to stream using the eStream functions.
 
@@ -46,12 +48,12 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 # Stream Configuration
-aScanListNames = ["AIN0", "AIN1", "AIN2"]  # Scan list names to stream
+aScanListNames = ["AIN7","AIN11","AIN2"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
-scanRate = 10000
-scansPerRead = int(scanRate / 2)
-aNames = ["AIN0_RANGE", "AIN1_RANGE", "AIN2_RANGE", "STREAM_SETTLING_US",
+scanRate = 3000
+scansPerRead = int(2)
+aNames = ["AIN7_RANGE", "AIN11_RANGE", "AIN2_RANGE","STREAM_SETTLING_US",
             "STREAM_RESOLUTION_INDEX"]
 aValues = [0.5, 0.5, 0.5, 0, 0]
 
@@ -59,7 +61,10 @@ aValues = [0.5, 0.5, 0.5, 0, 0]
 # Write the analog inputs' negative channels (when applicable), ranges,
 # stream settling time and stream resolution configuration.
 numFrames = len(aNames)
-ljm.eWriteNames(handle, numFrames, aNames, aValues)
+# ljm.eWriteNames(handle, numFrames, aNames, aValues)
+scanRate = ljm.eStreamStart(
+            handle, 100, 3, aScanList, 3000
+        )
 
 
 
@@ -76,40 +81,29 @@ start = datetime.now()
 totScans = 0
 totSkip = 0  # Total skipped samples
 
-i = 1
-while i <= MAX_REQUESTS:
+agg = []
+for i in range(2):
     ret = ljm.eStreamRead(handle)
     aData = ret[0]
-    scans = len(aData) / numAddresses
-    totScans += scans
-    # Count the skipped samples which are indicated by -9999 values. Missed
-    # samples occur after a device's stream buffer overflows and are
-    # reported after auto-recover mode ends.
-    curSkip = aData.count(-9999.0)
-    totSkip += curSkip
-    print("\neStreamRead %i" % i)
-    ainStr = ""
-    for j in range(0, numAddresses):
-        ainStr += "%s = %0.5f, " % (aScanListNames[j], aData[j])
-    print("  1st scan out of %i: %s" % (scans, ainStr))
-    print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
-            "%i" % (curSkip/numAddresses, ret[1], ret[2]))
-    i += 1
+    # agg = np.append(agg,aData)
+    # scans = len(aData) / numAddresses
+    # totScans += scans
 
 end = datetime.now()
 ljm.eStreamStop(handle)
+plt.plot(agg)
+plt.show()
+#import matplotlib.pyplot as plt
+#import numpy as np
 
-import matplotlib.pyplot as plt
-import numpy as np
+#aData_np = np.asarray(aData).reshape((-1,3)).T
+##aData_np = np.asarray(aData).reshape((3,-1))
 
-aData_np = np.asarray(aData).reshape((-1,3)).T
-#aData_np = np.asarray(aData).reshape((3,-1))
+#x = np.arange(len(aData_np[0]))/scanRate*1000
+#fig,axs = plt.subplots(3,1,sharex=True)
+#axs[0].plot(x, aData_np[0], '-o')
+#axs[1].plot(x, aData_np[1], '-o')
+#axs[2].plot(x, aData_np[2], '-o')
+#fig.show()
 
-x = np.arange(len(aData_np[0]))/scanRate*1000
-fig,axs = plt.subplots(3,1,sharex=True)
-axs[0].plot(x, aData_np[0], '-o')
-axs[1].plot(x, aData_np[1], '-o')
-axs[2].plot(x, aData_np[2], '-o')
-fig.show()
-
-ljm.close(handle)
+#ljm.close(handle)
