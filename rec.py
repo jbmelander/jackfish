@@ -16,14 +16,14 @@ if __name__ == '__main__':
         cam.OffsetY = cam.SensorHeight // 4
         cam.AcquisitionFrameRateAuto = 'Off'
         cam.AcquisitionFrameRateEnabled = True
-        cam.AcquisitionFrameRate=10
+        cam.AcquisitionFrameRate=60
         cam.ExposureMode = 'Timed'
         cam.ExposureAuto = 'Continuous'
         
 
         cam.LineSelector = 'Line1'
         cam.LineMode = 'Strobe'
-        cam.StrobeEnabled = True
+
 
         window = tk.Tk()
         window.title("camera acquisition")
@@ -35,12 +35,8 @@ if __name__ == '__main__':
         imglabel.place(x=10, y=20) #pixels from top-left
         window.update() #update TCL tasks to make window appear
         #cam.Binning
-        cam.start()
         
         # Width and height throttle framerate
-        cam.AcquisitionFrameRateEnabled = True
-        cam.AcquisitionFrameRateAuto= 'Off'
-        cam.AcquisitionFrameRate=10
 
         width,height = get_img_dimensions()
         framerate = get_img_framerate()    
@@ -52,8 +48,11 @@ if __name__ == '__main__':
         fjw = FJWriter(savepath,framerate,(width,height))
         tStart = time.time()
         
-
-        for i in range(int(framerate)*4):
+        # MUST TURN ON HERE - STARTS STROBING IMMEDIATELY
+        cam.StrobeEnabled = True
+        cam.StrobeDuration = 3000  # microseconds
+        cam.start()
+        for i in range(10):
             frame = cam.get_array()
             fjw.image_queue.put(frame)
             
@@ -71,10 +70,9 @@ if __name__ == '__main__':
                 imglabel.image = I #keep reference to image
                 window.update() #update on screen (this must be called from main thread)
 
+        cam.StrobeEnabled = False
         fjw.kill=True
 
-
-        cam.StrobeEnabled = False
     fjw.image_queue.join()#
     fjw.write_thread.join()
     window.destroy()

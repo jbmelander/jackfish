@@ -30,8 +30,7 @@ from datetime import datetime
 import sys
 
 from labjack import ljm
-
-MAX_REQUESTS = 4  # The number of eStreamRead calls that will be performed.
+MAX_REQUESTS = 8  # The number of eStreamRead calls that will be performed.
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
@@ -47,11 +46,11 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 # Stream Configuration
-aScanListNames = ["AIN7"]  # Scan list names to stream
+aScanListNames = ["FIO5"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
-scanRate = 1000
-scansPerRead = 2000
+scanRate = 3000
+scansPerRead = 1000
 
 try:
     # When streaming, negative channels and ranges can be configured for
