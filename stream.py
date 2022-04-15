@@ -31,8 +31,7 @@ import sys
 
 from labjack import ljm
 
-
-MAX_REQUESTS = 3  # The number of eStreamRead calls that will be performed.
+MAX_REQUESTS = 4  # The number of eStreamRead calls that will be performed.
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
@@ -48,11 +47,11 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 # Stream Configuration
-aScanListNames = ["AIN11", "AIN7"]  # Scan list names to stream
+aScanListNames = ["AIN7"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
-scanRate = 10000
-scansPerRead = int(scanRate / 2)
+scanRate = 1000
+scansPerRead = 2000
 
 try:
     # When streaming, negative channels and ranges can be configured for
@@ -122,7 +121,7 @@ try:
         i += 1
 
     end = datetime.now()
-
+    # plt.pause(0.01)
     print("\nTotal scans = %i" % (totScans))
     tt = (end - start).seconds + float((end - start).microseconds) / 1000000
     print("Time taken = %f seconds" % (tt))
@@ -149,8 +148,6 @@ except Exception:
 
 # Close handle
 ljm.close(handle)
-
-print(agg.shape)
-plt.plot(agg[0:-1:2],alpha=0.7,lw=0.7)
-# plt.plot(agg[1:-1:2],alpha=0.7,lw=0.7)
+x = np.arange(agg.shape[0])/scanRate
+plt.plot(agg)
 plt.show()

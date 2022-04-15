@@ -14,9 +14,16 @@ if __name__ == '__main__':
         cam.Height = cam.SensorHeight // 2
         cam.OffsetX = cam.SensorWidth // 4
         cam.OffsetY = cam.SensorHeight // 4
+        cam.AcquisitionFrameRateAuto = 'Off'
+        cam.AcquisitionFrameRateEnabled = True
+        cam.AcquisitionFrameRate=10
         cam.ExposureMode = 'Timed'
         cam.ExposureAuto = 'Continuous'
-        # cam.StrobeEnabled = 'On'
+        
+
+        cam.LineSelector = 'Line1'
+        cam.LineMode = 'Strobe'
+        cam.StrobeEnabled = True
 
         window = tk.Tk()
         window.title("camera acquisition")
@@ -46,7 +53,7 @@ if __name__ == '__main__':
         tStart = time.time()
         
 
-        for i in range(int(framerate)*360):
+        for i in range(int(framerate)*4):
             frame = cam.get_array()
             fjw.image_queue.put(frame)
             
@@ -67,6 +74,7 @@ if __name__ == '__main__':
         fjw.kill=True
 
 
+        cam.StrobeEnabled = False
     fjw.image_queue.join()#
     fjw.write_thread.join()
     window.destroy()
