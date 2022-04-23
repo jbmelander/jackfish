@@ -14,11 +14,12 @@ if __name__ == '__main__':
         cam.Height = cam.SensorHeight // 2
         cam.OffsetX = cam.SensorWidth // 4
         cam.OffsetY = cam.SensorHeight // 4
-        cam.AcquisitionFrameRateAuto = 'Off'
         cam.AcquisitionFrameRateEnabled = True
-        cam.AcquisitionFrameRate=60
+        cam.AcquisitionFrameRateAuto = 'Off'
+        cam.AcquisitionFrameRate=20
         cam.ExposureMode = 'Timed'
         cam.ExposureAuto = 'Continuous'
+        # cam.ExposureTimeAbs = 100
         
 
         cam.LineSelector = 'Line1'
@@ -44,7 +45,7 @@ if __name__ == '__main__':
         
         assert dtype[-1] == '8', 'Data should be in proper bit depth'
 
-        savepath= '/home/baccuslab/queuedUp.mp4'
+        savepath= '/home/baccuslab/test.mp4'
         fjw = FJWriter(savepath,framerate,(width,height))
         tStart = time.time()
         
@@ -52,7 +53,7 @@ if __name__ == '__main__':
         cam.StrobeEnabled = True
         cam.StrobeDuration = 3000  # microseconds
         cam.start()
-        for i in range(10):
+        for i in range(10000):
             frame = cam.get_array()
             fjw.image_queue.put(frame)
             

@@ -12,6 +12,7 @@ from time import sleep
 def get_subscreen(dir):
     # Define screen(s) for the rig. Units in meters
     # Fly is at (0, 0, 0), fly looking down +y axis. Top of the screen is at z=0
+
     z_bottom = -27.25e-2 #m
     z_top    = +27.25e-2
     x_left   = -15.25e-2
@@ -29,8 +30,8 @@ def get_subscreen(dir):
 
     elif dir == 'r':
         viewport_ll = (-1.0, -1.0)
-        viewport_width=2
-        viewport_height=2
+        viewport_width=4
+        viewport_height=4
         pa=(x_right, y_forward, z_bottom)
         pb=(x_right, y_back, z_bottom)
         pc=(x_right, y_forward, z_top)
@@ -56,8 +57,7 @@ def main():
     aux_screen = Screen(subscreens=[get_subscreen('aux')], server_number=0, id=2, fullscreen=False, vsync=False, square_size=(0, 0), square_loc=(-1, -1), name='Aux', horizontal_flip=False)
 
 
-    screens = [left_screen, right_screen, aux_screen]
-
+    screens = [left_screen,right_screen,aux_screen]
     manager = launch_stim_server(screens)
 
     manager.black_corner_square()

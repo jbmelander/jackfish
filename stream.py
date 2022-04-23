@@ -30,7 +30,7 @@ from datetime import datetime
 import sys
 
 from labjack import ljm
-MAX_REQUESTS = 8  # The number of eStreamRead calls that will be performed.
+MAX_REQUESTS = 20  # The number of eStreamRead calls that will be performed.
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
@@ -46,7 +46,7 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 # Stream Configuration
-aScanListNames = ["FIO5"]  # Scan list names to stream
+aScanListNames = ["AIN1","FIO5","FIO0","FIO1"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
 scanRate = 3000
@@ -62,9 +62,9 @@ try:
 
         # AIN0 and AIN1 ranges are +/-10 V, stream settling is 0 (default) and
         # stream resolution index is 0 (default).
-        aNames = ["AIN0_RANGE", "AIN1_RANGE", "STREAM_SETTLING_US",
+        aNames = ["AIN_ALL_RANGE" "STREAM_SETTLING_US",
                   "STREAM_RESOLUTION_INDEX"]
-        aValues = [0.5, 0.5, 0, 0]
+        aValues = [1.0, 1, 1]
     else:
         # LabJack T7 and other devices configuration
 
@@ -77,9 +77,12 @@ try:
         # All negative channels are single-ended, AIN0 and AIN1 ranges are
         # +/-10 V, stream settling is 0 (default) and stream resolution index
         # is 0 (default).
-        aNames = ["AIN_ALL_NEGATIVE_CH", "AIN7_RANGE", "AIN11_RANGE",
-                  "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-        aValues = [ljm.constants.GND, 0.5, 0.5, 1, 0]
+        aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US",
+                  "STREAM_RESOLUTION_INDEX"]
+        aValues = [1.0,0,0]
+        # aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_A", "AIN11_RANGE",
+        #           "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+        # aValues = [ljm.constants.GND, 0.5, 0.5, 1, 0]
     # Write the analog inputs' negative channels (when applicable), ranges,
     # stream settling time and stream resolution configuration.
     numFrames = len(aNames)
@@ -120,8 +123,7 @@ try:
         i += 1
 
     end = datetime.now()
-    # plt.pause(0.01)
-    print("\nTotal scans = %i" % (totScans))
+    # plt.pause(0.01) print("\nTotal scans = %i" % (totScans))
     tt = (end - start).seconds + float((end - start).microseconds) / 1000000
     print("Time taken = %f seconds" % (tt))
     print("LJM Scan Rate = %f scans/second" % (scanRate))
@@ -147,6 +149,6 @@ except Exception:
 
 # Close handle
 ljm.close(handle)
-x = np.arange(agg.shape[0])/scanRate
-plt.plot(agg)
+x = np.arange(agg.shape[0])/scanRate/3
+plt.plot(agg[0:-1:4])
 plt.show()
