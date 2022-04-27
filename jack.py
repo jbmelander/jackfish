@@ -12,19 +12,19 @@ class Jack():
     Initializes and controls input for Labjack T7.
     '''
     
-    def __init__(self, aScanListNames=["AIN0", "AIN1"], scanRate=3000, scansPerRead=1000):
+    def __init__(self, aScanListNames=["AIN0", "AIN1"]):
         # Store initialization arguments
         self.aScanListNames = aScanListNames
         self.numAddresses = len(aScanListNames)
-        self.scanRate = scanRate
-        self.scansPerRead = scansPerRead
+        
+        self.streaming = False
         
         # Initialize ljm T7 handle
         self.handle = ljm.openS("T7", "ANY", "ANY")
         self.info = ljm.getHandleInfo(self.handle)
         self.print_handle_info()
         
-        aScanList = ljm.namesToAddresses(self.numAddresses, aScanListNames)[0]
+        self.aScanList = ljm.namesToAddresses(self.numAddresses, aScanListNames)[0]
 
         # Ensure triggered stream is disabled.
         ljm.eWriteName(self.handle, "STREAM_TRIGGER_INDEX", 0)
@@ -49,25 +49,123 @@ class Jack():
             "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
             (self.info[0], self.info[1], self.info[2], ljm.numberToIP(self.info[3]), self.info[4], self.info[5]))
 
-    def start_stream(self):
+    def start_stream(self, do_record=True, record_filepath="", scanRate=3000, scansPerRead=1000):
+        self.do_record = do_record
+        self.record_filepath = record_filepath
         try:
             # Configure and start stream
-            scanRate = ljm.eStreamStart(self.handle, self.scansPerRead, self.numAddresses, self.aScanList, scanRate)
+            scanRate = ljm.eStreamStart(self.handle, scansPerRead, self.numAddresses, self.aScanList, scanRate)
+            print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
+            self.scanRate = scanRate
+            self.scansPerRead = scansPerRead
+
+            self.streaming = True #flag for recording status
+            ljm.setStreamCallback(self.handle, self.stream_callback)
+
+        except ljm.LJMError:
+            ljme = sys.exc_info()[1]
+            print(ljme)
+        except Exception:
+            e = sys.exc_info()[1]
+            print(e)
+
+    def stop_stream(self):
+        try:
+            print("\nStop Stream")
+            self.streaming = False
+            ljm.eStreamStop(self.handle)
+            
+            recording_duration = self.stream_end_time - self.stream_start_time
+            tt = recording_duration.seconds + float(recording_duration.microseconds) / 1000000
+            print("Time taken = %f seconds" % (tt))
+            print("LJM Scan Rate = %f scans/second" % (self.scanRate))
+            print("Timed Scan Rate = %f scans/second" % (self.totScans / tt))
+            print("Timed Sample Rate = %f samples/second" % (self.totScans * self.numAddresses / tt))
+            print("Skipped scans = %0.0f" % (self.totSkip / self.numAddresses))
+
+        except ljm.LJMError:
+            ljme = sys.exc_info()[1]
+            print(ljme)
+        except Exception:
+            e = sys.exc_info()[1]
+            print(e)
+        
+    def stream_callback(self, arg):
+        self.totScans = 0
+        self.totSkip = 0  # Total skipped samples
+
+        self.stream_start_time = datetime.now()
+        while self.streaming:
+            try:
+                ret = ljm.eStreamRead(self.handle)
+                data = ret[0]
+                scans = len(data) / self.numAddresses
+                self.totScans += scans
+
+                # Count the skipped samples which are indicated by -9999 values. Missed
+                # samples occur after a device's stream buffer overflows and are
+                # reported after auto-recover mode ends.
+                curSkip = data.count(-9999.0)
+                self.totSkip += curSkip
+                
+                print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
+                    "%i" % (curSkip/self.numAddresses, ret[1], ret[2]))
+
+                if self.do_record:
+                    with open(self.record_filepath, "a") as f:
+                        f.write("\n")
+                        f.write(str(ret[0]))
+            except ljm.LJMError:
+                ljme = sys.exc_info()[1]
+                print(ljme)
+            except Exception:
+                e = sys.exc_info()[1]
+                print(e)
+        else:
+            print("Shutting off Stream Callback")
+            self.stream_end_time = datetime.now()
+    
+    def close(self):
+        if self.streaming:
+            self.stop_stream()
+        ljm.close(self.handle)
+        
+    def plot_stream(self, data, numAddresses, scanRate):
+        data_np = np.asarray(data).reshape((-1,numAddresses)).T
+
+        x = np.arange(data_np.shape[1])/scanRate*1000
+        fig,axs = plt.subplots(numAddresses, 1, sharex=True)
+        for i in range(numAddresses):
+            axs[i].plot(x, data_np[i], '-')
+        axs[numAddresses-1].set_xlabel('Time [ms]')
+        plt.show()
+    
+    def stream_for_duration(self, duration, scanRate=3000, scansPerRead=1000):
+        '''
+        duration: (float) duration of recording in seconds. Can't be too long or we'll run over memory.
+        
+        Returns agg, the recording.
+        '''
+        
+        n_reads = duration * scanRate / scansPerRead
+        
+        try:
+            # Configure and start stream
+            scanRate = ljm.eStreamStart(self.handle, scansPerRead, self.numAddresses, self.aScanList, scanRate)
             print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
 
-            print("\nPerforming %i stream reads." % MAX_REQUESTS)
+            print("\nPerforming %i stream reads." % n_reads)
             start = datetime.now()
             totScans = 0
             totSkip = 0  # Total skipped samples
 
             i = 1
             agg = []
-            while i <= MAX_REQUESTS:
-                ret = ljm.eStreamRead(handle)
+            while i <= n_reads:
+                ret = ljm.eStreamRead(self.handle)
                 aData = ret[0]
-                bData = np.array(ret[0])
-                agg = np.append(agg,bData)
-                scans = len(aData) / numAddresses
+                agg = np.append(agg,np.array(aData))
+                scans = len(aData) / self.numAddresses
                 totScans += scans
 
                 # Count the skipped samples which are indicated by -9999 values. Missed
@@ -78,11 +176,11 @@ class Jack():
 
                 print("\neStreamRead %i" % i)
                 ainStr = ""
-                for j in range(0, numAddresses):
-                    ainStr += "%s = %0.5f, " % (aScanListNames[j], aData[j])
+                for j in range(0, self.numAddresses):
+                    ainStr += "%s = %0.5f, " % (self.aScanListNames[j], aData[j])
                 print("  1st scan out of %i: %s" % (scans, ainStr))
                 print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
-                    "%i" % (curSkip/numAddresses, ret[1], ret[2]))
+                    "%i" % (curSkip/self.numAddresses, ret[1], ret[2]))
                 i += 1
 
             end = datetime.now()
@@ -91,18 +189,23 @@ class Jack():
             print("Time taken = %f seconds" % (tt))
             print("LJM Scan Rate = %f scans/second" % (scanRate))
             print("Timed Scan Rate = %f scans/second" % (totScans / tt))
-            print("Timed Sample Rate = %f samples/second" % (totScans * numAddresses / tt))
-            print("Skipped scans = %0.0f" % (totSkip / numAddresses))
+            print("Timed Sample Rate = %f samples/second" % (totScans * self.numAddresses / tt))
+            print("Skipped scans = %0.0f" % (totSkip / self.numAddresses))
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             print(ljme)
         except Exception:
             e = sys.exc_info()[1]
             print(e)
+        
+        return agg
 
+    
 #%%
 
-jack = Jack()
-# %%
-ljm.getHandleInfo(jack.handle)
-# %%
+
+
+# jack = Jack()
+# # %%
+# ljm.getHandleInfo(jack.handle)
+# # %%
