@@ -103,8 +103,7 @@ try:
     while i <= MAX_REQUESTS:
         ret = ljm.eStreamRead(handle)
         aData = ret[0]
-        bData = np.array(ret[0])
-        agg = np.append(agg,bData)
+        agg = np.append(agg,np.array(aData))
         scans = len(aData) / numAddresses
         totScans += scans
 
