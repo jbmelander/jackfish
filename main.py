@@ -6,10 +6,10 @@ from PyQt5.QtGui import QPixmap, QImage
 import cv2
 from functools import partial
 import sys
-import core
+import gui
 
 cap = cv2.VideoCapture(0)
-class FLUI(QtWidgets.QMainWindow, core.Ui_MainWindow):
+class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def __init__(self, parent=None):
         super(FLUI, self).__init__(parent)
         self.setupUi(self)
