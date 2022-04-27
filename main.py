@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -6,6 +7,7 @@ from PyQt5.QtGui import QPixmap, QImage
 from functools import partial
 import sys
 from cam import FJCam
+from jack import Jack
 import gui
 
 class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
@@ -14,6 +16,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.setupUi(self)
 
         self.cam=FJCam()       
+        self.lj = Jack(['AIN1','FIO2'])
           
         self.set_path_push.clicked.connect(self.set_path)
         
@@ -34,7 +37,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_timer.timeout.connect(self.lj_updater)
     
         self.lj_prev_slider.setMinimum(0)
-        self.lj_prev_slider.setMaximum(2000)
+        self.lj_prev_slider.setMaximum(20000)
         self.lj_prev_slider.sliderReleased.connect(self.set_lj_slider)
     
     def record(self):
@@ -42,8 +45,13 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if state:
             self.cam_timer.stop()
             self.lj_timer.stop()
+            self.lj.start_stream(record_filepath=os.path.expanduser('~/data.minjo'))
+
             self.cam.rec(300)
             self.record_push.toggle()
+            self.lj.stop_stream()
+
+        
 
     def set_lj_slider(self):
         self.cam_timer.stop()
@@ -58,9 +66,13 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if state:
             self.cam_timer.start()
             self.lj_timer.start()
+            self.lj.start_stream(do_record=False)
+
+
         else:
             self.cam_timer.stop()
             self.lj_timer.stop()
+            self.lj.stop_stream()
 
 
     def set_path(self):
@@ -83,7 +95,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.cam_prev.setImage(self.frame)
 
     def lj_updater(self):
-        self.data = np.append(self.data,np.random.randn(2))
+        self.data = self.lj.data[0:-1:2]
         try:
             self.curve.setData(self.data[-self.lj_slider_val:])
         except:

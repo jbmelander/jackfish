@@ -16,7 +16,7 @@ class Jack():
         # Store initialization arguments
         self.aScanListNames = aScanListNames
         self.numAddresses = len(aScanListNames)
-        
+        self.data = []        
         self.streaming = False
         
         # Initialize ljm T7 handle
@@ -115,6 +115,8 @@ class Jack():
                     with open(self.record_filepath, "a") as f:
                         f.write("\n")
                         f.write(str(ret[0]))
+                else:
+                    self.data = np.append(self.data,data)
             except ljm.LJMError:
                 ljme = sys.exc_info()[1]
                 print(ljme)
@@ -124,6 +126,7 @@ class Jack():
         else:
             print("Shutting off Stream Callback")
             self.stream_end_time = datetime.now()
+
     
     def close(self):
         if self.streaming:
