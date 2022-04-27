@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1163</width>
-    <height>847</height>
+    <width>1098</width>
+    <height>633</height>
    </rect>
   </property>
   <property name="palette">
@@ -488,7 +488,7 @@
      <rect>
       <x>40</x>
       <y>20</y>
-      <width>120</width>
+      <width>261</width>
       <height>31</height>
      </rect>
     </property>
@@ -502,31 +502,12 @@
      <string>Init Cam One</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="init_cam1_push">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>20</y>
-      <width>120</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>13</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Init Cam Two</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="init_lj_push">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>309</x>
       <y>20</y>
-      <width>250</width>
+      <width>391</width>
       <height>31</height>
      </rect>
     </property>
@@ -543,7 +524,7 @@
    <widget class="QLineEdit" name="fr_edit">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>70</y>
       <width>113</width>
       <height>25</height>
@@ -554,6 +535,9 @@
       <family>Arial</family>
       <pointsize>13</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
      <string>60</string>
@@ -562,7 +546,7 @@
    <widget class="QLineEdit" name="et_edit">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>100</y>
       <width>113</width>
       <height>25</height>
@@ -573,6 +557,9 @@
       <family>Arial</family>
       <pointsize>13</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
      <string>Auto</string>
@@ -581,7 +568,7 @@
    <widget class="QLineEdit" name="gain_edit">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>130</y>
       <width>113</width>
       <height>25</height>
@@ -592,6 +579,9 @@
       <family>Arial</family>
       <pointsize>13</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
      <string>Auto</string>
@@ -600,7 +590,7 @@
    <widget class="QLineEdit" name="strobe_edit">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>160</y>
       <width>113</width>
       <height>25</height>
@@ -611,6 +601,9 @@
       <family>Arial</family>
       <pointsize>13</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
      <string>Line1</string>
@@ -619,10 +612,10 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>70</y>
+      <x>50</x>
+      <y>60</y>
       <width>90</width>
-      <height>17</height>
+      <height>40</height>
      </rect>
     </property>
     <property name="font">
@@ -630,6 +623,9 @@
       <family>Arial</family>
       <pointsize>13</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
      <string>Frame Rate</string>
@@ -638,10 +634,10 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>100</y>
+      <x>50</x>
+      <y>90</y>
       <width>140</width>
-      <height>17</height>
+      <height>40</height>
      </rect>
     </property>
     <property name="font">
@@ -649,6 +645,9 @@
       <family>Arial</family>
       <pointsize>13</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
      <string>Exposure Time</string>
@@ -657,10 +656,10 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>130</y>
+      <x>50</x>
+      <y>120</y>
       <width>81</width>
-      <height>17</height>
+      <height>40</height>
      </rect>
     </property>
     <property name="font">
@@ -668,6 +667,9 @@
       <family>Arial</family>
       <pointsize>13</pointsize>
      </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
      <string>Gain</string>
@@ -676,10 +678,10 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>160</y>
+      <x>50</x>
+      <y>150</y>
       <width>81</width>
-      <height>17</height>
+      <height>40</height>
      </rect>
     </property>
     <property name="font">
@@ -688,6 +690,9 @@
       <pointsize>13</pointsize>
      </font>
     </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
     <property name="text">
      <string>Strobe</string>
     </property>
@@ -695,7 +700,7 @@
    <widget class="QLineEdit" name="trigger_edit">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>170</x>
       <y>190</y>
       <width>113</width>
       <height>25</height>
@@ -707,6 +712,9 @@
       <pointsize>13</pointsize>
      </font>
     </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
     <property name="text">
      <string>Line2</string>
     </property>
@@ -714,10 +722,10 @@
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>190</y>
+      <x>50</x>
+      <y>180</y>
       <width>81</width>
-      <height>17</height>
+      <height>40</height>
      </rect>
     </property>
     <property name="font">
@@ -726,6 +734,9 @@
       <pointsize>13</pointsize>
      </font>
     </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
     <property name="text">
      <string>Trigger</string>
     </property>
@@ -733,7 +744,7 @@
    <widget class="QLineEdit" name="lj_chan_edit">
     <property name="geometry">
      <rect>
-      <x>459</x>
+      <x>469</x>
       <y>66</y>
       <width>231</width>
       <height>25</height>
@@ -752,7 +763,7 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>320</x>
       <y>66</y>
       <width>140</width>
       <height>17</height>
@@ -771,7 +782,7 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>320</x>
       <y>96</y>
       <width>110</width>
       <height>17</height>
@@ -790,7 +801,7 @@
    <widget class="QLineEdit" name="lj_sr_edit">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>470</x>
       <y>96</y>
       <width>231</width>
       <height>25</height>
@@ -809,7 +820,7 @@
    <widget class="QPushButton" name="preview_push">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>310</x>
       <y>130</y>
       <width>390</width>
       <height>40</height>
@@ -828,7 +839,7 @@
    <widget class="QPushButton" name="record_push">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>310</x>
       <y>180</y>
       <width>390</width>
       <height>40</height>
@@ -844,57 +855,59 @@
      <string>Record</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="filepath_edit">
+   <widget class="ImageView" name="cam_prev">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>230</y>
-      <width>660</width>
-      <height>40</height>
+      <x>40</x>
+      <y>240</y>
+      <width>510</width>
+      <height>330</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="PlotWidget" name="lj_prev">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>240</y>
+      <width>500</width>
+      <height>330</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="set_path_push">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>20</y>
+      <width>310</width>
+      <height>70</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set Filepath</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="filepath_label">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>110</y>
+      <width>260</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <family>Arial</family>
       <pointsize>15</pointsize>
-      <italic>true</italic>
      </font>
     </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
     <property name="text">
-     <string>path to save file</string>
+     <string>No File Selected</string>
     </property>
-   </widget>
-   <widget class="ImageView" name="cam_prev">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>270</y>
-      <width>661</width>
-      <height>371</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="PlotWidget" name="lj_plot_2">
-    <property name="geometry">
-     <rect>
-      <x>700</x>
-      <y>440</y>
-      <width>321</width>
-      <height>200</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="PlotWidget" name="lj_plot_1">
-    <property name="geometry">
-     <rect>
-      <x>700</x>
-      <y>230</y>
-      <width>321</width>
-      <height>200</height>
-     </rect>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>
@@ -902,12 +915,12 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlotWidget</class>
+   <class>ImageView</class>
    <extends>QGraphicsView</extends>
    <header>pyqtgraph</header>
   </customwidget>
   <customwidget>
-   <class>ImageView</class>
+   <class>PlotWidget</class>
    <extends>QGraphicsView</extends>
    <header>pyqtgraph</header>
   </customwidget>

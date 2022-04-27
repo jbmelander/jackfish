@@ -1,7 +1,7 @@
 import numpy as np
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtGui import QPixmap, QImage
 import cv2
 from functools import partial
@@ -14,29 +14,45 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         super(FLUI, self).__init__(parent)
         self.setupUi(self)
         
-        self.cams = []
-        self.init_cam0_push.clicked.connect(partial(self.init_cam,0))
-        self.init_cam1_push.clicked.connect(partial(self.init_cam,1))
-        self.init_lj_push.clicked.connect(self.init_lj)
 
-    def init_cam(self,num):
+        self.set_path_push.clicked.connect(self.set_path)
+
+        self.data = [0]
+        self.curve = self.lj_prev.getPlotItem().plot()
+        self.curve.setData(self.data)
+        self.lj_prev.show()
+
+        self.cam_timer = QtCore.QTimer()
+        self.cam_timer.timeout.connect(self.cam_updater)
+        self.lj_timer = QtCore.QTimer()
+        self.lj_timer.timeout.connect(self.lj_updater)
+
+        self.cam_timer.start()
+        self.lj_timer.start()
+
+    def set_path(self):
+        self.cam_timer.stop()
+        self.lj_timer.stop()
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*)", options=options)
+        if fileName:
+            print(fileName)
+
+        self.filepath = fileName
+        self.filepath_label.setText(self.filepath)
+        self.cam_timer.start()
+        self.lj_timer.start()
+
+    def cam_updater(self):
+        self.cam_prev.clear()
         ret, frame = cap.read()
-        frame = frame.mean(2).T
-        self.cam_prev.setImage(frame)
-        self.cam_prev.show()
-        # frame = np.array(frame,dtype='uint8')
-        # img = QImage(frame,frame.shape[1], frame.shape[0],QImage.Format_RGB888)
-        # self.img.setPixmap(QPixmap.fromImage(img))
-    def init_lj(self):
-        self.lj_plot_1.clear()
-        x = np.arange(0,100)
-        y = np.random.randn(100)
+        self.frame = frame.mean(2).T
+        self.cam_prev.setImage(self.frame)
 
-        self.lj_plot_1.plot(x,y)
-        self.lj_plot_1.setXRange(0,100)
-        self.lj_plot_1.setYRange(-5,5)
-
-
+    def lj_updater(self):
+        self.data = np.append(self.data,np.random.randn(2))
+        self.curve.setData(self.data)
+        self.lj_prev.show()         
 
 def main():
     app = QApplication(sys.argv)
