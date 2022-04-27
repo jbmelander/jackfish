@@ -8,22 +8,19 @@ import cv2
 from simple_pyspin import Camera
 
 
-def get_img_dimensions():
+def get_img_dimensions(cam):
     # Reversed from numpy convension
-    with Camera() as cam:
-        width = cam.__getattr__('Width')
-        height = cam.__getattr__('Height')
-        return width, height
+    width = cam.__getattr__('Width')
+    height = cam.__getattr__('Height')
+    return width, height
 
-def get_img_framerate():
-    with Camera() as cam:
-        framerate = cam.__getattr__('AcquisitionFrameRate')
-        return framerate
+def get_img_framerate(cam):
+    framerate = cam.__getattr__('AcquisitionFrameRate')
+    return framerate
 
-def get_img_dtype():
-    with Camera() as cam:
-        dtype = cam.__getattr__('PixelFormat')
-        return dtype
+def get_img_dtype(cam):
+    dtype = cam.__getattr__('PixelFormat')
+    return dtype
 
 def init_writer(savepath,framerate,img_shape,codecs='mp4v'):
     fourcc = cv2.VideoWriter_fourcc(*codecs)

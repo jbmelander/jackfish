@@ -53,6 +53,7 @@ if __name__ == '__main__':
         cam.StrobeEnabled = True
         cam.StrobeDuration = 3000  # microseconds
         cam.start()
+
         for i in range(10000):
             frame = cam.get_array()
             fjw.image_queue.put(frame)
