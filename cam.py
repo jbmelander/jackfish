@@ -1,6 +1,6 @@
-import tkinter as tk
+import os
+import matplotlib.pyplot as plt
 import queue, threading
-from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import time
 import numpy as np
@@ -9,17 +9,16 @@ from simple_pyspin import Camera
 
 class FJCam:
     def __init__(self):
+        self.mp4_path = os.path.expanduser('~/test.mp4')
         self.cam = Camera()
-
+        self.cam.init()
         self.atts = {}
 
-        self.x, self.y = self.get_img_dimensions()
-        self.framerate = self.get_img_framerate()
         self.cam.VideoMode = "Mode0"
-        self.cam.Width = cam.SensorWidth // 2
-        self.cam.Height = cam.SensorHeight // 2
-        self.cam.OffsetX = cam.SensorWidth // 4
-        self.cam.OffsetY = cam.SensorHeight // 4
+        self.cam.Width = self.cam.SensorWidth // 2
+        self.cam.Height = self.cam.SensorHeight // 2
+        self.cam.OffsetX = self.cam.SensorWidth // 4
+        self.cam.OffsetY = self.cam.SensorHeight // 4
         self.cam.AcquisitionFrameRateEnabled = True
         self.cam.AcquisitionFrameRateAuto = 'Off'
         self.cam.AcquisitionFrameRate=20
@@ -30,15 +29,23 @@ class FJCam:
         self.cam.LineMode = 'Strobe'
         self.cam.StrobeEnabled = True
         self.cam.StrobeDuration = 3000  # microseconds
-        self.cam.start()
 
+        self.cam.start()
+        self.get_img_dtype()
+        self.get_img_dimensions()
+        self.get_img_framerate()
+
+        assert self.dtype[-1] == '8', 'Data should be in proper bit depth'
+        
+        self.mp4_path = None
+        
     def grab(self):
-        return self.cam.get_array()
+        return self.cam.get_array().T
 
     def set_att(self,att,val):
         self.cam.__setattr__(att,val)
 
-    def get_img_framerate(self)(self):
+    def get_img_framerate(self):
         # Reversed from numpy convension
         self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
 
@@ -49,29 +56,38 @@ class FJCam:
 
     def get_img_dtype(self):
         self.dtype = self.cam.__getattr__('PixelFormat')
-            
-# def init_writer(savepath,framerate,img_shape,codecs='mp4v'):
-#     fourcc = cv2.VideoWriter_fourcc(*codecs)
-#     writer=cv2.VideoWriter(savepath,fourcc,framerate,img_shape)
-#     return writer
+    
+    def init_writer(self):
+        fourcc = cv2.VideoWriter_fourcc('M','P','4','V')
+        writer=cv2.VideoWriter(self.mp4_path,fourcc,self.framerate,(self.x,self.y))
+        self.writer = writer
+    
+    def rec(self,n_frames=100):
+        self.fn = 0
+        self.init_writer()
 
-# class FJWriter:
-#     def __init__(self,savepath,framerate,img_shape,codecs='mp4v'):
-#         self.kill = False
-
-#         self.writer = init_writer(savepath,framerate,img_shape,codecs)
+        self.image_queue = queue.Queue()
+        self.write_thread = threading.Thread(target=self.write,daemon=True).start()
         
-#         self.image_queue = queue.Queue()
-#         self.write_thread = threading.Thread(target=self.write)
-#         self.write_thread.start()
+        for i in range(n_frames):
+            frame = self.cam.get_array()
+            print(frame.shape)
+            print(self.x)
+            print(self.y)
+            self.image_queue.put(frame)
 
-#     def write(self):
-#         while not self.kill:
-#             deq = self.image_queue.get()
-#             if deq is None:
-#                 print('Empty')
-#                 break
-#             else:
-#                 frame_color = cv2.cvtColor(deq,cv2.COLOR_GRAY2BGR)
-#                 self.writer.write(frame_color)
-#                 self.image_queue.task_done()
+        self.image_queue.join()#
+        self.writer.release()
+        print('finished')
+
+    def write(self):
+        while True:
+            deq = self.image_queue.get()
+            self.fn += 1
+            print(self.fn)
+            frame_color = cv2.cvtColor(deq,cv2.COLOR_GRAY2BGR)
+            self.writer.write(frame_color)
+            self.image_queue.task_done()
+    
+
+

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/jerome/src/flirjack/gui.ui'
+# Form implementation generated from reading ui file '/home/baccuslab/flirjack/gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.6
 #
@@ -14,7 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1098, 633)
+        MainWindow.setWindowModality(QtCore.Qt.WindowModal)
+        MainWindow.resize(1128, 714)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(222, 221, 218))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -170,6 +171,7 @@ class Ui_MainWindow(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.PlaceholderText, brush)
         MainWindow.setPalette(palette)
+        MainWindow.setUnifiedTitleAndToolBarOnMac(True)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.init_cam0_push = QtWidgets.QPushButton(self.centralwidget)
@@ -315,16 +317,20 @@ class Ui_MainWindow(object):
         self.lj_prev.setGeometry(QtCore.QRect(560, 240, 500, 330))
         self.lj_prev.setObjectName("lj_prev")
         self.set_path_push = QtWidgets.QPushButton(self.centralwidget)
-        self.set_path_push.setGeometry(QtCore.QRect(710, 20, 310, 70))
+        self.set_path_push.setGeometry(QtCore.QRect(710, 20, 341, 70))
         self.set_path_push.setObjectName("set_path_push")
         self.filepath_label = QtWidgets.QLabel(self.centralwidget)
-        self.filepath_label.setGeometry(QtCore.QRect(730, 110, 260, 30))
+        self.filepath_label.setGeometry(QtCore.QRect(710, 100, 341, 30))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(15)
         self.filepath_label.setFont(font)
         self.filepath_label.setAlignment(QtCore.Qt.AlignCenter)
         self.filepath_label.setObjectName("filepath_label")
+        self.lj_prev_slider = QtWidgets.QSlider(self.centralwidget)
+        self.lj_prev_slider.setGeometry(QtCore.QRect(830, 580, 231, 16))
+        self.lj_prev_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.lj_prev_slider.setObjectName("lj_prev_slider")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusBar = QtWidgets.QStatusBar(MainWindow)
         self.statusBar.setObjectName("statusBar")

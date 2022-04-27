@@ -45,7 +45,7 @@ if __name__ == '__main__':
         
         assert dtype[-1] == '8', 'Data should be in proper bit depth'
 
-        savepath= '/home/baccuslab/test.mp4'
+        savepath= '/home/baccuslab/l.mp4'
         fjw = FJWriter(savepath,framerate,(width,height))
         tStart = time.time()
         
