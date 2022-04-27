@@ -1,10 +1,14 @@
+import numpy as np
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
-from functools import partial
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QPixmap, QImage
+import cv2
+from functools import partial
 import sys
 import core
 
-
+cap = cv2.VideoCapture(0)
 class FLUI(QtWidgets.QMainWindow, core.Ui_MainWindow):
     def __init__(self, parent=None):
         super(FLUI, self).__init__(parent)
@@ -16,9 +20,21 @@ class FLUI(QtWidgets.QMainWindow, core.Ui_MainWindow):
         self.init_lj_push.clicked.connect(self.init_lj)
 
     def init_cam(self,num):
-        pass
+        ret, frame = cap.read()
+        frame = frame.mean(2).T
+        self.cam_prev.setImage(frame)
+        self.cam_prev.show()
+        # frame = np.array(frame,dtype='uint8')
+        # img = QImage(frame,frame.shape[1], frame.shape[0],QImage.Format_RGB888)
+        # self.img.setPixmap(QPixmap.fromImage(img))
     def init_lj(self):
-        pass
+        self.lj_plot_1.clear()
+        x = np.arange(0,100)
+        y = np.random.randn(100)
+
+        self.lj_plot_1.plot(x,y)
+        self.lj_plot_1.setXRange(0,100)
+        self.lj_plot_1.setYRange(-5,5)
 
 
 
