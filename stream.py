@@ -30,7 +30,7 @@ from datetime import datetime
 import sys
 
 from labjack import ljm
-MAX_REQUESTS = 20  # The number of eStreamRead calls that will be performed.
+MAX_REQUESTS = 3  # The number of eStreamRead calls that will be performed.
 
 # Open first found LabJack
 handle = ljm.openS("ANY", "ANY", "ANY")  # Any device, Any connection, Any identifier
@@ -46,11 +46,12 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 # Stream Configuration
-aScanListNames = ["AIN1","FIO5","FIO0","FIO1"]  # Scan list names to stream
+#aScanListNames = ["AIN0", "AIN1", "AIN2"]  # Scan list names to stream
+aScanListNames = ["AIN0", "AIN2"]  # Scan list names to stream
 numAddresses = len(aScanListNames)
 aScanList = ljm.namesToAddresses(numAddresses, aScanListNames)[0]
 scanRate = 3000
-scansPerRead = 1000
+scansPerRead = int(scanRate/2)
 
 try:
     # When streaming, negative channels and ranges can be configured for
@@ -79,7 +80,7 @@ try:
         # is 0 (default).
         aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US",
                   "STREAM_RESOLUTION_INDEX"]
-        aValues = [1.0,0,0]
+        aValues = [1.0,1,1]
         # aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_A", "AIN11_RANGE",
         #           "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
         # aValues = [ljm.constants.GND, 0.5, 0.5, 1, 0]
@@ -149,6 +150,14 @@ except Exception:
 
 # Close handle
 ljm.close(handle)
-x = np.arange(agg.shape[0])/scanRate/3
-plt.plot(agg[0:-1:4])
+
+## Plot
+agg_np = np.asarray(agg).reshape((-1,numAddresses)).T
+#print(agg_np.shape)
+
+x = np.arange(agg_np.shape[1])/scanRate*1000
+fig,axs = plt.subplots(numAddresses, 1, sharex=True)
+for i in range(numAddresses):
+    axs[i].plot(x, agg_np[i], '-')
+axs[numAddresses-1].set_xlabel('Time [ms]')
 plt.show()
