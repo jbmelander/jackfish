@@ -331,6 +331,9 @@ class Ui_MainWindow(object):
         self.lj_prev_slider.setGeometry(QtCore.QRect(830, 580, 231, 16))
         self.lj_prev_slider.setOrientation(QtCore.Qt.Horizontal)
         self.lj_prev_slider.setObjectName("lj_prev_slider")
+        self.write_push = QtWidgets.QPushButton(self.centralwidget)
+        self.write_push.setGeometry(QtCore.QRect(780, 160, 89, 25))
+        self.write_push.setObjectName("write_push")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusBar = QtWidgets.QStatusBar(MainWindow)
         self.statusBar.setObjectName("statusBar")
@@ -362,4 +365,5 @@ class Ui_MainWindow(object):
         self.record_push.setText(_translate("MainWindow", "Record"))
         self.set_path_push.setText(_translate("MainWindow", "Set Filepath"))
         self.filepath_label.setText(_translate("MainWindow", "No File Selected"))
+        self.write_push.setText(_translate("MainWindow", "Test Write"))
 from pyqtgraph import ImageView, PlotWidget

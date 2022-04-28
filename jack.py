@@ -44,6 +44,11 @@ class Jack():
         numFrames = len(aNames)
         ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
 
+    def write(self,names,vals):
+        for name,val in zip(names,vals): 
+            ljm.eWriteName(self.handle,name,val)
+            print('wrote {}'.format(name))
+
     def print_handle_info(self):
         print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
             "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %

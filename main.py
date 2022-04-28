@@ -25,6 +25,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         self.record_push.setCheckable(True)
         self.record_push.clicked.connect(self.record)
+        self.write_push.clicked.connect(self.test_write)
 
         self.data = [0]
         self.curve = self.lj_prev.getPlotItem().plot()
@@ -40,13 +41,21 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_prev_slider.setMaximum(20000)
         self.lj_prev_slider.sliderReleased.connect(self.set_lj_slider)
     
+    def test_write(self,names):
+        for i in range(100):
+            if i%2==0:
+                self.lj.write(['FIO3'],[0])
+                time.sleep(1)
+            else: 
+                self.lj.write(['FIO3'],[1])
+                time.sleep(1)
+
     def record(self):
         state = self.record_push.isChecked()
         if state:
             self.cam_timer.stop()
             self.lj_timer.stop()
             self.lj.start_stream(record_filepath=os.path.expanduser('~/data.minjo'))
-
             self.cam.rec(300)
             self.record_push.toggle()
             self.lj.stop_stream()
