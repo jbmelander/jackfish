@@ -763,7 +763,7 @@
      </font>
     </property>
     <property name="text">
-     <string>AIN0, AIN1, AIN2, FIO3</string>
+     <string>AIN0, AIN1, AIN2</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -782,7 +782,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Labjack Channels</string>
+     <string>LJ Read Names</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
@@ -932,14 +932,96 @@
    <widget class="QPushButton" name="write_push">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>160</y>
-      <width>89</width>
+      <x>710</x>
+      <y>130</y>
+      <width>341</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>20</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Fire</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>711</x>
+      <y>190</y>
+      <width>140</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>LJ Write Names</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lj_write_chan_edit">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>190</y>
+      <width>201</width>
       <height>25</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
     <property name="text">
-     <string>Test Write</string>
+     <string>FIO3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_9">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>570</y>
+      <width>140</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>LJ Preview Chan</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="preview_chan_edit">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>590</y>
+      <width>201</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>FIO3</string>
     </property>
    </widget>
   </widget>

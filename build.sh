@@ -1,2 +1,2 @@
-pyuic5 -o /home/baccuslab/flirjack/gui.py /home/baccuslab/flirjack/gui.ui
-python3 /home/baccuslab/flirjack/main.py
+pyuic5 -o /home/baccuslab/src/jackfish/gui.py /home/baccuslab/src/jackfish/gui.ui
+python3 /home/baccuslab/src/jackfish/main.py
