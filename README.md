@@ -1,2 +1,2 @@
-# flirjack
+# jackfish
 FLIR-labjack-flystim interface
