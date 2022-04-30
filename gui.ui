@@ -989,7 +989,7 @@
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>580</x>
       <y>570</y>
       <width>140</width>
       <height>20</height>
@@ -1005,23 +1005,14 @@
      <string>LJ Preview Chan</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="preview_chan_edit">
+   <widget class="QComboBox" name="lj_chan_preview_drop">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>590</y>
-      <width>201</width>
+      <x>570</x>
+      <y>600</y>
+      <width>151</width>
       <height>25</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>13</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>FIO3</string>
     </property>
    </widget>
   </widget>

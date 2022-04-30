@@ -16,7 +16,10 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.setupUi(self)
 
         self.cam=FJCam()       
-        self.lj = Jack(['AIN1','FIO2'])
+
+        self.lj_chans = self.lj_chan_edit.text().split(',')
+        self.lj = Jack(self.lj_chans)
+        self.lj_chan_edit.editingFinished.connect(self.reset_lj_chans)
           
         self.set_path_push.clicked.connect(self.set_path)
         
@@ -40,6 +43,20 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_prev_slider.setMinimum(0)
         self.lj_prev_slider.setMaximum(20000)
         self.lj_prev_slider.sliderReleased.connect(self.set_lj_slider)
+
+        self.lj_chan_preview_drop.addItems(self.lj_chans)
+
+
+    def reset_lj_chans(self):
+        self.lj_chans = self.lj_chan_edit.text().split(',')
+        self.lj_chan_preview_drop.clear()
+        self.lj_chan_preview_drop.addItems(self.lj_chans)
+
+
+
+    def closeEvent(self,event): # do not change name, super override
+        self.lj.close()
+        
     
     def test_write(self,names):
         for i in range(100):
