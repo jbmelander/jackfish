@@ -2,7 +2,7 @@ import os
 import numpy as np
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog
 from PyQt5.QtGui import QPixmap, QImage
 from functools import partial
 import sys
@@ -107,12 +107,13 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.cam_timer.stop()
         self.lj_timer.stop()
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*)", options=options)
+        self.filepath = QFileDialog.getExistingDirectory(self,"Select save ddirectory")
+        
+        self.expt_name,ok = QInputDialog.getText(self,'Experiment name:','Experiment name:')
+        if not ok: 
+            while not ok:
+                self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
 
-        if fileName:
-            print(fileName)
-
-        self.filepath = fileName
         self.filepath_label.setText(self.filepath)
         self.cam.mp4_path=self.filepath
 
