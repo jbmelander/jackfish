@@ -51,6 +51,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_chans = self.lj_chan_edit.text().split(',')
         self.lj_chan_preview_drop.clear()
         self.lj_chan_preview_drop.addItems(self.lj_chans)
+        self.lj.close()
+        self.lj=Jack(self.lj_chans)
 
 
 
@@ -121,7 +123,9 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.cam_prev.setImage(self.frame)
 
     def lj_updater(self):
-        self.data = self.lj.data[0:-1:2]
+        idx= self.lj_chan_preview_drop.currentIndex()
+        print(type(idx))
+        self.data = self.lj.data[idx:-1:2]
         try:
             self.curve.setData(self.data[-self.lj_slider_val:])
         except:
