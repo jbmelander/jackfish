@@ -14,14 +14,14 @@ class FJCam:
         self.cam.init()
         self.atts = {}
 
-        self.cam.VideoMode = "Mode0"
-        self.cam.Width = self.cam.SensorWidth // 2
-        self.cam.Height = self.cam.SensorHeight // 2
-        self.cam.OffsetX = self.cam.SensorWidth // 4
-        self.cam.OffsetY = self.cam.SensorHeight // 4
-        self.cam.AcquisitionFrameRateEnabled = True
-        self.cam.AcquisitionFrameRateAuto = 'Off'
-        self.cam.AcquisitionFrameRate=20
+        self.cam.VideoMode = "Mode1"
+        # self.cam.Width = self.cam.SensorWidth // 2
+        # self.cam.Height = self.cam.SensorHeight // 2
+        # self.cam.OffsetX = self.cam.SensorWidth // 4
+        # self.cam.OffsetY = self.cam.SensorHeight // 4
+        # self.cam.AcquisitionFrameRateEnabled = True
+        # self.cam.AcquisitionFrameRateAuto = 'On'
+        # self.cam.AcquisitionFrameRate=
         self.cam.ExposureMode = 'Timed'
         self.cam.ExposureAuto = 'Continuous'
 

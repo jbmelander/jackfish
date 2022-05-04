@@ -17,6 +17,13 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         self.cam=FJCam()       
 
+        self.hist=self.cam_prev.getHistogramWidget()
+        self.hist.sigLevelsChanged.connect(self.lev_changed)
+
+
+        self.levels = [0,100]
+
+
         self.lj_chans = self.lj_chan_edit.text().split(',')
         self.lj = Jack(self.lj_chans)
         self.lj_chan_edit.editingFinished.connect(self.reset_lj_chans)
@@ -45,7 +52,9 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_prev_slider.sliderReleased.connect(self.set_lj_slider)
 
         self.lj_chan_preview_drop.addItems(self.lj_chans)
-
+    
+    def lev_changed(self):
+        self.levels = self.hist.getLevels()
 
     def reset_lj_chans(self):
         self.lj_chans = self.lj_chan_edit.text().split(',')
@@ -121,7 +130,9 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def cam_updater(self):
         self.cam_prev.clear()
         self.frame = self.cam.grab()
-        self.cam_prev.setImage(self.frame)
+        self.cam_prev.setImage(self.frame,autoLevels=False,levels=self.levels,autoHistogramRange=False)
+        self.cam_prev.setLevels(self.levels[0],self.levels[1])
+
 
     def lj_updater(self):
         idx= self.lj_chan_preview_drop.currentIndex()

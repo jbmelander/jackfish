@@ -1,4 +1,4 @@
-#%%
+import time#%%
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -213,7 +213,13 @@ class Jack():
 
 
 
-# jack = Jack()
-# # %%
-# ljm.getHandleInfo(jack.handle)
-# # %%
+# jack = Jack(['FIO1','FIO2'])
+# for i in range(100):
+#     if i%2==0:
+#         jack.write(['FIO3'],[0])
+#         time.sleep(1)
+#     else: 
+#         jack.write(['FIO3'],[1])
+#         time.sleep(1)
+
+# jack.close()
