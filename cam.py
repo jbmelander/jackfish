@@ -14,6 +14,7 @@ class FJCam:
         self.cam.init()
         self.atts = {}
 
+        self.cam.PixelFormat = 'Mono8'
         self.cam.VideoMode = "Mode1"
         # self.cam.Width = self.cam.SensorWidth // 2
         # self.cam.Height = self.cam.SensorHeight // 2
@@ -62,14 +63,14 @@ class FJCam:
         writer=cv2.VideoWriter(self.mp4_path,fourcc,self.framerate,(self.x,self.y))
         self.writer = writer
     
-    def rec(self,n_frames=100):
+    def rec(self):
         self.fn = 0
         self.init_writer()
 
         self.image_queue = queue.Queue()
         self.write_thread = threading.Thread(target=self.write,daemon=True).start()
         
-        for i in range(n_frames):
+        while self.do_record:
             frame = self.cam.get_array()
             print(frame.shape)
             print(self.x)

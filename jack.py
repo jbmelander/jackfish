@@ -44,10 +44,10 @@ class Jack():
         numFrames = len(aNames)
         ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
 
-    def write(self,names,vals):
-        for name,val in zip(names,vals): 
-            ljm.eWriteName(self.handle,name,val)
-            print('wrote {}'.format(name))
+    # def write(self,names,vals):
+    #     for name,val in zip(names,vals): 
+    #         ljm.eWriteName(self.handle,name,val)
+    #         print('wrote {}'.format(name))
 
     def print_handle_info(self):
         print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
@@ -75,6 +75,7 @@ class Jack():
             print(e)
 
     def stop_stream(self):
+        self.stream_start_time = datetime.now() # maybe not the best
         try:
             print("\nStop Stream")
             self.streaming = False
@@ -117,6 +118,7 @@ class Jack():
                     "%i" % (curSkip/self.numAddresses, ret[1], ret[2]))
 
                 if self.do_record:
+                    print('Writing')
                     with open(self.record_filepath, "a") as f:
                         f.write("\n")
                         f.write(str(ret[0]))

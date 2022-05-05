@@ -25,6 +25,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
 
         self.lj_chans = self.lj_chan_edit.text().split(',')
+        self.lj_chans = ['AIN0','FIO1','FIO3','FIO6','FIO7','EIO0']
+
         self.lj = Jack(self.lj_chans)
         self.lj_chan_edit.editingFinished.connect(self.reset_lj_chans)
           
@@ -83,12 +85,15 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if state:
             self.cam_timer.stop()
             self.lj_timer.stop()
-            self.lj.start_stream(record_filepath=os.path.expanduser('~/data.minjo'))
-            self.cam.rec(300)
-            self.record_push.toggle()
+            self.lj.start_stream(record_filepath=self.lj_write_path)
+            # self.cam.do_record=True
+            # self.cam.rec()
+            print('Stream Started')        
+        else:
+            # self.cam.do_record=False
             self.lj.stop_stream()
 
-        
+            print('Finished')        
 
     def set_lj_slider(self):
         self.cam_timer.stop()
@@ -115,16 +120,24 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def set_path(self):
         self.cam_timer.stop()
         self.lj_timer.stop()
+
         options = QFileDialog.Options()
         self.filepath = QFileDialog.getExistingDirectory(self,"Select save ddirectory")
-        
         self.expt_name,ok = QInputDialog.getText(self,'Experiment name:','Experiment name:')
+
         if not ok: 
             while not ok:
                 self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
+        
 
-        self.filepath_label.setText(self.filepath)
-        self.cam.mp4_path=self.filepath
+        self.filepath_label.setText(f'{self.filepath} >>> {self.expt_name}')
+        os.mkdir(os.path.join(self.filepath,self.expt_name))
+
+        self.cam.mp4_path=os.path.join(self.filepath,f'{self.expt_name}.mp4')
+        self.lj_write_path=os.path.join(self.filepath,f'{self.expt_name}.csv')
+
+
+        print(self.lj_write_path)
 
   
     def cam_updater(self):
@@ -137,7 +150,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def lj_updater(self):
         idx= self.lj_chan_preview_drop.currentIndex()
         print(type(idx))
-        self.data = self.lj.data[idx:-1:2]
+        self.data = self.lj.data[idx:-1:len(self.lj_chans)]
         try:
             self.curve.setData(self.data[-self.lj_slider_val:])
         except:
