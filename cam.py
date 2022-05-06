@@ -8,9 +8,9 @@ import cv2
 from simple_pyspin import Camera
 
 class FJCam:
-    def __init__(self):
+    def __init__(self, cam_index=1):
         self.mp4_path = os.path.expanduser('~/test.mp4')
-        self.cam = Camera()
+        self.cam = Camera(index=cam_index)
         self.cam.init()
         self.atts = {}
 

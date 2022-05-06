@@ -1,0 +1,28 @@
+        self.cam.PixelFormat = 'Mono8'
+
+        self.cam.BinningHorizontal = 4
+        self.cam.BinningVertical = 4
+
+        self.cam.ExposureMode = 'Timed'
+        self.cam.ExposureAuto = 'Off'
+        self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
+
+        self.cam.Width = self.cam.WidthMax
+        self.cam.Height = self.cam.HeightMax
+
+        self.cam.LineSelector = 'Line1' #FIO0
+        self.cam.LineMode = 'Output'
+        self.cam.LineSource = 'ExposureActive'
+
+        self.cam.GainAuto = 'Off'
+        self.cam.Gain = 30.0
+
+        self.cam.GammaEnable = False
+
+        self.cam.TriggerSelector = 'AcquisitionStart'
+        self.cam.TriggerMode = 'Off'
+        self.cam.TriggerSource = 'Line0' #FIO1
+        self.cam.TriggerActivation = 'RisingEdge'
+
+        self.cam.AcquisitionFrameRateEnable = True
+        self.cam.AcquisitionFrameRate = 350.0

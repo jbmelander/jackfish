@@ -15,7 +15,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         super(FLUI, self).__init__(parent)
         self.setupUi(self)
 
-        self.cam=FJCam()       
+        self.cam=FJCam(cam_index=1)
 
         self.hist=self.cam_prev.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.lev_changed)
@@ -122,7 +122,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_timer.stop()
 
         options = QFileDialog.Options()
-        self.filepath = QFileDialog.getExistingDirectory(self,"Select save ddirectory")
+        self.filepath = QFileDialog.getExistingDirectory(self,"Select save directory")
         self.expt_name,ok = QInputDialog.getText(self,'Experiment name:','Experiment name:')
 
         if not ok: 
@@ -131,11 +131,11 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         
 
         self.filepath_label.setText(f'{self.filepath} >>> {self.expt_name}')
-        os.mkdir(os.path.join(self.filepath,self.expt_name))
+        exp_path = os.path.join(self.filepath,self.expt_name)
+        os.mkdir(exp_path)
 
-        self.cam.mp4_path=os.path.join(self.filepath,f'{self.expt_name}.mp4')
-        self.lj_write_path=os.path.join(self.filepath,f'{self.expt_name}.csv')
-
+        self.cam.mp4_path=os.path.join(exp_path,f'{self.expt_name}.mp4')
+        self.lj_write_path=os.path.join(exp_path,f'{self.expt_name}.csv')
 
         print(self.lj_write_path)
 
@@ -149,7 +149,6 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
     def lj_updater(self):
         idx= self.lj_chan_preview_drop.currentIndex()
-        print(type(idx))
         self.data = self.lj.data[idx:-1:len(self.lj_chans)]
         try:
             self.curve.setData(self.data[-self.lj_slider_val:])
