@@ -151,5 +151,6 @@ class FJCam:
             self.writer.write(frame_color)
             self.image_queue.task_done()
     
-
+    def close(self):
+        self.cam.close()
 

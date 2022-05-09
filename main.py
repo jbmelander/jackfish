@@ -15,11 +15,17 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         super(FLUI, self).__init__(parent)
         self.setupUi(self)
 
-        self.cam=FJCam(cam_index=1)
+        if os.uname()[1] == "40hr-fitness":
+            self.cam=FJCam(cam_index=1)
+
+            # Init FT camera, set attributes, then disconnect so that Fictrac can use the cam.
+            ft_cam=FJCam(cam_index=0)
+            ft_cam.close()
+        else: # Josh's one-camera setup
+            self.cam=FJCam(cam_index=0)
 
         self.hist=self.cam_prev.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.lev_changed)
-
 
         self.levels = [0,100]
 
@@ -32,12 +38,19 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
           
         self.set_path_push.clicked.connect(self.set_path)
         
+        # self.init_cam0_push.setCheckable(True)
+        # self.init_cam0_push.clicked.connect(self.init_cam0)
+        # self.init_cam1_push.setCheckable(True)
+        # self.init_cam1_push.clicked.connect(self.init_cam1)
+
         self.preview_push.setCheckable(True)
         self.preview_push.clicked.connect(self.preview)
 
         self.record_push.setCheckable(True)
         self.record_push.clicked.connect(self.record)
-        self.write_push.clicked.connect(self.test_write)
+
+        self.lj_cam_trigger_chan_edit.editingFinished.connect(self.reset_lj_cam_trigger_chans)
+        self.cam_trigger_push.clicked.connect(self.trigger_cams)
 
         self.data = [0]
         self.curve = self.lj_prev.getPlotItem().plot()
@@ -65,20 +78,27 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj.close()
         self.lj=Jack(self.lj_chans)
 
-
+    def reset_lj_cam_trigger_chans(self):
+        self.lj_cam_trigger_chans = self.lj_cam_trigger_chan_edit.text().split(',')
 
     def closeEvent(self,event): # do not change name, super override
         self.lj.close()
-        
-    
-    def test_write(self,names):
-        for i in range(100):
-            if i%2==0:
-                self.lj.write(['FIO3'],[0])
-                time.sleep(1)
-            else: 
-                self.lj.write(['FIO3'],[1])
-                time.sleep(1)
+
+
+    def trigger_cams(self):
+        write_states = np.ones(len(self.lj_cam_trigger_chans), dtype=int)
+        self.lj.write(self.lj_cam_trigger_chans, write_states.tolist())
+        time.sleep(0.05)
+        self.lj.write(self.lj_cam_trigger_chans, (write_states*0).tolist())
+
+    # def test_write(self,names):
+    #     for i in range(100):
+    #         if i%2==0:
+    #             self.lj.write(['FIO3'],[0])
+    #             time.sleep(1)
+    #         else: 
+    #             self.lj.write(['FIO3'],[1])
+    #             time.sleep(1)
 
     def record(self):
         state = self.record_push.isChecked()

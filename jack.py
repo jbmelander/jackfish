@@ -37,17 +37,16 @@ class Jack():
         # is 0 (default).
         aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US",
                   "STREAM_RESOLUTION_INDEX"]
-        aValues = [1.0,0,0]
+        aValues = [1.0,6,0]
 
         # Write the analog inputs' negative channels (when applicable), ranges,
         # stream settling time and stream resolution configuration.
         numFrames = len(aNames)
         ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
 
-    # def write(self,names,vals):
-    #     for name,val in zip(names,vals): 
-    #         ljm.eWriteName(self.handle,name,val)
-    #         print('wrote {}'.format(name))
+    def write(self, names, vals):
+        ljm.eWriteNames(self.handle, names, vals)
+        # print('wrote {}'.format(name))
 
     def print_handle_info(self):
         print("Opened a LabJack with Device type: %i, Connection type: %i,\n"

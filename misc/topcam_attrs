@@ -1,3 +1,4 @@
+    elif self.cam.DeviceSerialNumber == '20243354': # 40hr Top camera
         self.cam.PixelFormat = 'Mono8'
 
         self.cam.BinningHorizontal = 4
