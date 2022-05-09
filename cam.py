@@ -14,22 +14,83 @@ class FJCam:
         self.cam.init()
         self.atts = {}
 
-        self.cam.PixelFormat = 'Mono8'
-        self.cam.VideoMode = "Mode1"
-        # self.cam.Width = self.cam.SensorWidth // 2
-        # self.cam.Height = self.cam.SensorHeight // 2
-        # self.cam.OffsetX = self.cam.SensorWidth // 4
-        # self.cam.OffsetY = self.cam.SensorHeight // 4
-        # self.cam.AcquisitionFrameRateEnabled = True
-        # self.cam.AcquisitionFrameRateAuto = 'On'
-        # self.cam.AcquisitionFrameRate=
-        self.cam.ExposureMode = 'Timed'
-        self.cam.ExposureAuto = 'Continuous'
+        if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
+            self.cam.PixelFormat = 'Mono8'
 
-        self.cam.LineSelector = 'Line1'
-        self.cam.LineMode = 'Strobe'
-        self.cam.StrobeEnabled = True
-        self.cam.StrobeDuration = 3000  # microseconds
+            self.cam.BinningHorizontal = 2
+            self.cam.BinningVertical = 2
+
+            self.cam.ExposureMode = 'Timed'
+            self.cam.ExposureAuto = 'Off'
+            self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
+
+            self.cam.Width = self.cam.WidthMax
+            self.cam.Height = self.cam.HeightMax
+
+            self.cam.LineSelector = 'Line1' #FIO2
+            self.cam.LineMode = 'Output'
+            self.cam.LineSource = 'ExposureActive'
+
+            self.cam.GainAuto = 'Off'
+            self.cam.Gain = 38.0
+
+            self.cam.GammaEnable = False
+
+            self.cam.TriggerSelector = 'AcquisitionStart'
+            self.cam.TriggerMode = 'Off'
+            self.cam.TriggerSource = 'Line0'  #FIO3
+            self.cam.TriggerActivation = 'RisingEdge'
+
+            self.cam.AcquisitionFrameRateEnable = True
+            self.cam.AcquisitionFrameRate = 350.0
+        
+        elif self.cam.DeviceSerialNumber == '20243354': # 40hr Top camera
+            self.cam.PixelFormat = 'Mono8'
+
+            self.cam.BinningHorizontal = 4
+            self.cam.BinningVertical = 4
+
+            self.cam.ExposureMode = 'Timed'
+            self.cam.ExposureAuto = 'Off'
+            self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
+
+            self.cam.Width = self.cam.WidthMax
+            self.cam.Height = self.cam.HeightMax
+
+            self.cam.LineSelector = 'Line1' #FIO0
+            self.cam.LineMode = 'Output'
+            self.cam.LineSource = 'ExposureActive'
+
+            self.cam.GainAuto = 'Off'
+            self.cam.Gain = 30.0
+
+            self.cam.GammaEnable = False
+
+            self.cam.TriggerSelector = 'AcquisitionStart'
+            self.cam.TriggerMode = 'Off'
+            self.cam.TriggerSource = 'Line0' #FIO1
+            self.cam.TriggerActivation = 'RisingEdge'
+
+            self.cam.AcquisitionFrameRateEnable = True
+            self.cam.AcquisitionFrameRate = 350.0
+
+        else: # Josh camera
+            self.cam.PixelFormat = 'Mono8'
+            self.cam.VideoMode = "Mode1"
+            # self.cam.Width = self.cam.SensorWidth // 2
+            # self.cam.Height = self.cam.SensorHeight // 2
+            # self.cam.OffsetX = self.cam.SensorWidth // 4
+            # self.cam.OffsetY = self.cam.SensorHeight // 4
+            # self.cam.AcquisitionFrameRateEnabled = True
+            # self.cam.AcquisitionFrameRateAuto = 'On'
+            # self.cam.AcquisitionFrameRate=
+            self.cam.ExposureMode = 'Timed'
+            self.cam.ExposureAuto = 'Continuous'
+
+            self.cam.LineSelector = 'Line1'
+            self.cam.LineMode = 'Strobe'
+            self.cam.StrobeEnabled = True
+            self.cam.StrobeDuration = 3000  # microseconds
 
         self.cam.start()
         self.get_img_dtype()
