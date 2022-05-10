@@ -15,11 +15,52 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         super(FLUI, self).__init__(parent)
         self.setupUi(self)
 
+        #### Labjack ####
+
+        # Set Labjack Scanrate
+        self.lj_sr_edit.editingFinished.connect(self.set_lj_scanrate)
+        self.set_lj_scanrate()
+
+        # Labjack Scan channels
+        self.lj_chans = self.lj_chan_edit.text().split(',')
+        self.lj_chan_edit.editingFinished.connect(self.reset_lj_chans)
+
+        self.lj_chan_preview_drop.addItems(self.lj_chans)
+
+        # Set Labjack Trigger channels
+        self.lj_cam_trigger_chan_edit.editingFinished.connect(self.set_lj_cam_trigger_chans)
+        self.set_lj_cam_trigger_chans()
+
+        # LJ Cam Trigger button
+        self.lj_cam_trigger_push.clicked.connect(self.trigger_cams)
+
+        # Initialize Labjack
+        self.lj = Jack(self.lj_chans)
+
+        # Labjack preview
+        self.lj_prev_slider.setMinimum(0)
+        self.lj_prev_slider.setMaximum(20000)
+        self.lj_prev_slider.sliderReleased.connect(self.set_lj_slider)
+
+        self.data = [0]
+        self.curve = self.lj_prev.getPlotItem().plot()
+        self.curve.setData(self.data)
+        self.lj_prev.show()
+
+        ################
+
+        #### Camera ####
+
+        # self.init_cam0_push.setCheckable(True)
+        # self.init_cam0_push.clicked.connect(self.init_cam0)
+        # self.init_cam1_push.setCheckable(True)
+        # self.init_cam1_push.clicked.connect(self.init_cam1)
+
         if os.uname()[1] == "40hr-fitness":
-            self.cam=FJCam(cam_index=1)
+            self.cam=FJCam(cam_index='20243354') # top camera
 
             # Init FT camera, set attributes, then disconnect so that Fictrac can use the cam.
-            ft_cam=FJCam(cam_index=0)
+            ft_cam=FJCam(cam_index='20243355') # side camera
             ft_cam.close()
         else: # Josh's one-camera setup
             self.cam=FJCam(cam_index=0)
@@ -29,19 +70,12 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         self.levels = [0,100]
 
+        self.cam_view_toggle.stateChanged.connect(self.set_cam_view)
+        self.set_cam_view()
 
-        self.lj_chans = self.lj_chan_edit.text().split(',')
-        self.lj_chans = ['AIN0','FIO1','FIO3','FIO6','FIO7','EIO0']
+        ################
 
-        self.lj = Jack(self.lj_chans)
-        self.lj_chan_edit.editingFinished.connect(self.reset_lj_chans)
-          
         self.set_path_push.clicked.connect(self.set_path)
-        
-        # self.init_cam0_push.setCheckable(True)
-        # self.init_cam0_push.clicked.connect(self.init_cam0)
-        # self.init_cam1_push.setCheckable(True)
-        # self.init_cam1_push.clicked.connect(self.init_cam1)
 
         self.preview_push.setCheckable(True)
         self.preview_push.clicked.connect(self.preview)
@@ -49,27 +83,25 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.record_push.setCheckable(True)
         self.record_push.clicked.connect(self.record)
 
-        self.lj_cam_trigger_chan_edit.editingFinished.connect(self.reset_lj_cam_trigger_chans)
-        self.cam_trigger_push.clicked.connect(self.trigger_cams)
-
-        self.data = [0]
-        self.curve = self.lj_prev.getPlotItem().plot()
-        self.curve.setData(self.data)
-        self.lj_prev.show()
-
         self.cam_timer = QtCore.QTimer()
         self.cam_timer.timeout.connect(self.cam_updater)
         self.lj_timer = QtCore.QTimer()
         self.lj_timer.timeout.connect(self.lj_updater)
     
-        self.lj_prev_slider.setMinimum(0)
-        self.lj_prev_slider.setMaximum(20000)
-        self.lj_prev_slider.sliderReleased.connect(self.set_lj_slider)
 
-        self.lj_chan_preview_drop.addItems(self.lj_chans)
+        self.shutdown_push.clicked.connect(self.shutdown)
     
+    def set_cam_view(self):
+        self.cam_view = self.cam_view_toggle.isChecked()
+
     def lev_changed(self):
         self.levels = self.hist.getLevels()
+
+    def set_lj_scanrate(self):
+        self.lj_scanrate = int(self.lj_sr_edit.text())
+
+    def set_lj_cam_trigger_chans(self):
+        self.lj_cam_trigger_chans = self.lj_cam_trigger_chan_edit.text().split(',')
 
     def reset_lj_chans(self):
         self.lj_chans = self.lj_chan_edit.text().split(',')
@@ -78,12 +110,13 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj.close()
         self.lj=Jack(self.lj_chans)
 
-    def reset_lj_cam_trigger_chans(self):
-        self.lj_cam_trigger_chans = self.lj_cam_trigger_chan_edit.text().split(',')
 
     def closeEvent(self,event): # do not change name, super override
         self.lj.close()
 
+    def shutdown(self):
+        # self.lj.close()
+        self.cam.close()
 
     def trigger_cams(self):
         write_states = np.ones(len(self.lj_cam_trigger_chans), dtype=int)
@@ -105,7 +138,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if state:
             self.cam_timer.stop()
             self.lj_timer.stop()
-            self.lj.start_stream(record_filepath=self.lj_write_path)
+            self.lj.start_stream(record_filepath=self.lj_write_path, scanRate=self.lj_scanrate)
             # self.cam.do_record=True
             # self.cam.rec()
             print('Stream Started')        
@@ -128,14 +161,12 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if state:
             self.cam_timer.start()
             self.lj_timer.start()
-            self.lj.start_stream(do_record=False)
-
+            self.lj.start_stream(do_record=False, scanRate=self.lj_scanrate)
 
         else:
             self.cam_timer.stop()
             self.lj_timer.stop()
             self.lj.stop_stream()
-
 
     def set_path(self):
         self.cam_timer.stop()
@@ -143,11 +174,10 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         options = QFileDialog.Options()
         self.filepath = QFileDialog.getExistingDirectory(self,"Select save directory")
-        self.expt_name,ok = QInputDialog.getText(self,'Experiment name:','Experiment name:')
-
-        if not ok: 
-            while not ok:
-                self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
+        
+        ok = False
+        while not ok:
+            self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
         
 
         self.filepath_label.setText(f'{self.filepath} >>> {self.expt_name}')
@@ -159,13 +189,15 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         print(self.lj_write_path)
 
-  
     def cam_updater(self):
         self.cam_prev.clear()
-        self.frame = self.cam.grab()
-        self.cam_prev.setImage(self.frame,autoLevels=False,levels=self.levels,autoHistogramRange=False)
-        self.cam_prev.setLevels(self.levels[0],self.levels[1])
-
+        if self.cam_view:
+            try:
+                self.frame = self.cam.grab(wait=False)
+                self.cam_prev.setImage(self.frame,autoLevels=False,levels=self.levels,autoHistogramRange=False)
+                self.cam_prev.setLevels(self.levels[0],self.levels[1])
+            except:
+                pass
 
     def lj_updater(self):
         idx= self.lj_chan_preview_drop.currentIndex()

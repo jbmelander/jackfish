@@ -494,7 +494,7 @@
      <rect>
       <x>40</x>
       <y>20</y>
-      <width>261</width>
+      <width>121</width>
       <height>31</height>
      </rect>
     </property>
@@ -505,7 +505,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Init Cam One</string>
+     <string>Init Main Cam</string>
     </property>
    </widget>
    <widget class="QPushButton" name="init_lj_push">
@@ -722,7 +722,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
-     <string>Line2</string>
+     <string>Line0</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
@@ -763,7 +763,7 @@
      </font>
     </property>
     <property name="text">
-     <string>AIN0, AIN1, AIN2</string>
+     <string>AIN0, AIN1, AIN2, FIO0, FIO2</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -820,7 +820,7 @@
      </font>
     </property>
     <property name="text">
-     <string>3000</string>
+     <string>5000</string>
     </property>
    </widget>
    <widget class="QPushButton" name="preview_push">
@@ -929,7 +929,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QPushButton" name="write_push">
+   <widget class="QPushButton" name="lj_cam_trigger_push">
     <property name="geometry">
      <rect>
       <x>710</x>
@@ -945,7 +945,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Fire</string>
+     <string>Trigger Cameras</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_8">
@@ -953,7 +953,7 @@
      <rect>
       <x>711</x>
       <y>190</y>
-      <width>140</width>
+      <width>181</width>
       <height>17</height>
      </rect>
     </property>
@@ -964,15 +964,15 @@
      </font>
     </property>
     <property name="text">
-     <string>LJ Write Names</string>
+     <string>Cam Trigger LJ Names</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lj_write_chan_edit">
+   <widget class="QLineEdit" name="lj_cam_trigger_chan_edit">
     <property name="geometry">
      <rect>
-      <x>850</x>
+      <x>910</x>
       <y>190</y>
-      <width>201</width>
+      <width>141</width>
       <height>25</height>
      </rect>
     </property>
@@ -983,7 +983,7 @@
      </font>
     </property>
     <property name="text">
-     <string>FIO3</string>
+     <string>FIO1, FIO3</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_9">
@@ -1013,6 +1013,54 @@
       <width>151</width>
       <height>25</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cam_view_toggle">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>570</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show live cam</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="init_cam1_push">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>20</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Init FT Cam</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="shutdown_push">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>640</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Shutdown</string>
     </property>
    </widget>
   </widget>

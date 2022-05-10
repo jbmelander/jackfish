@@ -45,7 +45,7 @@ class Jack():
         ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
 
     def write(self, names, vals):
-        ljm.eWriteNames(self.handle, names, vals)
+        ljm.eWriteNames(self.handle, len(names), names, vals)
         # print('wrote {}'.format(name))
 
     def print_handle_info(self):
@@ -79,6 +79,7 @@ class Jack():
             print("\nStop Stream")
             self.streaming = False
             ljm.eStreamStop(self.handle)
+            self.stream_end_time = datetime.now()
             
             recording_duration = self.stream_end_time - self.stream_start_time
             tt = recording_duration.seconds + float(recording_duration.microseconds) / 1000000
@@ -131,7 +132,7 @@ class Jack():
                 print(e)
         else:
             print("Shutting off Stream Callback")
-            self.stream_end_time = datetime.now()
+            
 
     
     def close(self):

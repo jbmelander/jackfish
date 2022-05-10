@@ -15,6 +15,7 @@ class FJCam:
         self.atts = {}
 
         if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
+            print('Initializing side cam')
             self.cam.PixelFormat = 'Mono8'
 
             self.cam.BinningHorizontal = 2
@@ -37,7 +38,7 @@ class FJCam:
             self.cam.GammaEnable = False
 
             self.cam.TriggerSelector = 'AcquisitionStart'
-            self.cam.TriggerMode = 'Off'
+            self.cam.TriggerMode = 'On'
             self.cam.TriggerSource = 'Line0'  #FIO3
             self.cam.TriggerActivation = 'RisingEdge'
 
@@ -45,6 +46,7 @@ class FJCam:
             self.cam.AcquisitionFrameRate = 350.0
         
         elif self.cam.DeviceSerialNumber == '20243354': # 40hr Top camera
+            print('Initializing top cam')
             self.cam.PixelFormat = 'Mono8'
 
             self.cam.BinningHorizontal = 4
@@ -67,7 +69,7 @@ class FJCam:
             self.cam.GammaEnable = False
 
             self.cam.TriggerSelector = 'AcquisitionStart'
-            self.cam.TriggerMode = 'Off'
+            self.cam.TriggerMode = 'On'
             self.cam.TriggerSource = 'Line0' #FIO1
             self.cam.TriggerActivation = 'RisingEdge'
 
@@ -75,6 +77,7 @@ class FJCam:
             self.cam.AcquisitionFrameRate = 350.0
 
         else: # Josh camera
+            print('Initializing Josh cam')
             self.cam.PixelFormat = 'Mono8'
             self.cam.VideoMode = "Mode1"
             # self.cam.Width = self.cam.SensorWidth // 2
@@ -101,8 +104,8 @@ class FJCam:
         
         self.mp4_path = None
         
-    def grab(self):
-        return self.cam.get_array().T
+    def grab(self, wait=True):
+        return self.cam.get_array(wait=wait).T
 
     def set_att(self,att,val):
         self.cam.__setattr__(att,val)
