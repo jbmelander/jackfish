@@ -122,8 +122,9 @@ class Jack():
                     with open(self.record_filepath, "a") as f:
                         f.write("\n")
                         f.write(str(ret[0]))
-                else:
-                    self.data = np.append(self.data,data)
+                
+                self.data = np.append(self.data, data) #### TODO: make this a queue with fixed length so this doesn't blow up...
+                 
             except ljm.LJMError:
                 ljme = sys.exc_info()[1]
                 print(ljme)

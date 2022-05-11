@@ -156,18 +156,19 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             if self.preview_push.isChecked(): # preview was on
                 self.preview_push.click()
 
+            self.lj_timer.start()
             self.lj.start_stream(do_record=True, record_filepath=self.lj_write_path, scanRate=self.lj_scanrate)
             self.cam.start()
             self.cam.start_rec()
 
-            print('Stream Started')        
+            print('Experiment Started')        
         else:
-            # self.cam.do_record=False
+            self.lj_timer.stop()
             self.lj.stop_stream()
             self.cam.stop_rec()
             self.cam.stop()
 
-            print('Finished')
+            print('Experiment Finished')
 
 
     def set_lj_slider(self):
