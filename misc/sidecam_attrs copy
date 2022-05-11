@@ -1,3 +1,4 @@
+    if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
         self.cam.PixelFormat = 'Mono8'
 
         self.cam.BinningHorizontal = 2

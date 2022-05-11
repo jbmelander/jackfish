@@ -8,11 +8,12 @@ import cv2
 from simple_pyspin import Camera
 
 class FJCam:
-    def __init__(self, cam_index=1):
-        self.mp4_path = os.path.expanduser('~/test.mp4')
+    def __init__(self, cam_index=1, video_out_path=None):
         self.cam = Camera(index=cam_index)
         self.cam.init()
         self.atts = {}
+
+        self.set_video_out_path(video_out_path)
 
         if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
             print('Initializing side cam')
@@ -95,15 +96,22 @@ class FJCam:
             self.cam.StrobeEnabled = True
             self.cam.StrobeDuration = 3000  # microseconds
 
-        self.cam.start()
+        self.start()
         self.get_img_dtype()
         self.get_img_dimensions()
         self.get_img_framerate()
+        self.stop()
 
         assert self.dtype[-1] == '8', 'Data should be in proper bit depth'
         
-        self.mp4_path = None
-        
+        self.video_out_path = None
+
+    def start(self):
+        self.cam.start()
+
+    def stop(self):
+        self.cam.stop()
+
     def grab(self, wait=True):
         return self.cam.get_array(wait=wait).T
 
@@ -112,7 +120,7 @@ class FJCam:
 
     def get_img_framerate(self):
         # Reversed from numpy convension
-        self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
+        self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
 
     def get_img_dimensions(self):
         # Reversed from numpy convension
@@ -122,12 +130,46 @@ class FJCam:
     def get_img_dtype(self):
         self.dtype = self.cam.__getattr__('PixelFormat')
     
+    def set_video_out_path(self, path=None):
+        if path is None:
+            path = os.path.expanduser('~/test.mp4')
+        self.video_out_path = path
+        print(path)
+
+    def start_rec(self):
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        self.writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
+
+        self.fn = 0
+        self.do_record = True
+        self.record_thread = threading.Thread(target=self.rec_callback, daemon=True).start()
+
+    def rec_callback(self):
+        while self.do_record:
+            try:
+                frame = self.cam.get_array(wait=False)
+                frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+                self.writer.write(frame_color)
+                self.fn += 1
+                # print(self.fn)
+            except:
+                # print('No frame acquired')
+                pass
+
+    def stop_rec(self):
+        self.do_record = False
+        self.writer.release()
+        print("Recording finished.")
+
+
+
+
     def init_writer(self):
-        fourcc = cv2.VideoWriter_fourcc('M','P','4','V')
-        writer=cv2.VideoWriter(self.mp4_path,fourcc,self.framerate,(self.x,self.y))
+        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        writer=cv2.VideoWriter(self.video_out_path,fourcc,self.framerate,(self.x,self.y))
         self.writer = writer
     
-    def rec(self):
+    def rec(self, wait=True):
         self.fn = 0
         self.init_writer()
 
@@ -135,7 +177,7 @@ class FJCam:
         self.write_thread = threading.Thread(target=self.write,daemon=True).start()
         
         while self.do_record:
-            frame = self.cam.get_array()
+            frame = self.cam.get_array(wait=wait)
             print(frame.shape)
             print(self.x)
             print(self.y)

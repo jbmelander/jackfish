@@ -25,7 +25,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_chans = self.lj_chan_edit.text().split(',')
         self.lj_chan_edit.editingFinished.connect(self.reset_lj_chans)
 
-        self.lj_chan_preview_drop.addItems(self.lj_chans)
+        self.lj_chan_preview_drop.addItems(['None'] + self.lj_chans)
 
         # Set Labjack Trigger channels
         self.lj_cam_trigger_chan_edit.editingFinished.connect(self.set_lj_cam_trigger_chans)
@@ -60,10 +60,11 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.cam=FJCam(cam_index='20243354') # top camera
 
             # Init FT camera, set attributes, then disconnect so that Fictrac can use the cam.
-            ft_cam=FJCam(cam_index='20243355') # side camera
-            ft_cam.close()
+            self.ft_cam=FJCam(cam_index='20243355') # side camera
+
         else: # Josh's one-camera setup
             self.cam=FJCam(cam_index=0)
+            self.ft_cam = None
 
         self.hist=self.cam_prev.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.lev_changed)
@@ -106,7 +107,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def reset_lj_chans(self):
         self.lj_chans = self.lj_chan_edit.text().split(',')
         self.lj_chan_preview_drop.clear()
-        self.lj_chan_preview_drop.addItems(self.lj_chans)
+        self.lj_chan_preview_drop.addItems(['None'] + self.lj_chans)
         self.lj.close()
         self.lj=Jack(self.lj_chans)
 
@@ -117,6 +118,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def shutdown(self):
         # self.lj.close()
         self.cam.close()
+        if self.ft_cam is not None:
+            self.ft_cam.close()
 
     def trigger_cams(self):
         write_states = np.ones(len(self.lj_cam_trigger_chans), dtype=int)
@@ -133,20 +136,39 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     #             self.lj.write(['FIO3'],[1])
     #             time.sleep(1)
 
+    def preview(self):
+        state = self.preview_push.isChecked()
+        if state:
+            self.lj_timer.start()
+            self.lj.start_stream(do_record=False, scanRate=self.lj_scanrate)
+            self.cam_timer.start()
+            self.cam.start()
+        else:
+            print("Turning preview off")
+            self.lj_timer.stop()
+            self.lj.stop_stream()
+            self.cam_timer.stop()
+            self.cam.stop()
+
     def record(self):
         state = self.record_push.isChecked()
         if state:
-            self.cam_timer.stop()
-            self.lj_timer.stop()
-            self.lj.start_stream(record_filepath=self.lj_write_path, scanRate=self.lj_scanrate)
-            # self.cam.do_record=True
-            # self.cam.rec()
+            if self.preview_push.isChecked(): # preview was on
+                self.preview_push.click()
+
+            self.lj.start_stream(do_record=True, record_filepath=self.lj_write_path, scanRate=self.lj_scanrate)
+            self.cam.start()
+            self.cam.start_rec()
+
             print('Stream Started')        
         else:
             # self.cam.do_record=False
             self.lj.stop_stream()
+            self.cam.stop_rec()
+            self.cam.stop()
 
-            print('Finished')        
+            print('Finished')
+
 
     def set_lj_slider(self):
         self.cam_timer.stop()
@@ -155,18 +177,6 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_slider_val = int(self.lj_prev_slider.value())
         self.cam_timer.start()
         self.lj_timer.start()
-
-    def preview(self):
-        state = self.preview_push.isChecked()
-        if state:
-            self.cam_timer.start()
-            self.lj_timer.start()
-            self.lj.start_stream(do_record=False, scanRate=self.lj_scanrate)
-
-        else:
-            self.cam_timer.stop()
-            self.lj_timer.stop()
-            self.lj.stop_stream()
 
     def set_path(self):
         self.cam_timer.stop()
@@ -184,7 +194,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         exp_path = os.path.join(self.filepath,self.expt_name)
         os.mkdir(exp_path)
 
-        self.cam.mp4_path=os.path.join(exp_path,f'{self.expt_name}.mp4')
+        self.cam.set_video_out_path(os.path.join(exp_path,f'{self.expt_name}.mp4'))
         self.lj_write_path=os.path.join(exp_path,f'{self.expt_name}.csv')
 
         print(self.lj_write_path)
@@ -201,12 +211,18 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
     def lj_updater(self):
         idx= self.lj_chan_preview_drop.currentIndex()
-        self.data = self.lj.data[idx:-1:len(self.lj_chans)]
-        try:
-            self.curve.setData(self.data[-self.lj_slider_val:])
-        except:
-            self.curve.setData(self.data)
-        self.lj_prev.show()         
+
+        if idx == 0: # None
+            return
+        else:
+            idx -= 1 # Not None; subtract index by 1 to correct for the None
+
+            self.data = self.lj.data[idx:-1:len(self.lj_chans)]
+            try:
+                self.curve.setData(self.data[-self.lj_slider_val:])
+            except:
+                self.curve.setData(self.data)
+            self.lj_prev.show()         
 
 def main():
     app = QApplication(sys.argv)
