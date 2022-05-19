@@ -15,7 +15,7 @@ class FJCam:
 
         self.set_video_out_path(video_out_path)
         
-        if 'DeviceSerialNumber' in list(self.cam.__dir__()):
+        if 'DeviceSerialNumber' in list(self.cam.camera_attributes.keys()):
             if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
                 print('Initializing side cam')
                 self.cam.PixelFormat = 'Mono8'
