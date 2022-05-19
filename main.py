@@ -25,7 +25,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         # Labjack Scan channels
         self.lj_chans = self.lj_chan_edit.text().split(',')
-        self.lj_chan_edit.editingFinished.connect(self.reset_lj_chans)
+        self.lj_chan_edit.editingFinished.connect(self.set_lj_chans)
 
         self.lj_chan_preview_drop.addItems(['None'] + self.lj_chans)
 
@@ -37,17 +37,21 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.lj_cam_trigger_push.clicked.connect(self.trigger_cams)
 
         # Initialize Labjack
-        self.lj = Jack(self.lj_chans)
+        self.lj = Jack()
+
+        # Labjack preview drop change
+        self.lj_chan_preview_drop.currentIndexChanged.connect(self.set_lj_chan_preview)
 
         # Labjack preview
         self.lj_prev_slider.setMinimum(0)
         self.lj_prev_slider.setMaximum(20000)
         self.lj_prev_slider.sliderReleased.connect(self.set_lj_slider)
 
-        self.data = [0]
-        self.curve = self.lj_prev.getPlotItem().plot()
-        self.curve.setData(self.data)
+        self.lj_data = [0]
+        self.lj_curve = self.lj_prev.getPlotItem().plot()
+        self.lj_curve.setData(self.lj_data)
         self.lj_prev.show()
+        self.lj_show_preview = False
 
         ################
 
@@ -63,7 +67,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
             # Init FT camera, set attributes, then disconnect so that Fictrac can use the cam.
             self.ft_cam=FJCam(cam_index='20243355') # side camera
-            self.ft_cam.close()
+            # self.ft_cam.close()
 
             self.ft_params = {
                 'bin' :    "/home/clandinin/src/fictrac/bin/fictrac",
@@ -77,22 +81,30 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 'timestamp_idx' : 21
             }
 
+            self.cam1_trigger_toggle.stateChanged.connect(self.toggle_cam1_trigger)
+            self.cam1_trigger_toggle.setChecked(self.ft_cam.cam.TriggerMode == 'On')
+
+            self.launch_fictrac_toggle.stateChanged.connect(self.set_launch_fictrac)
+            self.set_launch_fictrac()
+
         else: # Josh's one-camera setup
             self.cam=FJCam(cam_index=0)
             self.ft_cam = None
 
         self.hist=self.cam_prev.getHistogramWidget()
-        self.hist.sigLevelsChanged.connect(self.lev_changed)
+        self.hist.sigLevelsChanged.connect(self.cam_lev_changed)
 
-        self.levels = [0,100]
+        self.cam_levels = [0,255]
 
-        self.cam_view_toggle.stateChanged.connect(self.set_cam_view)
-        self.set_cam_view()
+        self.cam_view_toggle.stateChanged.connect(self.toggle_cam_view)
+        self.toggle_cam_view()
+
+        self.cam0_trigger_toggle.stateChanged.connect(self.toggle_cam0_trigger)
+        self.cam0_trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'On')
+
 
         ################
 
-        self.launch_fictrac_toggle.stateChanged.connect(self.set_launch_fictrac)
-        self.set_launch_fictrac()
         self.ft_manager = None
 
         self.set_path_push.clicked.connect(self.set_path)
@@ -113,11 +125,21 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def set_launch_fictrac(self):
         self.do_launch_fictrac = self.launch_fictrac_toggle.isChecked()
 
-    def set_cam_view(self):
+    def toggle_cam_view(self):
         self.cam_view = self.cam_view_toggle.isChecked()
 
-    def lev_changed(self):
-        self.levels = self.hist.getLevels()
+    def toggle_cam0_trigger(self):
+        self.cam.cam.TriggerMode = 'On' if self.cam0_trigger_toggle.isChecked() else 'Off'
+
+    def toggle_cam1_trigger(self):
+        self.ft_cam.cam.TriggerMode = 'On' if self.cam1_trigger_toggle.isChecked() else 'Off'
+
+    def cam_lev_changed(self):
+        levels = self.hist.getLevels()
+        min_level = max(levels[0], 0)
+        max_level = min(levels[1], 255)
+        self.cam_levels = (min_level, max_level)
+        self.hist.setLevels(min_level, max_level)
 
     def set_lj_scanrate(self):
         self.lj_scanrate = int(self.lj_sr_edit.text())
@@ -125,13 +147,10 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def set_lj_cam_trigger_chans(self):
         self.lj_cam_trigger_chans = self.lj_cam_trigger_chan_edit.text().split(',')
 
-    def reset_lj_chans(self):
+    def set_lj_chans(self):
         self.lj_chans = self.lj_chan_edit.text().split(',')
         self.lj_chan_preview_drop.clear()
         self.lj_chan_preview_drop.addItems(['None'] + self.lj_chans)
-        self.lj.close()
-        self.lj=Jack(self.lj_chans)
-
 
     def closeEvent(self,event): # do not change name, super override
         self.lj.close()
@@ -161,7 +180,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         state = self.preview_push.isChecked()
         if state:
             self.lj_timer.start()
-            self.lj.start_stream(do_record=False, scanRate=self.lj_scanrate)
+            self.lj.start_stream(do_record=False, aScanListNames=self.lj_chans, scanRate=self.lj_scanrate, dataQ_len_sec=15)
             self.cam_fn_prev = 0
             self.cam_timer.start()
             self.cam.start()
@@ -194,7 +213,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.preview_push.click()
 
             self.lj_timer.start()
-            self.lj.start_stream(do_record=True, record_filepath=self.lj_write_path, scanRate=self.lj_scanrate)
+            self.lj.start_stream(do_record=True, record_filepath=self.lj_write_path, aScanListNames=self.lj_chans, scanRate=self.lj_scanrate, dataQ_len_sec=15)
             self.cam_fn_prev = 0
             self.cam_timer.start()
             self.cam.start()
@@ -251,24 +270,29 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def cam_updater(self):
         if self.cam_view and self.cam.fn > self.cam_fn_prev:
             self.cam_prev.clear()
-            self.cam_prev.setImage(self.cam.frame.T, autoLevels=False, levels=self.levels, autoHistogramRange=False)
-            self.cam_prev.setLevels(self.levels[0],self.levels[1])
+            self.cam_prev.setImage(self.cam.frame.T, autoLevels=False, levels=self.cam_levels, autoHistogramRange=False)
+            self.cam_prev.setLevels(self.cam_levels[0],self.cam_levels[1])
             self.cam_fn_prev = self.cam.fn
 
-    def lj_updater(self):
-        idx= self.lj_chan_preview_drop.currentIndex()
-
-        if idx == 0: # None
-            return
+    def set_lj_chan_preview(self):
+        self.lj_chan_preview_idx = self.lj_chan_preview_drop.currentIndex()
+        if self.lj_chan_preview_idx == 0: # None
+            self.lj.stop_collect_dataQ()
+            self.lj_show_preview = False
         else:
-            idx -= 1 # Not None; subtract index by 1 to correct for the None
+            self.lj_chan_preview_idx -= 1 # Not None; subtract index by 1 to correct for the None
+            self.lj.start_collect_dataQ()
+            self.lj_show_preview = True
 
-            self.data = self.lj.data[idx:-1:len(self.lj_chans)]
+    def lj_updater(self):
+        if self.lj_show_preview:
+
+            self.lj_data = list(self.lj.dataQ)[self.lj_chan_preview_idx:-1:len(self.lj_chans)]
             try:
-                self.curve.setData(self.data[-self.lj_slider_val:])
+                self.lj_curve.setData(self.lj_data[-self.lj_slider_val:])
             except:
-                self.curve.setData(self.data)
-            self.lj_prev.show()         
+                self.lj_curve.setData(self.lj_data)
+            self.lj_prev.show() 
 
 def main():
     app = QApplication(sys.argv)

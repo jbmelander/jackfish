@@ -703,34 +703,12 @@
      <string>Strobe</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="trigger_edit">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>180</y>
-      <width>91</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>13</pointsize>
-     </font>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="text">
-     <string>Line0</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
       <x>40</x>
       <y>170</y>
-      <width>81</width>
+      <width>101</width>
       <height>40</height>
      </rect>
     </property>
@@ -744,7 +722,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="text">
-     <string>Trigger</string>
+     <string>Trigger Mode</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lj_chan_edit">
@@ -1072,28 +1050,6 @@
      <string>60</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="trigger_edit_2">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>180</y>
-      <width>91</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>13</pointsize>
-     </font>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="text">
-     <string>Line0</string>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="et_edit_2">
     <property name="geometry">
      <rect>
@@ -1173,7 +1129,39 @@
      <string>Launch Fictrac</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cam0_trigger_toggle">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>180</y>
+      <width>16</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cam1_trigger_toggle">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>180</y>
+      <width>16</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>
