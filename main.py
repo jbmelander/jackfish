@@ -81,9 +81,13 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 'timestamp_idx' : 21
             }
 
+            # Connect FT camera param change functions
             self.cam1_trigger_toggle.stateChanged.connect(self.toggle_cam1_trigger)
             self.cam1_trigger_toggle.setChecked(self.ft_cam.cam.TriggerMode == 'On')
-
+            
+            # Set launch_fictrac to true
+            self.launch_fictrac_toggle.setChecked(True)
+            
         else: # Josh's one-camera setup
             self.cam=FJCam(cam_index=0)
             self.ft_cam = None
