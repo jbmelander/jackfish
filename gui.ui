@@ -821,6 +821,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="record_push">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>349</x>

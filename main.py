@@ -84,12 +84,15 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.cam1_trigger_toggle.stateChanged.connect(self.toggle_cam1_trigger)
             self.cam1_trigger_toggle.setChecked(self.ft_cam.cam.TriggerMode == 'On')
 
-            self.launch_fictrac_toggle.stateChanged.connect(self.set_launch_fictrac)
-            self.set_launch_fictrac()
-
         else: # Josh's one-camera setup
             self.cam=FJCam(cam_index=0)
             self.ft_cam = None
+
+        self.cam0_trigger_toggle.stateChanged.connect(self.toggle_cam0_trigger)
+        self.cam0_trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'On')
+
+        self.launch_fictrac_toggle.stateChanged.connect(self.set_launch_fictrac)
+        self.set_launch_fictrac()
 
         self.hist=self.cam_prev.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.cam_lev_changed)
@@ -99,15 +102,14 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.cam_view_toggle.stateChanged.connect(self.toggle_cam_view)
         self.toggle_cam_view()
 
-        self.cam0_trigger_toggle.stateChanged.connect(self.toggle_cam0_trigger)
-        self.cam0_trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'On')
-
 
         ################
 
         self.ft_manager = None
 
         self.set_path_push.clicked.connect(self.set_path)
+        self.filepath = ""
+        self.expt_name = ""
         self.exp_path = os.environ['HOME']
 
         self.preview_push.setCheckable(True)
@@ -202,9 +204,15 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.ft_manager = None
 
                 # delete fictrac output
-                fictrac_files = sorted([x for x in os.listdir(self.exp_path) if x[0:7]=='fictrac'])
-                for i in range(len(fictrac_files)):
-                    os.remove(os.path.join(self.exp_path, fictrac_files[i]))
+                fictrac_files = sorted([x for x in os.listdir(self.exp_path) if x.startswith('fictrac')])
+                fictrac_dat_files = [x for x in fictrac_files if x.endswith('.dat')]
+                fictrac_datetime = fictrac_dat_files[-1].split('.')[0].split('-')[-1]
+                fictrac_files_to_del = sorted([x for x in fictrac_files if x.split('.')[0].endswith(fictrac_datetime)])
+                if 'fictrac-template.png' in fictrac_files:
+                    fictrac_files_to_del.append('fictrac-template.png')
+
+                for i in range(len(fictrac_files_to_del)):
+                    os.remove(os.path.join(self.exp_path, fictrac_files_to_del[i]))
 
     def record(self):
         state = self.record_push.isChecked()
@@ -233,6 +241,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.ft_manager.close()
                 self.ft_manager = None
 
+            self.record_push.setEnabled(False)
+
             print('Experiment Finished')
 
     def launch_fictrac(self, ft_bin, ft_config, cwd=None):
@@ -253,19 +263,22 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         options = QFileDialog.Options()
         self.filepath = QFileDialog.getExistingDirectory(self,"Select save directory")
         
-        ok = False
-        while not ok:
-            self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
-        
+        self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
+        if not ok:
+            self.expt_name = ""
+            
+        if not (self.filepath == "" or self.expt_name == ""):
+            self.filepath_label.setText(f'{self.filepath} >>> {self.expt_name}')
+            self.exp_path = os.path.join(self.filepath,self.expt_name)
+            os.mkdir(self.exp_path)
 
-        self.filepath_label.setText(f'{self.filepath} >>> {self.expt_name}')
-        self.exp_path = os.path.join(self.filepath,self.expt_name)
-        os.mkdir(self.exp_path)
+            self.cam.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
+            self.lj_write_path=os.path.join(self.exp_path,f'{self.expt_name}.csv')
 
-        self.cam.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
-        self.lj_write_path=os.path.join(self.exp_path,f'{self.expt_name}.csv')
+            # Enable record button
+            self.record_push.setEnabled(True)
 
-        print(self.lj_write_path)
+            print(self.lj_write_path)
 
     def cam_updater(self):
         if self.cam_view and self.cam.fn > self.cam_fn_prev:

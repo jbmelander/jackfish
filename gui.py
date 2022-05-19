@@ -296,6 +296,7 @@ class Ui_MainWindow(object):
         self.preview_push.setFont(font)
         self.preview_push.setObjectName("preview_push")
         self.record_push = QtWidgets.QPushButton(self.centralwidget)
+        self.record_push.setEnabled(False)
         self.record_push.setGeometry(QtCore.QRect(349, 190, 351, 40))
         font = QtGui.QFont()
         font.setFamily("Arial")
