@@ -1,0 +1,85 @@
+# Manually created xorg.conf for use with Psychtoolbox VR HMD drivers
+# for the Oculus Rift and similar devices. This needs to be tailored
+# to your specific setups. The given example is for a Oculus Rift CV1,
+# connected to the HDMI output of a AMD RavenRidge integrated graphics
+# chip on a AMD Ryzen 5 2400G processor, running under Linux 5.13
+# with Ubuntu 20.04.2-LTS.
+#
+# "amdgpu" needs to be replaced by a suitable name of the display
+# driver for your graphics card, unless it is indeed a modern AMD
+# gpu.
+#
+# "DisplayPort-1" needs to be replaced by the name of the video output
+# of your desktop monitor on X-Screen 0.
+#
+# "HDMI-A-0" needs to be replaced by the name of the video output to
+# which your VR HMD is connected.
+#
+# You would need to copy this file to /etc/X11/xorg.conf.d/ and then
+# logout and login again into a X11 native desktop session, ie. no Wayland!
+#
+
+Section "ServerLayout"
+  Identifier    "DualScreen"
+  Screen 0      "Screen0" 0 0
+  Screen 1      "Screen1" RightOf "Screen0"
+  Screen 2      "Screen2" RightOf "Screen1"
+EndSection
+
+Section "Monitor"
+  Identifier    "DisplayPort-0"
+  Option        "Enable" "on"
+EndSection
+
+Section "Monitor"
+  Identifier    "DisplayPort-1"
+EndSection
+
+Section "Monitor"
+  Identifier    "DisplayPort-2" 
+  # Option        "Enable" "on"
+EndSection
+
+Section "Device"
+  Identifier  "Card0"
+  Driver      "amdgpu"
+  Option      "ZaphodHeads" "DisplayPort-0"
+  Option      "Monitor-DisplayPort-0" "DisplayPort-0"
+  Option      "VariableRefresh" "on"
+  Screen 0
+EndSection
+
+Section "Device"
+  Identifier  "Card1"
+  Driver      "amdgpu"
+  Option      "ZaphodHeads" "DisplayPort-1"
+  Option      "Monitor-DisplayPort-1" "DisplayPort-1"
+  Screen 1
+EndSection
+
+Section "Device"
+  Identifier  "Card2"
+  Driver      "amdgpu"
+  Option      "ZaphodHeads" "DisplayPort-2"
+  Option      "Monitor-DisplayPort-2" "DisplayPort-2"
+  Screen 2
+EndSection
+
+Section "Screen"
+  Identifier    "Screen0"
+  Device        "Card0"
+  Monitor       "DisplayPort-0"
+EndSection
+
+Section "Screen"
+  Identifier    "Screen1"
+  Device        "Card1"
+  Monitor       "DisplayPort-1"
+EndSection
+
+Section "Screen"
+  Identifier    "Screen2"
+  Device        "Card2"
+  Monitor       "DisplayPort-2"
+EndSection
+

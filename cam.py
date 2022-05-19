@@ -14,68 +14,69 @@ class FJCam:
         self.atts = {}
 
         self.set_video_out_path(video_out_path)
-
-        if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
-            print('Initializing side cam')
-            self.cam.PixelFormat = 'Mono8'
-
-            self.cam.BinningHorizontal = 2
-            self.cam.BinningVertical = 2
-
-            self.cam.ExposureMode = 'Timed'
-            self.cam.ExposureAuto = 'Off'
-            self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
-
-            self.cam.Width = self.cam.WidthMax
-            self.cam.Height = self.cam.HeightMax
-
-            self.cam.LineSelector = 'Line1' #FIO2
-            self.cam.LineMode = 'Output'
-            self.cam.LineSource = 'ExposureActive'
-
-            self.cam.GainAuto = 'Off'
-            self.cam.Gain = 38.0
-
-            self.cam.GammaEnable = False
-
-            self.cam.TriggerSelector = 'AcquisitionStart'
-            self.cam.TriggerMode = 'On'
-            self.cam.TriggerSource = 'Line0'  #FIO3
-            self.cam.TriggerActivation = 'RisingEdge'
-
-            self.cam.AcquisitionFrameRateEnable = True
-            self.cam.AcquisitionFrameRate = 350.0
         
-        elif self.cam.DeviceSerialNumber == '20243354': # 40hr Top camera
-            print('Initializing top cam')
-            self.cam.PixelFormat = 'Mono8'
+        if 'DeviceSerialNumber' in list(self.cam.__dir__()):
+            if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
+                print('Initializing side cam')
+                self.cam.PixelFormat = 'Mono8'
 
-            self.cam.BinningHorizontal = 4
-            self.cam.BinningVertical = 4
+                self.cam.BinningHorizontal = 2
+                self.cam.BinningVertical = 2
 
-            self.cam.ExposureMode = 'Timed'
-            self.cam.ExposureAuto = 'Off'
-            self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
+                self.cam.ExposureMode = 'Timed'
+                self.cam.ExposureAuto = 'Off'
+                self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
 
-            self.cam.Width = self.cam.WidthMax
-            self.cam.Height = self.cam.HeightMax
+                self.cam.Width = self.cam.WidthMax
+                self.cam.Height = self.cam.HeightMax
 
-            self.cam.LineSelector = 'Line1' #FIO0
-            self.cam.LineMode = 'Output'
-            self.cam.LineSource = 'ExposureActive'
+                self.cam.LineSelector = 'Line1' #FIO2
+                self.cam.LineMode = 'Output'
+                self.cam.LineSource = 'ExposureActive'
 
-            self.cam.GainAuto = 'Off'
-            self.cam.Gain = 25.0
+                self.cam.GainAuto = 'Off'
+                self.cam.Gain = 38.0
 
-            self.cam.GammaEnable = False
+                self.cam.GammaEnable = False
 
-            self.cam.TriggerSelector = 'AcquisitionStart'
-            self.cam.TriggerMode = 'On'
-            self.cam.TriggerSource = 'Line0' #FIO1
-            self.cam.TriggerActivation = 'RisingEdge'
+                self.cam.TriggerSelector = 'AcquisitionStart'
+                self.cam.TriggerMode = 'On'
+                self.cam.TriggerSource = 'Line0'  #FIO3
+                self.cam.TriggerActivation = 'RisingEdge'
 
-            self.cam.AcquisitionFrameRateEnable = True
-            self.cam.AcquisitionFrameRate = 350.0
+                self.cam.AcquisitionFrameRateEnable = True
+                self.cam.AcquisitionFrameRate = 350.0
+        
+            elif self.cam.DeviceSerialNumber == '20243354': # 40hr Top camera
+                print('Initializing top cam')
+                self.cam.PixelFormat = 'Mono8'
+
+                self.cam.BinningHorizontal = 4
+                self.cam.BinningVertical = 4
+
+                self.cam.ExposureMode = 'Timed'
+                self.cam.ExposureAuto = 'Off'
+                self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
+
+                self.cam.Width = self.cam.WidthMax
+                self.cam.Height = self.cam.HeightMax
+
+                self.cam.LineSelector = 'Line1' #FIO0
+                self.cam.LineMode = 'Output'
+                self.cam.LineSource = 'ExposureActive'
+
+                self.cam.GainAuto = 'Off'
+                self.cam.Gain = 25.0
+
+                self.cam.GammaEnable = False
+
+                self.cam.TriggerSelector = 'AcquisitionStart'
+                self.cam.TriggerMode = 'On'
+                self.cam.TriggerSource = 'Line0' #FIO1
+                self.cam.TriggerActivation = 'RisingEdge'
+
+                self.cam.AcquisitionFrameRateEnable = True
+                self.cam.AcquisitionFrameRate = 350.0
 
         else: # Josh camera
             print('Initializing Josh cam')
@@ -85,9 +86,9 @@ class FJCam:
             # self.cam.Height = self.cam.SensorHeight // 2
             # self.cam.OffsetX = self.cam.SensorWidth // 4
             # self.cam.OffsetY = self.cam.SensorHeight // 4
-            # self.cam.AcquisitionFrameRateEnabled = True
+            self.cam.AcquisitionFrameRateEnabled = True
             # self.cam.AcquisitionFrameRateAuto = 'On'
-            # self.cam.AcquisitionFrameRate=
+            self.cam.AcquisitionFrameRate=10
             self.cam.ExposureMode = 'Timed'
             self.cam.ExposureAuto = 'Continuous'
 
@@ -120,7 +121,7 @@ class FJCam:
 
     def get_img_framerate(self):
         # Reversed from numpy convension
-        self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
+        self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
 
     def get_img_dimensions(self):
         # Reversed from numpy convension
