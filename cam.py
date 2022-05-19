@@ -65,7 +65,7 @@ class FJCam:
             self.cam.LineSource = 'ExposureActive'
 
             self.cam.GainAuto = 'Off'
-            self.cam.Gain = 30.0
+            self.cam.Gain = 25.0
 
             self.cam.GammaEnable = False
 
@@ -136,6 +136,28 @@ class FJCam:
         self.video_out_path = path
         print(path)
 
+    def grab_frame(self):
+        try:
+            self.frame = self.cam.get_array(wait=False)
+            # print('after grab')
+            return 0 #success
+        except:
+            return 1 #fail
+
+    def start_preview(self):
+        self.fn = 0
+        self.do_preview = True
+        self.preview_thread = threading.Thread(target=self.preview_callback, daemon=True).start()
+
+    def preview_callback(self):
+        while self.do_preview:
+            if self.grab_frame() == 0:
+                self.fn += 1
+
+    def stop_preview(self):
+        self.do_preview = False
+        print("Preview finished.")
+
     def start_rec(self):
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         self.writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
@@ -146,56 +168,18 @@ class FJCam:
 
     def rec_callback(self):
         while self.do_record:
-            try:
-                frame = self.cam.get_array(wait=False)
-                frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+            if self.grab_frame() == 0:
+                frame_color = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
                 self.writer.write(frame_color)
                 self.fn += 1
                 # print(self.fn)
-            except:
-                # print('No frame acquired')
-                pass
-
+    
     def stop_rec(self):
         self.do_record = False
+        time.sleep(2) # give rec_callback time to finish writing frame
         self.writer.release()
         print("Recording finished.")
 
-
-
-
-    def init_writer(self):
-        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-        writer=cv2.VideoWriter(self.video_out_path,fourcc,self.framerate,(self.x,self.y))
-        self.writer = writer
-    
-    def rec(self, wait=True):
-        self.fn = 0
-        self.init_writer()
-
-        self.image_queue = queue.Queue()
-        self.write_thread = threading.Thread(target=self.write,daemon=True).start()
-        
-        while self.do_record:
-            frame = self.cam.get_array(wait=wait)
-            print(frame.shape)
-            print(self.x)
-            print(self.y)
-            self.image_queue.put(frame)
-
-        self.image_queue.join()#
-        self.writer.release()
-        print('finished')
-
-    def write(self):
-        while True:
-            deq = self.image_queue.get()
-            self.fn += 1
-            print(self.fn)
-            frame_color = cv2.cvtColor(deq,cv2.COLOR_GRAY2BGR)
-            self.writer.write(frame_color)
-            self.image_queue.task_done()
-    
     def close(self):
         self.cam.close()
 

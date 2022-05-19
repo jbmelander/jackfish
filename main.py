@@ -9,6 +9,8 @@ import sys
 from cam import FJCam
 from jack import Jack
 import gui
+if os.uname()[1] == "40hr-fitness":
+    from ftutil.ft_managers import FtManager
 
 class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -61,6 +63,19 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
             # Init FT camera, set attributes, then disconnect so that Fictrac can use the cam.
             self.ft_cam=FJCam(cam_index='20243355') # side camera
+            self.ft_cam.close()
+
+            self.ft_params = {
+                'bin' :    "/home/clandinin/src/fictrac/bin/fictrac",
+                'config' : "/home/clandinin/src/fictrac/config.txt",
+                'host' : '127.0.0.1',  # The server's hostname or IP address
+                'port' : 33334,         # The port used by the server
+                'frame_num_idx' : 0,
+                'x_idx' : 14,
+                'y_idx' : 15,
+                'theta_idx' : 16,
+                'timestamp_idx' : 21
+            }
 
         else: # Josh's one-camera setup
             self.cam=FJCam(cam_index=0)
@@ -76,7 +91,12 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         ################
 
+        self.launch_fictrac_toggle.stateChanged.connect(self.set_launch_fictrac)
+        self.set_launch_fictrac()
+        self.ft_manager = None
+
         self.set_path_push.clicked.connect(self.set_path)
+        self.exp_path = os.environ['HOME']
 
         self.preview_push.setCheckable(True)
         self.preview_push.clicked.connect(self.preview)
@@ -84,14 +104,15 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.record_push.setCheckable(True)
         self.record_push.clicked.connect(self.record)
 
+
         self.cam_timer = QtCore.QTimer()
         self.cam_timer.timeout.connect(self.cam_updater)
         self.lj_timer = QtCore.QTimer()
         self.lj_timer.timeout.connect(self.lj_updater)
-    
+        
+    def set_launch_fictrac(self):
+        self.do_launch_fictrac = self.launch_fictrac_toggle.isChecked()
 
-        self.shutdown_push.clicked.connect(self.shutdown)
-    
     def set_cam_view(self):
         self.cam_view = self.cam_view_toggle.isChecked()
 
@@ -141,14 +162,30 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if state:
             self.lj_timer.start()
             self.lj.start_stream(do_record=False, scanRate=self.lj_scanrate)
+            self.cam_fn_prev = 0
             self.cam_timer.start()
             self.cam.start()
+            self.cam.start_preview()
+
+            if self.do_launch_fictrac:
+                self.launch_fictrac(ft_bin=self.ft_params['bin'], ft_config=self.ft_params['config'], cwd=self.exp_path)
+ 
         else:
             print("Turning preview off")
             self.lj_timer.stop()
             self.lj.stop_stream()
             self.cam_timer.stop()
+            self.cam.stop_preview()
             self.cam.stop()
+
+            if self.ft_manager is not None:
+                self.ft_manager.close()
+                self.ft_manager = None
+
+                # delete fictrac output
+                fictrac_files = sorted([x for x in os.listdir(self.exp_path) if x[0:7]=='fictrac'])
+                for i in range(len(fictrac_files)):
+                    os.remove(os.path.join(self.exp_path, fictrac_files[i]))
 
     def record(self):
         state = self.record_push.isChecked()
@@ -158,8 +195,13 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
             self.lj_timer.start()
             self.lj.start_stream(do_record=True, record_filepath=self.lj_write_path, scanRate=self.lj_scanrate)
+            self.cam_fn_prev = 0
+            self.cam_timer.start()
             self.cam.start()
             self.cam.start_rec()
+
+            if self.do_launch_fictrac:
+                self.launch_fictrac(ft_bin=self.ft_params['bin'], ft_config=self.ft_params['config'], cwd=self.exp_path)
 
             print('Experiment Started')        
         else:
@@ -168,8 +210,14 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.cam.stop_rec()
             self.cam.stop()
 
+            if self.ft_manager is not None:
+                self.ft_manager.close()
+                self.ft_manager = None
+
             print('Experiment Finished')
 
+    def launch_fictrac(self, ft_bin, ft_config, cwd=None):
+        self.ft_manager = FtManager(ft_bin=ft_bin, ft_config=ft_config, cwd=cwd)
 
     def set_lj_slider(self):
         self.cam_timer.stop()
@@ -192,23 +240,20 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         
 
         self.filepath_label.setText(f'{self.filepath} >>> {self.expt_name}')
-        exp_path = os.path.join(self.filepath,self.expt_name)
-        os.mkdir(exp_path)
+        self.exp_path = os.path.join(self.filepath,self.expt_name)
+        os.mkdir(self.exp_path)
 
-        self.cam.set_video_out_path(os.path.join(exp_path,f'{self.expt_name}.mp4'))
-        self.lj_write_path=os.path.join(exp_path,f'{self.expt_name}.csv')
+        self.cam.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
+        self.lj_write_path=os.path.join(self.exp_path,f'{self.expt_name}.csv')
 
         print(self.lj_write_path)
 
     def cam_updater(self):
-        self.cam_prev.clear()
-        if self.cam_view:
-            try:
-                self.frame = self.cam.grab(wait=False)
-                self.cam_prev.setImage(self.frame,autoLevels=False,levels=self.levels,autoHistogramRange=False)
-                self.cam_prev.setLevels(self.levels[0],self.levels[1])
-            except:
-                pass
+        if self.cam_view and self.cam.fn > self.cam_fn_prev:
+            self.cam_prev.clear()
+            self.cam_prev.setImage(self.cam.frame.T, autoLevels=False, levels=self.levels, autoHistogramRange=False)
+            self.cam_prev.setLevels(self.levels[0],self.levels[1])
+            self.cam_fn_prev = self.cam.fn
 
     def lj_updater(self):
         idx= self.lj_chan_preview_drop.currentIndex()
