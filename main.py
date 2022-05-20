@@ -63,11 +63,11 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         # self.init_cam1_push.clicked.connect(self.init_cam1)
 
         if os.uname()[1] == "40hr-fitness":
-            self.cam=FJCam(cam_index='20243354') # top camera
+            self.cam0 = FJCam(cam_index='20243354') # top camera
 
             # Init FT camera, set attributes, then disconnect so that Fictrac can use the cam.
-            self.ft_cam=FJCam(cam_index='20243355') # side camera
-            # self.ft_cam.close()
+            self.cam1 = FJCam(cam_index='20243355') # side camera
+            # self.cam1.close()
 
             self.ft_params = {
                 'bin' :    "/home/clandinin/src/fictrac/bin/fictrac",
@@ -81,19 +81,32 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 'timestamp_idx' : 21
             }
 
-            # Connect FT camera param change functions
-            self.cam1_trigger_toggle.stateChanged.connect(self.toggle_cam1_trigger)
-            self.cam1_trigger_toggle.setChecked(self.ft_cam.cam.TriggerMode == 'On')
-            
             # Set launch_fictrac to true
             self.launch_fictrac_toggle.setChecked(True)
             
         else: # Josh's one-camera setup
-            self.cam=FJCam(cam_index=0)
-            self.ft_cam = None
+            self.cam0 = FJCam(cam_index=0)
+            self.cam1 = None
 
         self.cam0_trigger_toggle.stateChanged.connect(self.toggle_cam0_trigger)
-        self.cam0_trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'On')
+        self.cam0_trigger_toggle.setChecked(self.cam0.cam.TriggerMode == 'On')
+
+        self.cam0_gain_edit.stateChanged.connect(self.edit_cam0_gain)
+        self.cam0_gain_edit.setText('Auto' if self.cam0.cam.GainAuto == 'On' else str(self.cam0.cam.Gain))
+
+        self.cam0_exposure_edit.stateChanged.connect(self.edit_cam0_exposure)
+        self.cam0_exposure_edit.setText('Auto' if self.cam0.cam.ExposureAuto == 'On' else str(self.cam0.cam.Exposure))
+
+        if self.cam1 is not None:
+            self.cam1_trigger_toggle.stateChanged.connect(self.toggle_cam1_trigger)
+            self.cam1_trigger_toggle.setChecked(self.cam1.cam.TriggerMode == 'On')
+            
+            self.cam1_gain_edit.stateChanged.connect(self.edit_cam1_gain)
+            self.cam1_gain_edit.setText('Auto' if self.cam1.cam.GainAuto == 'On' else str(self.cam1.cam.Gain))
+            
+            self.cam1_exposure_edit.stateChanged.connect(self.edit_cam1_exposure)
+            self.cam1_exposure_edit.setText('Auto' if self.cam1.cam.ExposureAuto == 'On' else str(self.cam1.cam.Exposure))
+
 
         self.launch_fictrac_toggle.stateChanged.connect(self.set_launch_fictrac)
         self.set_launch_fictrac()
@@ -135,10 +148,59 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.cam_view = self.cam_view_toggle.isChecked()
 
     def toggle_cam0_trigger(self):
-        self.cam.cam.TriggerMode = 'On' if self.cam0_trigger_toggle.isChecked() else 'Off'
+        self.cam0.cam.TriggerMode = 'On' if self.cam0_trigger_toggle.isChecked() else 'Off'
 
     def toggle_cam1_trigger(self):
-        self.ft_cam.cam.TriggerMode = 'On' if self.cam1_trigger_toggle.isChecked() else 'Off'
+        self.cam1.cam.TriggerMode = 'On' if self.cam1_trigger_toggle.isChecked() else 'Off'
+
+    def edit_cam0_gain(self):
+        gain_txt = self.cam0_gain_edit.text()
+        if gain_txt.lower()=='auto':
+            self.cam0.cam.GainAuto = 'On'
+            self.cam0_gain_edit.setText('Auto')
+        elif gain_txt.isnumeric():
+            self.cam0.cam.GainAuto = 'Off'
+            self.cam0.cam.Gain = float(gain_txt)
+            self.cam0_gain_edit.setText(str(self.cam0.cam.Gain))
+        else:
+            self.cam0_gain_edit.setText(str(self.cam0.cam.Gain))
+
+    def edit_cam1_gain(self):
+        gain_txt = self.cam1_gain_edit.text()
+        if gain_txt.lower()=='auto':
+            self.cam1.cam.GainAuto = 'On'
+            self.cam1_gain_edit.setText('Auto')
+        elif gain_txt.isnumeric():
+            self.cam1.cam.GainAuto = 'Off'
+            self.cam1.cam.Gain = float(gain_txt)
+            self.cam1_gain_edit.setText(str(self.cam1.cam.Gain))
+        else:
+            self.cam1_gain_edit.setText(str(self.cam1.cam.Gain))
+
+    def edit_cam0_exposure(self):
+        exposure_txt = self.cam0_exposure_edit.text()
+        if exposure_txt.lower()=='auto':
+            self.cam0.cam.ExposureAuto = 'On'
+            self.cam0_exposure_edit.setText('Auto')
+        elif exposure_txt.isnumeric():
+            self.cam0.cam.ExposureAuto = 'Off'
+            self.cam0.cam.Exposure = float(exposure_txt)
+            self.cam0_exposure_edit.setText(str(self.cam0.cam.Exposure))
+        else:
+            self.cam0_exposure_edit.setText(str(self.cam0.cam.Exposure))
+
+    def edit_cam1_exposure(self):
+        exposure_txt = self.cam1_exposure_edit.text()
+        if exposure_txt.lower()=='auto':
+            self.cam1.cam.ExposureAuto = 'On'
+            self.cam1_exposure_edit.setText('Auto')
+        elif exposure_txt.isnumeric():
+            self.cam1.cam.ExposureAuto = 'Off'
+            self.cam1.cam.Exposure = float(exposure_txt)
+            self.cam1_exposure_edit.setText(str(self.cam1.cam.Exposure))
+        else:
+            self.cam1_exposure_edit.setText(str(self.cam1.cam.Exposure))
+
 
     def cam_lev_changed(self):
         levels = self.hist.getLevels()
@@ -163,9 +225,9 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
     def shutdown(self):
         # self.lj.close()
-        self.cam.close()
-        if self.ft_cam is not None:
-            self.ft_cam.close()
+        self.cam0.close()
+        if self.cam1 is not None:
+            self.cam1.close()
 
     def trigger_cams(self):
         write_states = np.ones(len(self.lj_cam_trigger_chans), dtype=int)
@@ -189,8 +251,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.lj.start_stream(do_record=False, aScanListNames=self.lj_chans, scanRate=self.lj_scanrate, dataQ_len_sec=15)
             self.cam_fn_prev = 0
             self.cam_timer.start()
-            self.cam.start()
-            self.cam.start_preview()
+            self.cam0.start()
+            self.cam0.start_preview()
 
             if self.do_launch_fictrac:
                 self.launch_fictrac(ft_bin=self.ft_params['bin'], ft_config=self.ft_params['config'], cwd=self.exp_path)
@@ -200,8 +262,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.lj_timer.stop()
             self.lj.stop_stream()
             self.cam_timer.stop()
-            self.cam.stop_preview()
-            self.cam.stop()
+            self.cam0.stop_preview()
+            self.cam0.stop()
 
             if self.ft_manager is not None:
                 self.ft_manager.close()
@@ -228,8 +290,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.lj.start_stream(do_record=True, record_filepath=self.lj_write_path, aScanListNames=self.lj_chans, scanRate=self.lj_scanrate, dataQ_len_sec=15)
             self.cam_fn_prev = 0
             self.cam_timer.start()
-            self.cam.start()
-            self.cam.start_rec()
+            self.cam0.start()
+            self.cam0.start_rec()
 
             if self.do_launch_fictrac:
                 self.launch_fictrac(ft_bin=self.ft_params['bin'], ft_config=self.ft_params['config'], cwd=self.exp_path)
@@ -238,8 +300,8 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         else:
             self.lj_timer.stop()
             self.lj.stop_stream()
-            self.cam.stop_rec()
-            self.cam.stop()
+            self.cam0.stop_rec()
+            self.cam0.stop()
 
             if self.ft_manager is not None:
                 self.ft_manager.close()
@@ -276,7 +338,7 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.exp_path = os.path.join(self.filepath,self.expt_name)
             os.mkdir(self.exp_path)
 
-            self.cam.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
+            self.cam0.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
             self.lj_write_path=os.path.join(self.exp_path,f'{self.expt_name}.csv')
 
             # Enable record button
@@ -285,11 +347,11 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             print(self.lj_write_path)
 
     def cam_updater(self):
-        if self.cam_view and self.cam.fn > self.cam_fn_prev:
+        if self.cam_view and self.cam0.fn > self.cam_fn_prev:
             self.cam_prev.clear()
-            self.cam_prev.setImage(self.cam.frame.T, autoLevels=False, levels=self.cam_levels, autoHistogramRange=False)
+            self.cam_prev.setImage(self.cam0.frame.T, autoLevels=False, levels=self.cam_levels, autoHistogramRange=False)
             self.cam_prev.setLevels(self.cam_levels[0],self.cam_levels[1])
-            self.cam_fn_prev = self.cam.fn
+            self.cam_fn_prev = self.cam0.fn
 
     def set_lj_chan_preview(self):
         self.lj_chan_preview_idx = self.lj_chan_preview_drop.currentIndex()
