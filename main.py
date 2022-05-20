@@ -91,21 +91,21 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.cam0_trigger_toggle.stateChanged.connect(self.toggle_cam0_trigger)
         self.cam0_trigger_toggle.setChecked(self.cam0.cam.TriggerMode == 'On')
 
-        self.cam0_gain_edit.stateChanged.connect(self.edit_cam0_gain)
-        self.cam0_gain_edit.setText('Auto' if self.cam0.cam.GainAuto == 'On' else str(self.cam0.cam.Gain))
+        self.cam0_gain_edit.editingFinished.connect(self.edit_cam0_gain)
+        self.cam0_gain_edit.setText('Auto' if self.cam0.cam.GainAuto == 'Continuous' else f'{self.cam0.cam.Gain:.2f}')
 
-        self.cam0_exposure_edit.stateChanged.connect(self.edit_cam0_exposure)
-        self.cam0_exposure_edit.setText('Auto' if self.cam0.cam.ExposureAuto == 'On' else str(self.cam0.cam.Exposure))
+        self.cam0_exposure_edit.editingFinished.connect(self.edit_cam0_exposure)
+        self.cam0_exposure_edit.setText('Auto' if self.cam0.cam.ExposureAuto == 'Continuous' else f'{self.cam0.cam.ExposureTime:.2f}')
 
         if self.cam1 is not None:
             self.cam1_trigger_toggle.stateChanged.connect(self.toggle_cam1_trigger)
             self.cam1_trigger_toggle.setChecked(self.cam1.cam.TriggerMode == 'On')
             
-            self.cam1_gain_edit.stateChanged.connect(self.edit_cam1_gain)
-            self.cam1_gain_edit.setText('Auto' if self.cam1.cam.GainAuto == 'On' else str(self.cam1.cam.Gain))
+            self.cam1_gain_edit.editingFinished.connect(self.edit_cam1_gain)
+            self.cam1_gain_edit.setText('Auto' if self.cam1.cam.GainAuto == 'Continuous' else f'{self.cam1.cam.Gain:.2f}')
             
-            self.cam1_exposure_edit.stateChanged.connect(self.edit_cam1_exposure)
-            self.cam1_exposure_edit.setText('Auto' if self.cam1.cam.ExposureAuto == 'On' else str(self.cam1.cam.Exposure))
+            self.cam1_exposure_edit.editingFinished.connect(self.edit_cam1_exposure)
+            self.cam1_exposure_edit.setText('Auto' if self.cam1.cam.ExposureAuto == 'Continuous' else f'{self.cam1.cam.ExposureTime:.2f}')
 
 
         self.launch_fictrac_toggle.stateChanged.connect(self.set_launch_fictrac)
@@ -156,50 +156,50 @@ class FLUI(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def edit_cam0_gain(self):
         gain_txt = self.cam0_gain_edit.text()
         if gain_txt.lower()=='auto':
-            self.cam0.cam.GainAuto = 'On'
+            self.cam0.cam.GainAuto = 'Continuous'
             self.cam0_gain_edit.setText('Auto')
         elif gain_txt.isnumeric():
             self.cam0.cam.GainAuto = 'Off'
             self.cam0.cam.Gain = float(gain_txt)
-            self.cam0_gain_edit.setText(str(self.cam0.cam.Gain))
+            self.cam0_gain_edit.setText(f'{self.cam0.cam.Gain:.2f}')
         else:
-            self.cam0_gain_edit.setText(str(self.cam0.cam.Gain))
+            self.cam0_gain_edit.setText(f'{self.cam0.cam.Gain:.2f}')
 
     def edit_cam1_gain(self):
         gain_txt = self.cam1_gain_edit.text()
         if gain_txt.lower()=='auto':
-            self.cam1.cam.GainAuto = 'On'
+            self.cam1.cam.GainAuto = 'Continuous'
             self.cam1_gain_edit.setText('Auto')
         elif gain_txt.isnumeric():
             self.cam1.cam.GainAuto = 'Off'
             self.cam1.cam.Gain = float(gain_txt)
-            self.cam1_gain_edit.setText(str(self.cam1.cam.Gain))
+            self.cam1_gain_edit.setText(f'{self.cam1.cam.Gain:.2f}')
         else:
-            self.cam1_gain_edit.setText(str(self.cam1.cam.Gain))
+            self.cam1_gain_edit.setText(f'{self.cam1.cam.Gain:.2f}')
 
     def edit_cam0_exposure(self):
         exposure_txt = self.cam0_exposure_edit.text()
         if exposure_txt.lower()=='auto':
-            self.cam0.cam.ExposureAuto = 'On'
+            self.cam0.cam.ExposureAuto = 'Continuous'
             self.cam0_exposure_edit.setText('Auto')
         elif exposure_txt.isnumeric():
             self.cam0.cam.ExposureAuto = 'Off'
-            self.cam0.cam.Exposure = float(exposure_txt)
-            self.cam0_exposure_edit.setText(str(self.cam0.cam.Exposure))
+            self.cam0.cam.ExposureTime = float(exposure_txt)
+            self.cam0_exposure_edit.setText(f'{self.cam0.cam.ExposureTime:.2f}')
         else:
-            self.cam0_exposure_edit.setText(str(self.cam0.cam.Exposure))
+            self.cam0_exposure_edit.setText(f'{self.cam0.cam.ExposureTime:.2f}')
 
     def edit_cam1_exposure(self):
         exposure_txt = self.cam1_exposure_edit.text()
         if exposure_txt.lower()=='auto':
-            self.cam1.cam.ExposureAuto = 'On'
+            self.cam1.cam.ExposureAuto = 'Continuous'
             self.cam1_exposure_edit.setText('Auto')
         elif exposure_txt.isnumeric():
             self.cam1.cam.ExposureAuto = 'Off'
-            self.cam1.cam.Exposure = float(exposure_txt)
-            self.cam1_exposure_edit.setText(str(self.cam1.cam.Exposure))
+            self.cam1.cam.ExposureTime = float(exposure_txt)
+            self.cam1_exposure_edit.setText(f'{self.cam1.cam.ExposureTime:.2f}')
         else:
-            self.cam1_exposure_edit.setText(str(self.cam1.cam.Exposure))
+            self.cam1_exposure_edit.setText(f'{self.cam1.cam.ExposureTime:.2f}')
 
 
     def cam_lev_changed(self):
