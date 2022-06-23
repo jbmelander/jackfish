@@ -45,7 +45,7 @@ class FJCam:
                 self.cam.TriggerActivation = 'RisingEdge'
 
                 self.cam.AcquisitionFrameRateEnable = True
-                self.cam.AcquisitionFrameRate = 350.0
+                self.cam.AcquisitionFrameRate = 30
         
             elif self.cam.DeviceSerialNumber == '20243354': # 40hr Top camera
                 print('Initializing top cam')
@@ -81,14 +81,14 @@ class FJCam:
         else: # Josh camera
             print('Initializing Josh cam')
             self.cam.PixelFormat = 'Mono8'
-            self.cam.VideoMode = "Mode1"
+            self.cam.VideoMode = "Mode0"
             # self.cam.Width = self.cam.SensorWidth // 2
             # self.cam.Height = self.cam.SensorHeight // 2
             # self.cam.OffsetX = self.cam.SensorWidth // 4
             # self.cam.OffsetY = self.cam.SensorHeight // 4
             self.cam.AcquisitionFrameRateEnabled = True
             # self.cam.AcquisitionFrameRateAuto = 'On'
-            self.cam.AcquisitionFrameRate=10
+            self.cam.AcquisitionFrameRate=80
             self.cam.ExposureMode = 'Timed'
             self.cam.ExposureAuto = 'Continuous'
 

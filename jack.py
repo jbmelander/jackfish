@@ -56,7 +56,7 @@ class Jack():
         self.numAddresses = len(aScanListNames)
         self.aScanList = ljm.namesToAddresses(self.numAddresses, aScanListNames)[0]
 
-        dataQ_len = dataQ_len_sec * scanRate * self.numAddresses
+        dataQ_len = int(dataQ_len_sec * scanRate * self.numAddresses)
         self.dataQ = deque([0]*dataQ_len, maxlen=dataQ_len) #only for visualization; not for storing whole data
 
         self.do_record = do_record
