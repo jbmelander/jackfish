@@ -22,6 +22,7 @@ class Jack():
         # Initialize ljm T7 handle
         self.handle = ljm.openS("T7", "ANY", "ANY")
         self.info = ljm.getHandleInfo(self.handle)
+        self.serial_number = self.info[2]
         self.print_handle_info()
         
         # Ensure triggered stream is disabled.

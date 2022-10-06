@@ -1,4 +1,5 @@
 import sys
+import os
 import time
 import numpy as np
 
@@ -66,9 +67,11 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.timer.stop()
         self.daq.stop_stream()
 
-    def set_write_path(self, path):
+    def set_write_path(self, dir, file_name=None):
         self.timer.stop()
-        self.write_path = path
+        if file_name is None:
+            file_name = f'daq_{self.daq.serial_number}.csv'
+        self.write_path = os.path.join(dir, file_name)
         print(f"DAQ write path: {self.write_path}")
 
     def set_scanrate(self):

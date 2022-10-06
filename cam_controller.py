@@ -1,4 +1,5 @@
 import sys
+import os
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog
@@ -66,10 +67,11 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             self.cam.stop_preview()
         self.cam.stop()
 
-    def set_video_out_path(self, path):
+    def set_video_out_path(self, dir, file_name=None):
         self.timer.stop()
-        self.cam.set_video_out_path(path)
-        print(f"Cam write path: {self.cam.video_out_path}")
+        if file_name is None:
+            file_name = f'cam_{self.cam.serial_number}.mp4'
+        self.cam.set_video_out_path(os.path.join(dir, file_name))
 
     def load_attrs(self):
         self.attrs_json_path = QFileDialog.getOpenFileName(self, "Open json file", filter="JSON files (*.json)")

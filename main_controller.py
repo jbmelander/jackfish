@@ -14,6 +14,20 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         super(MainUI, self).__init__(parent)
         self.setupUi(self)
 
+        #### Main UI ####
+
+        self.main_dir = ""
+        self.expt_name = ""
+        self.exp_path = os.environ['HOME']
+
+        self.set_path_push.clicked.connect(self.query_and_set_module_write_paths)
+
+        self.preview_push.setCheckable(True)
+        self.preview_push.clicked.connect(self.preview)
+
+        self.record_push.setCheckable(True)
+        self.record_push.clicked.connect(self.record)
+    
         #### DAQ ####
 
         self.daqUIs = []
@@ -32,42 +46,33 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.init_cam1_push.setCheckable(True)
         self.init_cam1_push.clicked.connect(self.init_cam1)
 
-        #### Main UI ####
-
-        self.set_path_push.clicked.connect(self.set_path)
-        self.filepath = ""
-        self.expt_name = ""
-        self.exp_path = os.environ['HOME']
-
-        self.preview_push.setCheckable(True)
-        self.preview_push.clicked.connect(self.preview)
-
-        self.record_push.setCheckable(True)
-        self.record_push.clicked.connect(self.record)
-    
-    def set_path(self):
+    def query_and_set_module_write_paths(self):
         # options = QFileDialog.Options()
-        self.filepath = QFileDialog.getExistingDirectory(self,"Select save directory")
+        self.main_dir = QFileDialog.getExistingDirectory(self,"Select save directory")
         
         self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
         if not ok:
             self.expt_name = ""
             
-        if not (self.filepath == "" or self.expt_name == ""):
-            self.filepath_label.setText(f'{self.filepath} >>> {self.expt_name}')
-            self.exp_path = os.path.join(self.filepath,self.expt_name)
-            os.mkdir(self.exp_path)
+        if not (self.main_dir == "" or self.expt_name == ""):
+            self.main_dir_label.setText(f'{self.main_dir} >>> {self.expt_name}')
+            self.exp_path = os.path.join(self.main_dir,self.expt_name)
+            os.makedirs(self.exp_path, exist_ok=True)
 
-            for daqUI in self.daqUIs:
-                daqUI.set_write_path(os.path.join(self.exp_path,f'{self.expt_name}.csv'))
-            for camUI in self.camUIs:
-                camUI.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
+            self.set_module_write_paths()
 
             # Enable record button
             self.record_push.setEnabled(True)
 
+    def set_module_write_paths(self):
+        for daqUI in self.daqUIs:
+            daqUI.set_write_path(os.path.join(self.exp_path,f'{self.expt_name}.csv'))
+        for camUI in self.camUIs:
+            camUI.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
+
     def init_daq(self):
         daqUI = DAQUI(parent=self)
+        daqUI.set_write_path(dir=self.exp_path)
         daqUI.show()
         self.daqUIs.append(daqUI)
 
@@ -79,6 +84,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
     def init_camera_module(self, cam_index, attrs_json_path=None):
         camUI = CamUI(cam_index=cam_index, attrs_json_path=attrs_json_path, parent=self)
+        camUI.set_video_out_path(dir=self.exp_path)
         camUI.show()
         self.camUIs.append(camUI)
 

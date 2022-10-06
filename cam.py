@@ -138,7 +138,7 @@ class JFCam:
     
     def set_video_out_path(self, path=None):
         if path is None:
-            path = os.path.expanduser('~/test.mp4')
+            path = os.path.expanduser(f'~/{self.serial_number}_test.mp4')
         self.video_out_path = path
         print(path)
 
