@@ -5,97 +5,21 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 import cv2
+import json
 from simple_pyspin import Camera
 
-class FJCam:
-    def __init__(self, cam_index=1, video_out_path=None):
+class JFCam:
+    def __init__(self, cam_index=0, attrs_json_fn=None, video_out_path=None):
+        '''
+        cam_index: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.
+        '''
         self.cam = Camera(index=cam_index)
         self.cam.init()
-        self.atts = {}
+        self.serial_number = self.get_cam_serial_number()
+        if attrs_json_fn is not None:
+            self.set_cam_attrs_from_json(attrs_json_fn, n_repeat=3)
 
         self.set_video_out_path(video_out_path)
-        
-        if 'DeviceSerialNumber' in list(self.cam.camera_attributes.keys()):
-            if self.cam.DeviceSerialNumber == '20243355': # 40hr Side camera
-                print('Initializing side cam')
-                self.cam.PixelFormat = 'Mono8'
-
-                self.cam.BinningHorizontal = 2
-                self.cam.BinningVertical = 2
-
-                self.cam.ExposureMode = 'Timed'
-                self.cam.ExposureAuto = 'Off'
-                self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
-
-                self.cam.Width = self.cam.WidthMax
-                self.cam.Height = self.cam.HeightMax
-
-                self.cam.LineSelector = 'Line1' #FIO2
-                self.cam.LineMode = 'Output'
-                self.cam.LineSource = 'ExposureActive'
-
-                self.cam.GainAuto = 'Off'
-                self.cam.Gain = 38.0
-
-                self.cam.GammaEnable = False
-
-                self.cam.TriggerSelector = 'AcquisitionStart'
-                self.cam.TriggerMode = 'On'
-                self.cam.TriggerSource = 'Line0'  #FIO3
-                self.cam.TriggerActivation = 'RisingEdge'
-
-                self.cam.AcquisitionFrameRateEnable = True
-                self.cam.AcquisitionFrameRate = 30
-        
-            elif self.cam.DeviceSerialNumber == '20243354': # 40hr Top camera
-                print('Initializing top cam')
-                self.cam.PixelFormat = 'Mono8'
-
-                self.cam.BinningHorizontal = 4
-                self.cam.BinningVertical = 4
-
-                self.cam.ExposureMode = 'Timed'
-                self.cam.ExposureAuto = 'Off'
-                self.cam.ExposureTime = 3200.0 # Resulting frame rate ~300
-
-                self.cam.Width = self.cam.WidthMax
-                self.cam.Height = self.cam.HeightMax
-
-                self.cam.LineSelector = 'Line1' #FIO0
-                self.cam.LineMode = 'Output'
-                self.cam.LineSource = 'ExposureActive'
-
-                self.cam.GainAuto = 'Off'
-                self.cam.Gain = 25.0
-
-                self.cam.GammaEnable = False
-
-                self.cam.TriggerSelector = 'AcquisitionStart'
-                self.cam.TriggerMode = 'On'
-                self.cam.TriggerSource = 'Line0' #FIO1
-                self.cam.TriggerActivation = 'RisingEdge'
-
-                self.cam.AcquisitionFrameRateEnable = True
-                self.cam.AcquisitionFrameRate = 350.0
-
-        else: # Josh camera
-            print('Initializing Josh cam')
-            self.cam.PixelFormat = 'Mono8'
-            self.cam.VideoMode = "Mode0"
-            # self.cam.Width = self.cam.SensorWidth // 2
-            # self.cam.Height = self.cam.SensorHeight // 2
-            # self.cam.OffsetX = self.cam.SensorWidth // 4
-            # self.cam.OffsetY = self.cam.SensorHeight // 4
-            self.cam.AcquisitionFrameRateEnabled = True
-            # self.cam.AcquisitionFrameRateAuto = 'On'
-            self.cam.AcquisitionFrameRate=80
-            self.cam.ExposureMode = 'Timed'
-            self.cam.ExposureAuto = 'Continuous'
-
-            self.cam.LineSelector = 'Line1'
-            self.cam.LineMode = 'Strobe'
-            self.cam.StrobeEnabled = True
-            self.cam.StrobeDuration = 3000  # microseconds
 
         self.start()
         self.get_img_dtype()
@@ -106,6 +30,87 @@ class FJCam:
         assert self.dtype[-1] == '8', 'Data should be in proper bit depth'
         
         self.video_out_path = None
+
+    def get_cam_serial_number(self):
+        cam = self.cam
+        serial_number_candidates = [x for x in cam.camera_attributes.keys() if "serialnumber" in x.lower()]
+        if len(serial_number_candidates) != 1:
+            print(f'Found {len(serial_number_candidates)} serial number candidates.')
+            return None
+        else:
+            serial_number = cam.__getattr__(serial_number_candidates[0])
+            return serial_number
+
+
+    # def gen_cam_attrs_json(self):
+    #     cam = self.cam
+
+    #     attrs_dict = {}
+    #     for k in cam.camera_attributes.keys():
+    #         print(k)
+    #         if 'power' not in k.lower() and 'pwr' not in k.lower():
+    #             access_info = cam.get_info(k)['access']
+    #             if isinstance(access_info, str) and 'read' in access_info:
+    #                 attrs_dict[k] = cam.get_info(k)['value']
+
+    #     out_fn = f"{self.serial_number}_attrs.json" if self.serial_number is not None else "cam_attrs.json"
+    #     with open(out_fn, "w") as outfile:
+    #         json.dump(attrs_dict, outfile)
+
+    def gen_cam_doc(self):
+        cam = self.cam
+        with open(f'{self.serial_number}_doc.md', 'w') as f:
+            f.write(cam.document())
+
+    def set_cam_attrs_from_json(self, json_path, n_repeat=3):
+        '''
+        n_repeat: # of times to set the values, in case the first few passes don't set the values (e.g. dependence on other values)
+        '''
+        with open(json_path, 'r') as f:
+            attrs_dict = json.load(f)
+        for _ in range(n_repeat):
+            for (k,v) in attrs_dict.items():
+                attr_value_result = self.set_cam_attr(k, v)
+
+    def set_cam_attr(self, attr_name, attr_val):
+        cam = self.cam
+
+        print(f'Trying to write {attr_name}...')
+
+        # check that attr_name is in cam.camera_attributes
+        if attr_name not in cam.camera_attributes.keys():
+            print('Attribute not in camera.')
+            return
+        
+        attr_info = cam.get_info(attr_name)
+
+        # check that attr_name can be set
+        if 'write' not in attr_info['access']:
+            print('Attribute is not writeable.')
+            return
+
+        # check that the node type is the type of attr_val
+        # if attribute is of type enum, check that attr_val is valid
+        if attr_info['type'] == 'enum':
+            assert attr_val in attr_info['entries']
+        elif attr_info['type'] == 'float':
+            assert isinstance(attr_val, float)
+        elif attr_info['type'] == 'int':
+            assert isinstance(attr_val, int)
+        elif attr_info['type'] == 'string':
+            assert isinstance(attr_val, str)
+        elif attr_info['type'] == 'bool':
+            assert isinstance(attr_val, bool)
+        elif attr_info['type'] == 'command':
+            print('Attribute type command is unknown.')
+            return
+        else:
+            print('Attribute type unknown.')
+            return
+        
+        print('Setting attribute.')
+        cam.__setattr__(attr_name, attr_val)
+        return cam.__getattr__(attr_name)
 
     def start(self):
         self.cam.start()

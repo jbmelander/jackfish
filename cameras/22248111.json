@@ -1,0 +1,38 @@
+{
+"PixelFormat": "Mono8",
+
+"VideoMode": "Mode0",
+"BinningHorizontal": 1,
+"BinningVertical": 1,
+
+"Width": 2048,
+"Height": 700,
+"OffsetY": 680,
+
+"ExposureMode": "Timed",
+"ExposureAuto": "Off",
+"ExposureTime": 1500.0,
+
+"LineSelector": "Line1",
+"LineMode": "Output",
+"LineSource": "ExposureActive",
+
+"GainAuto": "Off",
+"Gain": 0.0,
+
+"BlackLevelClampingEnable": false,
+
+"GammaEnabled": false,
+
+"SharpnessEnabled": false,
+"HueEnabled": false,
+"SaturationEnabled": false,
+
+"TriggerSelector": "AcquisitionStart",
+"TriggerMode": "On",
+"TriggerSource": "Line0",
+"TriggerActivation": "RisingEdge",
+
+"AcquisitionFrameRateControl": true,
+"AcquisitionFrameRate": 257
+}
