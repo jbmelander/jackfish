@@ -9,7 +9,7 @@ import json
 from simple_pyspin import Camera
 
 class JFCam:
-    def __init__(self, cam_index=0, attrs_json_fn=None, video_out_path=None):
+    def __init__(self, cam_index=0, attrs_json_fn=None):
         '''
         cam_index: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.
         '''
@@ -18,8 +18,6 @@ class JFCam:
         self.serial_number = self.get_cam_serial_number()
         if attrs_json_fn is not None:
             self.set_cam_attrs_from_json(attrs_json_fn, n_repeat=3)
-
-        self.set_video_out_path(video_out_path)
 
         self.start()
         self.get_img_dtype()
@@ -140,7 +138,7 @@ class JFCam:
         if path is None:
             path = os.path.expanduser(f'~/{self.serial_number}_test.mp4')
         self.video_out_path = path
-        print(path)
+        print(f"Cam video out path: {self.video_out_path}")
 
     def grab_frame(self):
         try:

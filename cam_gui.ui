@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
+    <width>704</width>
     <height>308</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>361</width>
+     <width>451</width>
      <height>271</height>
     </rect>
    </property>
@@ -26,7 +26,7 @@
   <widget class="QCheckBox" name="trigger_toggle">
    <property name="geometry">
     <rect>
-     <x>532</x>
+     <x>622</x>
      <y>200</y>
      <width>16</width>
      <height>23</height>
@@ -42,7 +42,7 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>402</x>
+     <x>492</x>
      <y>160</y>
      <width>81</width>
      <height>40</height>
@@ -64,7 +64,7 @@
   <widget class="QLabel" name="label_0">
    <property name="geometry">
     <rect>
-     <x>402</x>
+     <x>492</x>
      <y>70</y>
      <width>90</width>
      <height>40</height>
@@ -86,7 +86,7 @@
   <widget class="QLabel" name="label_1">
    <property name="geometry">
     <rect>
-     <x>402</x>
+     <x>492</x>
      <y>100</y>
      <width>81</width>
      <height>40</height>
@@ -108,7 +108,7 @@
   <widget class="QLineEdit" name="fr_edit">
    <property name="geometry">
     <rect>
-     <x>502</x>
+     <x>592</x>
      <y>80</y>
      <width>91</width>
      <height>25</height>
@@ -130,7 +130,7 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>402</x>
+     <x>492</x>
      <y>190</y>
      <width>101</width>
      <height>40</height>
@@ -152,7 +152,7 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>402</x>
+     <x>492</x>
      <y>130</y>
      <width>81</width>
      <height>40</height>
@@ -174,7 +174,7 @@
   <widget class="QLineEdit" name="gain_edit">
    <property name="geometry">
     <rect>
-     <x>502</x>
+     <x>592</x>
      <y>140</y>
      <width>91</width>
      <height>25</height>
@@ -196,7 +196,7 @@
   <widget class="QLineEdit" name="strobe_edit">
    <property name="geometry">
     <rect>
-     <x>502</x>
+     <x>592</x>
      <y>170</y>
      <width>91</width>
      <height>25</height>
@@ -218,7 +218,7 @@
   <widget class="QLineEdit" name="exposure_edit">
    <property name="geometry">
     <rect>
-     <x>502</x>
+     <x>592</x>
      <y>110</y>
      <width>91</width>
      <height>25</height>
@@ -240,7 +240,7 @@
   <widget class="QPushButton" name="init_push">
    <property name="geometry">
     <rect>
-     <x>530</x>
+     <x>620</x>
      <y>40</y>
      <width>61</width>
      <height>31</height>
@@ -259,7 +259,7 @@
   <widget class="QCheckBox" name="preview_toggle">
    <property name="geometry">
     <rect>
-     <x>400</x>
+     <x>490</x>
      <y>250</y>
      <width>121</width>
      <height>23</height>
@@ -275,7 +275,7 @@
   <widget class="QPushButton" name="load_attrs_push">
    <property name="geometry">
     <rect>
-     <x>400</x>
+     <x>490</x>
      <y>40</y>
      <width>121</width>
      <height>31</height>

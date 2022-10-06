@@ -55,7 +55,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.expt_name = ""
             
         if not (self.main_dir == "" or self.expt_name == ""):
-            self.main_dir_label.setText(f'{self.main_dir} >>> {self.expt_name}')
+            self.filepath_label.setText(f'{self.main_dir} >>> {self.expt_name}')
             self.exp_path = os.path.join(self.main_dir,self.expt_name)
             os.makedirs(self.exp_path, exist_ok=True)
 
@@ -66,9 +66,9 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
     def set_module_write_paths(self):
         for daqUI in self.daqUIs:
-            daqUI.set_write_path(os.path.join(self.exp_path,f'{self.expt_name}.csv'))
+            daqUI.set_write_path(dir=self.exp_path)
         for camUI in self.camUIs:
-            camUI.set_video_out_path(os.path.join(self.exp_path,f'{self.expt_name}.mp4'))
+            camUI.set_video_out_path(dir=self.exp_path)
 
     def init_daq(self):
         daqUI = DAQUI(parent=self)
