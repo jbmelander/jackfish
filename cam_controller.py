@@ -14,10 +14,11 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
         self.parent = parent
         self.barcode = barcode
-
         self.attrs_json_path = attrs_json_path
 
         self.cam = JFCam(cam_index=cam_index, attrs_json_fn=attrs_json_path)
+
+        self.setWindowTitle(f'Camera {self.cam.serial_number}')
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.preview_updater)
@@ -75,7 +76,8 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.cam.set_video_out_path(os.path.join(dir, file_name))
 
     def load_attrs(self):
-        self.attrs_json_path = QFileDialog.getOpenFileName(self, "Open json file", filter="JSON files (*.json)")
+        self.attrs_json_path,_ = QFileDialog.getOpenFileName(self, "Open json file", filter="JSON files (*.json)")
+        print(self.attrs_json_path)
         self.cam.set_cam_attrs_from_json(self.attrs_json_path, n_repeat=3)
 
     def toggle_preview(self):

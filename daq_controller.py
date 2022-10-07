@@ -17,6 +17,11 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.parent = parent
         self.barcode = barcode
 
+        # Initialize Labjack
+        self.daq = Jack()
+
+        self.setWindowTitle(f'DAQ {self.daq.serial_number}')
+
         # Set Labjack Scanrate
         self.sr_edit.editingFinished.connect(self.set_scanrate)
         self.set_scanrate()
@@ -34,8 +39,6 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         # LJ Cam Trigger button
         self.trigger_push.clicked.connect(self.trigger)
 
-        # Initialize Labjack
-        self.daq = Jack()
 
         # Labjack preview drop change
         self.chan_preview_drop.currentIndexChanged.connect(self.set_chan_preview)

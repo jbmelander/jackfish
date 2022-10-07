@@ -31,5 +31,5 @@
 "TriggerActivation": "RisingEdge",
 
 "AcquisitionFrameRateEnable": true,
-"AcquisitionFrameRate": 253
+"AcquisitionFrameRate": 253.0
 }

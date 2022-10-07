@@ -33,7 +33,6 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         self.daqUIs = {}
 
-        self.init_daq_push.setCheckable(True)
         self.init_daq_push.clicked.connect(self.init_daq)
 
         #### Camera ####
@@ -42,9 +41,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.cam_serial_numbers = ['20243354', '22248111']
         self.camUIs = {}
 
-        self.init_cam0_push.setCheckable(True)
         self.init_cam0_push.clicked.connect(self.init_cam0)
-        self.init_cam1_push.setCheckable(True)
         self.init_cam1_push.clicked.connect(self.init_cam1)
 
     def query_and_set_module_write_paths(self):
