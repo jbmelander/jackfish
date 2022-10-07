@@ -136,7 +136,7 @@ class JFCam:
     
     def set_video_out_path(self, path=None):
         if path is None:
-            path = os.path.expanduser(f'~/{self.serial_number}_test.mp4')
+            path = os.path.expanduser(f'~/cam_{self.serial_number}.mp4')
         self.video_out_path = path
         print(f"Cam video out path: {self.video_out_path}")
 
@@ -152,6 +152,7 @@ class JFCam:
         self.fn = 0
         self.do_preview = True
         self.preview_thread = threading.Thread(target=self.preview_callback, daemon=True).start()
+        print("Camera preview started.")
 
     def preview_callback(self):
         while self.do_preview:
@@ -160,7 +161,7 @@ class JFCam:
 
     def stop_preview(self):
         self.do_preview = False
-        print("Preview finished.")
+        print("Camera preview ended.")
 
     def start_rec(self):
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -169,6 +170,7 @@ class JFCam:
         self.fn = 0
         self.do_record = True
         self.record_thread = threading.Thread(target=self.rec_callback, daemon=True).start()
+        print("Camera record started.")
 
     def rec_callback(self):
         while self.do_record:
@@ -182,7 +184,7 @@ class JFCam:
         self.do_record = False
         time.sleep(2) # give rec_callback time to finish writing frame
         self.writer.release()
-        print("Recording finished.")
+        print("Camera record finished.")
 
     def close(self):
         self.cam.close()

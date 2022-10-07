@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog
@@ -30,7 +31,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     
         #### DAQ ####
 
-        self.daqUIs = []
+        self.daqUIs = {}
 
         self.init_daq_push.setCheckable(True)
         self.init_daq_push.clicked.connect(self.init_daq)
@@ -39,7 +40,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         self.cam_names = ['Left', 'Top']
         self.cam_serial_numbers = ['20243354', '22248111']
-        self.camUIs = []
+        self.camUIs = {}
 
         self.init_cam0_push.setCheckable(True)
         self.init_cam0_push.clicked.connect(self.init_cam0)
@@ -65,16 +66,17 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.record_push.setEnabled(True)
 
     def set_module_write_paths(self):
-        for daqUI in self.daqUIs:
+        for daqUI in self.daqUIs.values():
             daqUI.set_write_path(dir=self.exp_path)
-        for camUI in self.camUIs:
+        for camUI in self.camUIs.values():
             camUI.set_video_out_path(dir=self.exp_path)
 
     def init_daq(self):
-        daqUI = DAQUI(parent=self)
+        barcode = random.randint(0, 2**31-1)
+        daqUI = DAQUI(parent=self, barcode=barcode)
         daqUI.set_write_path(dir=self.exp_path)
         daqUI.show()
-        self.daqUIs.append(daqUI)
+        self.daqUIs[barcode] = daqUI
 
     def init_cam0(self):
         self.init_camera_module(cam_index=self.cam_serial_numbers[0], attrs_json_path=None)
@@ -83,26 +85,27 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.init_camera_module(cam_index=self.cam_serial_numbers[1], attrs_json_path=None)
 
     def init_camera_module(self, cam_index, attrs_json_path=None):
-        camUI = CamUI(cam_index=cam_index, attrs_json_path=attrs_json_path, parent=self)
+        barcode = random.randint(0, 2**31-1)
+        camUI = CamUI(cam_index=cam_index, attrs_json_path=attrs_json_path, parent=self, barcode=barcode)
         camUI.set_video_out_path(dir=self.exp_path)
         camUI.show()
-        self.camUIs.append(camUI)
+        self.camUIs[barcode] = camUI
 
     def preview(self):
         state = self.preview_push.isChecked()
         if state:
-            for daqUI in self.daqUIs:
+            for daqUI in self.daqUIs.values():
                 daqUI.start(record=False)
 
-            for camUI in self.camUIs:
+            for camUI in self.camUIs.values():
                 camUI.start(record=False)
 
             print("Preview Started")
         else: 
-            for daqUI in self.daqUIs:
+            for daqUI in self.daqUIs.values():
                 daqUI.stop()
 
-            for camUI in self.camUIs:
+            for camUI in self.camUIs.values():
                 camUI.stop(record=False)
 
             print("Preview Finished")
@@ -113,18 +116,18 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             if self.preview_push.isChecked(): # preview was on
                 self.preview_push.click()
 
-            for daqUI in self.daqUIs:
+            for daqUI in self.daqUIs.values():
                 daqUI.start(record=True)
 
-            for camUI in self.camUIs:
+            for camUI in self.camUIs.values():
                 camUI.start(record=True)
 
             print('Experiment Started')
         else:
-            for daqUI in self.daqUIs:
+            for daqUI in self.daqUIs.values():
                 daqUI.stop()
 
-            for camUI in self.camUIs:
+            for camUI in self.camUIs.values():
                 camUI.stop(record=True)
 
             self.record_push.setEnabled(False)
@@ -132,11 +135,11 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             print('Experiment Finished')
 
     def closeEvent(self, event): # do not change name, super override
-        for camUI in self.camUIs:
-            camUI.closeEvent(None)
+        for camUI in list(self.camUIs.values()): #list avoids runtime error of dict changing size during close
+            camUI.close()
 
-        for daqUI in self.daqUIs:
-            daqUI.closeEvent(None)
+        for daqUI in list(self.daqUIs.values()):
+            daqUI.close()
 
 def main():
     app = QApplication(sys.argv)

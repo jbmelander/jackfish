@@ -1,4 +1,3 @@
-import time#%%
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -65,7 +64,7 @@ class Jack():
         try:
             # Configure and start stream
             scanRate = ljm.eStreamStart(self.handle, scansPerRead, self.numAddresses, self.aScanList, scanRate)
-            print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
+            print("\nLabjack stream started with a scan rate of %0.0f Hz." % scanRate)
             self.scanRate = scanRate
             self.scansPerRead = scansPerRead
 
@@ -82,7 +81,7 @@ class Jack():
     def stop_stream(self):
         self.stream_start_time = datetime.now() # maybe not the best
         try:
-            print("\nStop Stream")
+            print("\nLabjack stream stopping")
             self.streaming = False
             ljm.eStreamStop(self.handle)
             self.stream_end_time = datetime.now()
@@ -161,79 +160,3 @@ class Jack():
             axs[i].plot(x, data_np[i], '-')
         axs[numAddresses-1].set_xlabel('Time [ms]')
         plt.show()
-    
-    # def stream_for_duration(self, duration, scanRate=3000, scansPerRead=1000):
-    #     '''
-    #     duration: (float) duration of recording in seconds. Can't be too long or we'll run over memory.
-        
-    #     Returns agg, the recording.
-    #     '''
-        
-    #     n_reads = duration * scanRate / scansPerRead
-        
-    #     try:
-    #         # Configure and start stream
-    #         scanRate = ljm.eStreamStart(self.handle, scansPerRead, self.numAddresses, self.aScanList, scanRate)
-    #         print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
-
-    #         print("\nPerforming %i stream reads." % n_reads)
-    #         start = datetime.now()
-    #         totScans = 0
-    #         totSkip = 0  # Total skipped samples
-
-    #         i = 1
-    #         agg = []
-    #         while i <= n_reads:
-    #             ret = ljm.eStreamRead(self.handle)
-    #             aData = ret[0]
-    #             agg = np.append(agg,np.array(aData))
-    #             scans = len(aData) / self.numAddresses
-    #             totScans += scans
-
-    #             # Count the skipped samples which are indicated by -9999 values. Missed
-    #             # samples occur after a device's stream buffer overflows and are
-    #             # reported after auto-recover mode ends.
-    #             curSkip = aData.count(-9999.0)
-    #             totSkip += curSkip
-
-    #             print("\neStreamRead %i" % i)
-    #             ainStr = ""
-    #             for j in range(0, self.numAddresses):
-    #                 ainStr += "%s = %0.5f, " % (self.aScanListNames[j], aData[j])
-    #             print("  1st scan out of %i: %s" % (scans, ainStr))
-    #             print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
-    #                 "%i" % (curSkip/self.numAddresses, ret[1], ret[2]))
-    #             i += 1
-
-    #         end = datetime.now()
-    #         # plt.pause(0.01) print("\nTotal scans = %i" % (totScans))
-    #         tt = (end - start).seconds + float((end - start).microseconds) / 1000000
-    #         print("Time taken = %f seconds" % (tt))
-    #         print("LJM Scan Rate = %f scans/second" % (scanRate))
-    #         print("Timed Scan Rate = %f scans/second" % (totScans / tt))
-    #         print("Timed Sample Rate = %f samples/second" % (totScans * self.numAddresses / tt))
-    #         print("Skipped scans = %0.0f" % (totSkip / self.numAddresses))
-    #     except ljm.LJMError:
-    #         ljme = sys.exc_info()[1]
-    #         print(ljme)
-    #     except Exception:
-    #         e = sys.exc_info()[1]
-    #         print(e)
-        
-    #     return agg
-
-    
-#%%
-
-
-
-# jack = Jack(['FIO1','FIO2'])
-# for i in range(100):
-#     if i%2==0:
-#         jack.write(['FIO3'],[0])
-#         time.sleep(1)
-#     else: 
-#         jack.write(['FIO3'],[1])
-#         time.sleep(1)
-
-# jack.close()

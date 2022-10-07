@@ -10,11 +10,12 @@ from jack import Jack
 from daq_gui import Ui_DAQWindow
 
 class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, barcode=None):
         super(DAQUI, self).__init__(None)
         self.setupUi(self)
 
         self.parent = parent
+        self.barcode = barcode
 
         # Set Labjack Scanrate
         self.sr_edit.editingFinished.connect(self.set_scanrate)
@@ -122,7 +123,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
     def closeEvent(self, event): # do not change name, super override
         self.daq.close()
-        # TODO: Destroy handle to self in parent MainUI's daqUIs list.
+        if self.barcode is not None:
+            self.parent.daqUIs.pop(self.barcode)
 
 def main():
     app = QApplication(sys.argv)

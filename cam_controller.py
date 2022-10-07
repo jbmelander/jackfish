@@ -8,11 +8,12 @@ from cam import JFCam
 from cam_gui import Ui_CamWindow
 
 class CamUI(QtWidgets.QFrame, Ui_CamWindow):
-    def __init__(self, cam_index=0, attrs_json_path=None, parent=None):
+    def __init__(self, cam_index=0, attrs_json_path=None, parent=None, barcode=None):
         super(CamUI, self).__init__(None)
         self.setupUi(self)
 
         self.parent = parent
+        self.barcode = barcode
 
         self.attrs_json_path = attrs_json_path
 
@@ -123,7 +124,8 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
     def closeEvent(self, event): # do not change name, super override
         self.cam.close()
-        # TODO: Destroy handle to self in parent MainUI's daqUIs list.
+        if self.barcode is not None:
+            self.parent.camUIs.pop(self.barcode)
 
 def main():
     app = QApplication(sys.argv)
