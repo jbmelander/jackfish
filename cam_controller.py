@@ -8,7 +8,7 @@ from cam import JFCam
 from cam_gui import Ui_CamWindow
 
 class CamUI(QtWidgets.QFrame, Ui_CamWindow):
-    def __init__(self, cam_index=0, attrs_json_path=None, parent=None, barcode=None):
+    def __init__(self, serial_number=None, attrs_json_path=None, parent=None, barcode=None):
         super(CamUI, self).__init__(None)
         self.setupUi(self)
 
@@ -16,7 +16,8 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.barcode = barcode
         self.attrs_json_path = attrs_json_path
 
-        self.cam = JFCam(cam_index=cam_index, attrs_json_fn=attrs_json_path)
+        if serial_number is None: serial_number = 0
+        self.cam = JFCam(serial_number=serial_number, attrs_json_fn=attrs_json_path)
 
         self.setWindowTitle(f'Camera {self.cam.serial_number}')
 
@@ -50,7 +51,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def init_cam(self):
         if self.cam is not None:
             self.cam.close()
-        self.cam = JFCam(cam_index=0) # TODO
+        self.cam = JFCam(serial_number=0) # TODO
 
     def start(self, record=False):
         self.fn_preview = 0

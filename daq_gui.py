@@ -95,7 +95,7 @@ class Ui_DAQWindow(object):
     def retranslateUi(self, DAQWindow):
         _translate = QtCore.QCoreApplication.translate
         DAQWindow.setWindowTitle(_translate("DAQWindow", "DAQ Window"))
-        self.read_chan_edit.setText(_translate("DAQWindow", "AIN0, AIN1, AIN2, FIO0, FIO2"))
+        self.read_chan_edit.setText(_translate("DAQWindow", "AIN0, FIO0"))
         self.trigger_chan_edit.setText(_translate("DAQWindow", "FIO1, FIO3"))
         self.label_0.setText(_translate("DAQWindow", "Read Chs"))
         self.init_push.setText(_translate("DAQWindow", "Re-init"))

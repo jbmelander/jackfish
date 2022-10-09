@@ -25,9 +25,9 @@
     "SharpnessEnabled": false,
     "SharpnessAuto": "Off",
     
-    "TriggerSelector": "FrameStart",
     "TriggerMode": "Off",
     "TriggerSource": "Line0",
+    "TriggerSelector": "FrameStart",
     "TriggerActivation": "RisingEdge",
     
     "AcquisitionFrameRateAuto": "Off",

@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import json
 import numpy as np
 
 from PyQt5 import QtCore, QtWidgets
@@ -10,7 +11,7 @@ from jack import Jack
 from daq_gui import Ui_DAQWindow
 
 class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
-    def __init__(self, parent=None, barcode=None):
+    def __init__(self, serial_number=None, attrs_json_path=None, parent=None, barcode=None):
         super(DAQUI, self).__init__(None)
         self.setupUi(self)
 
@@ -18,9 +19,29 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.barcode = barcode
 
         # Initialize Labjack
-        self.daq = Jack()
+        self.daq = Jack(serial_number=serial_number)
 
         self.setWindowTitle(f'DAQ {self.daq.serial_number}')
+
+        # Parse attrs
+        if attrs_json_path is not None:
+            with open(attrs_json_path, 'r') as f:
+                attrs_dict = json.load(f)
+
+            if 'sample_rate' in attrs_dict.keys():
+                self.sr_edit.setText(str(attrs_dict['sample_rate']))
+
+            if 'read_chs' in attrs_dict.keys():
+                read_chs = attrs_dict['read_chs']
+                if isinstance(read_chs, list):
+                    read_chs = ", ".join(read_chs)
+                self.read_chan_edit.setText(read_chs)
+            
+            if 'trigger_chs' in attrs_dict.keys():
+                trigger_chs = attrs_dict['trigger_chs']
+                if isinstance(trigger_chs, list):
+                    trigger_chs = ", ".join(trigger_chs)
+                self.trigger_chan_edit.setText(trigger_chs)
 
         # Set Labjack Scanrate
         self.sr_edit.editingFinished.connect(self.set_scanrate)

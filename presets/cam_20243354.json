@@ -25,9 +25,9 @@
 "SharpeningEnable": false,
 "SharpeningAuto": false,
 
-"TriggerSelector": "AcquisitionStart",
-"TriggerMode": "On",
+"TriggerMode": "Off",
 "TriggerSource": "Line0",
+"TriggerSelector": "FrameStart",
 "TriggerActivation": "RisingEdge",
 
 "AcquisitionFrameRateEnable": true,

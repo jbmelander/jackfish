@@ -9,17 +9,17 @@ from collections import deque
 #%%
 class Jack():
     '''
-    Initializes and controls input for Labjack T7.
+    Initializes and controls input for Labjack T4/T7.
     '''
     
-    def __init__(self):
+    def __init__(self, serial_number=None):
         # Store initialization arguments
         self.dataQ = []
         self.collect_dataQ = False
         self.streaming = False
         
-        # Initialize ljm T7 handle
-        self.handle = ljm.openS("T7", "ANY", "ANY")
+        # Initialize ljm T4/T7 handle
+        self.handle = ljm.openS("TSERIES", "ANY", "ANY" if serial_number is None else serial_number)
         self.info = ljm.getHandleInfo(self.handle)
         self.serial_number = self.info[2]
         self.print_handle_info()

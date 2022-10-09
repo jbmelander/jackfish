@@ -29,7 +29,7 @@
     </font>
    </property>
    <property name="text">
-    <string>AIN0, AIN1, AIN2, FIO0, FIO2</string>
+    <string>AIN0, FIO0</string>
    </property>
   </widget>
   <widget class="QSlider" name="preview_slider">

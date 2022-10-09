@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+import json
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog
@@ -15,12 +16,18 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         super(MainUI, self).__init__(parent)
         self.setupUi(self)
 
-        #### Main UI ####
-
-        self.main_dir = ""
+        self.main_dir = os.environ['HOME']
         self.expt_name = ""
         self.exp_path = os.environ['HOME']
 
+        self.daqUIs = {}
+        self.camUIs = {}
+
+        #### Import presets ####
+        self.load_preset(fallback=True)
+
+        #### UI ####
+        self.load_preset_push.clicked.connect(self.load_preset)
         self.set_path_push.clicked.connect(self.query_and_set_module_write_paths)
 
         self.preview_push.setCheckable(True)
@@ -29,20 +36,35 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.record_push.setCheckable(True)
         self.record_push.clicked.connect(self.record)
     
-        #### DAQ ####
+        self.daq_init_push.clicked.connect(self.init_daq)
+        self.cam_init_push.clicked.connect(self.init_cam)
 
-        self.daqUIs = {}
+    def load_preset(self, fallback=False):
+        json_fn, _ = QFileDialog.getOpenFileName(self, "Select preset json file.", self.main_dir, "JSON files (*.json)")
 
-        self.init_daq_push.clicked.connect(self.init_daq)
+        if json_fn == "":
+            if fallback:
+                preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
+            else:
+                return
+        else:
+            with open(json_fn, 'r') as f:
+                preset_dict = json.load(f)
 
-        #### Camera ####
+        main_presets = preset_dict['main']
+        if "default_dir" in main_presets.keys():
+            self.main_dir = main_presets['default_dir']
 
-        self.cam_names = ['Left', 'Top']
-        self.cam_serial_numbers = ['20243354', '22248111']
-        self.camUIs = {}
+        self.cam_presets = preset_dict['cameras']
+        self.cam_names = list(self.cam_presets.keys())
 
-        self.init_cam0_push.clicked.connect(self.init_cam0)
-        self.init_cam1_push.clicked.connect(self.init_cam1)
+        self.daq_presets = preset_dict['DAQs']
+        self.daq_names = list(self.daq_presets.keys())
+
+        self.daq_names_drop.clear()
+        self.daq_names_drop.addItems(self.daq_names)
+        self.cam_names_drop.clear()
+        self.cam_names_drop.addItems(self.cam_names)
 
     def query_and_set_module_write_paths(self):
         # options = QFileDialog.Options()
@@ -69,21 +91,29 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             camUI.set_video_out_path(dir=self.exp_path)
 
     def init_daq(self):
+        daq_drop_index = self.daq_names_drop.currentIndex()
+        daq_name = self.daq_names[daq_drop_index]
+        daq_serial_number = self.daq_presets[daq_name]['serial_number'] if 'serial_number' in self.daq_presets[daq_name].keys() else None
+        if daq_serial_number == "": daq_serial_number = None
+        daq_attrs_json = self.daq_presets[daq_name]['attrs_json'] if 'attrs_json' in self.daq_presets[daq_name].keys() else None
+        if daq_attrs_json == "": daq_attrs_json = None
+
         barcode = random.randint(0, 2**31-1)
-        daqUI = DAQUI(parent=self, barcode=barcode)
+        daqUI = DAQUI(serial_number=daq_serial_number, attrs_json_path=daq_attrs_json, parent=self, barcode=barcode)
         daqUI.set_write_path(dir=self.exp_path)
         daqUI.show()
         self.daqUIs[barcode] = daqUI
 
-    def init_cam0(self):
-        self.init_camera_module(cam_index=self.cam_serial_numbers[0], attrs_json_path=None)
+    def init_cam(self):
+        cam_drop_index = self.cam_names_drop.currentIndex()
+        cam_name = self.cam_names[cam_drop_index]
+        cam_serial_number = self.cam_presets[cam_name]['serial_number'] if 'serial_number' in self.cam_presets[cam_name].keys() else None
+        if cam_serial_number == "": cam_serial_number = None
+        cam_attrs_json = self.cam_presets[cam_name]['attrs_json'] if 'attrs_json' in self.cam_presets[cam_name].keys() else None
+        if cam_attrs_json == "": cam_attrs_json = None
 
-    def init_cam1(self):
-        self.init_camera_module(cam_index=self.cam_serial_numbers[1], attrs_json_path=None)
-
-    def init_camera_module(self, cam_index, attrs_json_path=None):
         barcode = random.randint(0, 2**31-1)
-        camUI = CamUI(cam_index=cam_index, attrs_json_path=attrs_json_path, parent=self, barcode=barcode)
+        camUI = CamUI(serial_number=cam_serial_number, attrs_json_path=cam_attrs_json, parent=self, barcode=barcode)
         camUI.set_video_out_path(dir=self.exp_path)
         camUI.show()
         self.camUIs[barcode] = camUI

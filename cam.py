@@ -9,11 +9,11 @@ import json
 from simple_pyspin import Camera
 
 class JFCam:
-    def __init__(self, cam_index=0, attrs_json_fn=None):
+    def __init__(self, serial_number=0, attrs_json_fn=None):
         '''
-        cam_index: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.
+        serial_number: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.
         '''
-        self.cam = Camera(index=cam_index)
+        self.cam = Camera(index=serial_number)
         self.cam.init()
         self.serial_number = self.get_cam_serial_number()
         if attrs_json_fn is not None:
@@ -90,6 +90,8 @@ class JFCam:
         # check that the node type is the type of attr_val
         # if attribute is of type enum, check that attr_val is valid
         if attr_info['type'] == 'enum':
+            print(attr_val)
+            print(attr_info['entries'])
             assert attr_val in attr_info['entries']
         elif attr_info['type'] == 'float':
             assert isinstance(attr_val, float)

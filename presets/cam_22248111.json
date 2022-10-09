@@ -28,9 +28,9 @@
 "HueEnabled": false,
 "SaturationEnabled": false,
 
-"TriggerSelector": "AcquisitionStart",
-"TriggerMode": "On",
+"TriggerMode": "Off",
 "TriggerSource": "Line0",
+"TriggerSelector": "FrameStart",
 "TriggerActivation": "RisingEdge",
 
 "AcquisitionFrameRateControl": true,
