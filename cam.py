@@ -28,6 +28,7 @@ class JFCam:
         assert self.dtype[-1] == '8', 'Data should be in proper bit depth'
         
         self.video_out_path = None
+        self.t = time.time()
 
     def get_cam_serial_number(self):
         cam = self.cam
@@ -143,12 +144,7 @@ class JFCam:
         print(f"Cam video out path: {self.video_out_path}")
 
     def grab_frame(self):
-        try:
-            self.frame = self.cam.get_array(wait=True)
-            # print('after grab')
-            return 0 #success
-        except:
-            return 1 #fail
+        self.frame = self.cam.get_array(wait=True)
 
     def start_preview(self):
         self.fn = 0
@@ -158,8 +154,8 @@ class JFCam:
 
     def preview_callback(self):
         while self.do_preview:
-            if self.grab_frame() == 0:
-                self.fn += 1
+            self.grab_frame()
+            self.fn += 1
 
     def stop_preview(self):
         self.do_preview = False
@@ -176,10 +172,11 @@ class JFCam:
 
     def rec_callback(self):
         while self.do_record:
-            if self.grab_frame() == 0:
-                frame_color = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
-                self.writer.write(frame_color)
-                self.fn += 1
+            self.grab_frame()
+            t = time.time()
+            frame_color = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
+            self.writer.write(frame_color)
+            self.fn += 1
                 # print(self.fn)
     
     def stop_rec(self):
