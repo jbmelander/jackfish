@@ -144,7 +144,7 @@ class JFCam:
 
     def grab_frame(self):
         try:
-            self.frame = self.cam.get_array(wait=False)
+            self.frame = self.cam.get_array(wait=True)
             # print('after grab')
             return 0 #success
         except:
