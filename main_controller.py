@@ -24,7 +24,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.camUIs = {}
 
         #### Import presets ####
-        self.load_preset(fallback=True)
+        self.load_preset(init=True)
 
         #### UI ####
         self.load_preset_push.clicked.connect(self.load_preset)
@@ -39,17 +39,17 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.daq_init_push.clicked.connect(self.init_daq)
         self.cam_init_push.clicked.connect(self.init_cam)
 
-    def load_preset(self, fallback=False):
-        json_fn, _ = QFileDialog.getOpenFileName(self, "Select preset json file.", self.main_dir, "JSON files (*.json)")
-
-        if json_fn == "":
-            if fallback:
-                preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
-            else:
-                return
+    def load_preset(self, init=False):
+        if init:
+            preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
         else:
-            with open(json_fn, 'r') as f:
-                preset_dict = json.load(f)
+            json_fn, _ = QFileDialog.getOpenFileName(self, "Select preset json file.", self.main_dir, "JSON files (*.json)")
+
+            if json_fn == "":
+                return
+            else:
+                with open(json_fn, 'r') as f:
+                    preset_dict = json.load(f)
 
         main_presets = preset_dict['main']
         if "default_dir" in main_presets.keys():
