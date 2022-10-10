@@ -119,12 +119,6 @@ class JFCam:
     def stop(self):
         self.cam.stop()
 
-    def grab(self, wait=True):
-        return self.cam.get_array(wait=wait).T
-
-    def set_att(self,att,val):
-        self.cam.__setattr__(att,val)
-
     def get_img_framerate(self):
         # Reversed from numpy convension
         self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
@@ -143,8 +137,8 @@ class JFCam:
         self.video_out_path = path
         print(f"Cam video out path: {self.video_out_path}")
 
-    def grab_frame(self):
-        self.frame = self.cam.get_array(wait=True)
+    def grab_frame(self, wait=True):
+        self.frame = self.cam.get_array(wait=wait)
 
     def start_preview(self):
         self.fn = 0
