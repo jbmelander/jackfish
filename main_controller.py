@@ -5,7 +5,8 @@ import json
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog
-
+from PyQt5.QtGui import QMovie, QPixmap
+from PyQt5.QtCore import QSize
 from cam_controller import CamUI
 from daq_controller import DAQUI
 
@@ -15,6 +16,16 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainUI, self).__init__(parent)
         self.setupUi(self)
+        jackfish_dir = os.path.realpath(os.path.dirname(__file__))
+        title_path = os.path.join(jackfish_dir,'assets/title.gif')
+        gif = QMovie(title_path)
+        self.title_gif_label.setMovie(gif)
+        gif.start()
+        
+        image_dir = os.path.join(jackfish_dir,'assets/jf.jpg')
+        self.label.setPixmap(QPixmap(image_dir))
+        self.label.setScaledContents(True)
+        self.label.setObjectName("label")
 
         self.main_dir = os.environ['HOME']
         self.expt_name = ""
