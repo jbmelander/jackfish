@@ -43,7 +43,10 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         if init:
             preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
         else:
-            json_fn, _ = QFileDialog.getOpenFileName(self, "Select preset json file.", self.main_dir, "JSON files (*.json)")
+            jackfish_dir = os.path.realpath(os.path.dirname(__file__))
+            presets_dir = os.path.join(jackfish_dir,'presets')
+
+            json_fn, _ = QFileDialog.getOpenFileName(self, "Select preset json file.", presets_dir, "JSON files (*.json)")
 
             if json_fn == "":
                 return
