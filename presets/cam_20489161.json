@@ -1,0 +1,7 @@
+{
+    "PixelFormat": "Mono8",
+      
+    "AcquisitionFrameRateAuto": "Off",
+    "AcquisitionFrameRateEnabled": true,
+    "AcquisitionFrameRate": 60.0
+    }
