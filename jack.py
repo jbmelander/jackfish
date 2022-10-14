@@ -21,21 +21,30 @@ class Jack():
         # Initialize ljm T4/T7 handle
         self.handle = ljm.openS("TSERIES", "ANY", "ANY" if serial_number is None else serial_number)
         self.info = ljm.getHandleInfo(self.handle)
+        self.deviceType = self.info[0]
         self.serial_number = self.info[2]
         self.print_handle_info()
         
-        # Ensure triggered stream is disabled.
-        ljm.eWriteName(self.handle, "STREAM_TRIGGER_INDEX", 0)
+        if self.deviceType == ljm.constants.dtT4:
+            # LabJack T4 configuration
 
-        # Enabling internally-clocked stream.
-        ljm.eWriteName(self.handle, "STREAM_CLOCK_SOURCE", 0)
+            # All analog input ranges are +/-1 V, stream settling is 0 (default) and
+            # stream resolution index is 0 (default).
+            aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+            aValues = [1.0, 0, 0]
+        else:
+            # LabJack T7 and other devices configuration
 
-        # All negative channels are single-ended, AIN0 and AIN1 ranges are
-        # +/-10 V, stream settling is 0 (default) and stream resolution index
-        # is 0 (default).
-        aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US",
-                  "STREAM_RESOLUTION_INDEX"]
-        aValues = [1.0,6,0]
+            # Ensure triggered stream is disabled.
+            ljm.eWriteName(self.handle, "STREAM_TRIGGER_INDEX", 0)
+
+            # Enabling internally-clocked stream.
+            ljm.eWriteName(self.handle, "STREAM_CLOCK_SOURCE", 0)
+
+            # All analog input ranges are +/-1 V, stream settling is 6 
+            # and stream resolution index is 0 (default).
+            aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
+            aValues = [1.0, 6, 0]
 
         # Write the analog inputs' negative channels (when applicable), ranges,
         # stream settling time and stream resolution configuration.
