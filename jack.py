@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 from labjack import ljm
 from collections import deque
-
+import socket, atexit
 
 #%%
 class Jack():
@@ -60,7 +60,7 @@ class Jack():
             "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
             (self.info[0], self.info[1], self.info[2], ljm.numberToIP(self.info[3]), self.info[4], self.info[5]))
 
-    def start_stream(self, do_record=True, record_filepath="", aScanListNames=["AIN0", "AIN1"], scanRate=3000, scansPerRead=1000, dataQ_len_sec=15):
+    def start_stream(self, do_record=True, record_filepath="", aScanListNames=["AIN0", "AIN1"], scanRate=3000, scansPerRead=1000, dataQ_len_sec=15, socket_target=None):
         self.aScanListNames = aScanListNames
         self.numAddresses = len(aScanListNames)
         self.aScanList = ljm.namesToAddresses(self.numAddresses, aScanListNames)[0]
@@ -70,6 +70,35 @@ class Jack():
 
         self.do_record = do_record
         self.record_filepath = record_filepath
+        if self.do_record:
+            self.record_outfile = open(self.record_filepath, "a")
+
+        #### Socket stream ####
+        self.socket_target = socket_target
+        if self.socket_target is not None:
+            host, port = self.socket_target
+
+            # set defaults
+            if host is None:
+                host = '127.0.0.1'
+
+            assert port is not None, 'The port must be specified when creating a client.'
+
+            conn = socket.create_connection((host, port))
+
+            # make sure that connection is closed on
+            def cleanup():
+                try:
+                    conn.shutdown(socket.SHUT_RDWR)
+                    conn.close()
+                except (OSError, ConnectionResetError):
+                    pass
+
+            atexit.register(cleanup)
+
+            self.socket_outfile = conn.makefile('w')
+        ####
+
         try:
             # Configure and start stream
             scanRate = ljm.eStreamStart(self.handle, scansPerRead, self.numAddresses, self.aScanList, scanRate)
@@ -131,11 +160,18 @@ class Jack():
                 print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
                     "%i" % (curSkip/self.numAddresses, ret[1], ret[2]))
 
+                if self.socket_target is not None:
+                    try:
+                        self.socket_outfile.write(str(data))
+                        self.socket_outfile.flush()
+                    except BrokenPipeError:
+                        # will happen if the other side disconnected
+                        pass
+
                 if self.do_record:
-                    print('Writing')
-                    with open(self.record_filepath, "a") as f:
-                        f.write("\n")
-                        f.write(str(ret[0]))
+                    # print('Writing')
+                    self.record_outfile.write("\n" + str(data))
+                    self.record_outfile.flush()
                 
                 if self.collect_dataQ:
                     self.dataQ.extend(data)
@@ -148,6 +184,10 @@ class Jack():
                 print(e)
         else:
             print("Shutting off Stream Callback")
+            if self.socket_target is not None:
+                self.socket_outfile.close()
+            if self.do_record:
+                self.record_outfile.close()
     
     def start_collect_dataQ(self):
         self.collect_dataQ = True
