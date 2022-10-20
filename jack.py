@@ -96,7 +96,7 @@ class Jack():
 
             atexit.register(cleanup)
 
-            self.socket_outfile = conn.makefile('w')
+            self.socket_outfile = conn.makefile('wb')
         ####
 
         try:
@@ -151,6 +151,7 @@ class Jack():
                 scans = len(data) / self.numAddresses
                 self.totScans += scans
 
+                data_to_send = np.sum(data[::self.numAddresses])
                 # Count the skipped samples which are indicated by -9999 values. Missed
                 # samples occur after a device's stream buffer overflows and are
                 # reported after auto-recover mode ends.
@@ -162,7 +163,7 @@ class Jack():
 
                 if self.socket_target is not None:
                     try:
-                        self.socket_outfile.write(str(data))
+                        self.socket_outfile.write(str(data_to_send) + "\n")
                         self.socket_outfile.flush()
                     except BrokenPipeError:
                         # will happen if the other side disconnected
