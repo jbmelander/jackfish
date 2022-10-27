@@ -73,8 +73,10 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.preview_slider.sliderReleased.connect(self.set_slider)
 
         self.data = [0]
-        self.curve = self.preview.getPlotItem().plot()
-        self.curve.setData(self.data)
+        preview_plotItem = self.preview.getPlotItem()
+        preview_plotItem.setLabel("bottom", "Time [ms]")
+        self.preview_plotDataItem = preview_plotItem.plot()
+        self.preview_plotDataItem.setData(self.data)
         self.preview.show()
         self.show_preview = False
 
@@ -133,9 +135,12 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
             self.data = list(self.daq.dataQ)[self.chan_preview_idx:-1:len(self.chans)]
             try:
-                self.curve.setData(self.data[-self.slider_val:])
+                data_to_plot = self.data[-self.slider_val:]
+                curve_t = np.arange(0, len(data_to_plot)) / self.scanrate * 1000 # ms
+                self.preview_plotDataItem.setData(curve_t, data_to_plot)
             except:
-                self.curve.setData(self.data)
+                curve_t = np.arange(0, len(self.data)) / self.scanrate * 1000 # ms
+                self.preview_plotDataItem.setData(curve_t, self.data)
             self.preview.show() 
 
 
