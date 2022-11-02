@@ -31,7 +31,11 @@ class Jack():
             # All analog input ranges are +/-1 V, stream settling is 0 (default) and
             # stream resolution index is 0 (default).
             aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-            aValues = [1.0, 0, 0]
+            aValues = [10.0, 0, 0]
+
+            # Configure FIO4 to FIO7 as digital I/O.
+            ljm.eWriteName(self.handle, "DIO_INHIBIT", 0xFFF0F)
+            ljm.eWriteName(self.handle, "DIO_ANALOG_ENABLE", 0x00000)
         else:
             # LabJack T7 and other devices configuration
 
@@ -43,8 +47,8 @@ class Jack():
 
             # All analog input ranges are +/-1 V, stream settling is 6 
             # and stream resolution index is 0 (default).
-            aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
-            aValues = [1.0, 6, 0]
+            aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX", "AIN_ALL_NEGATIVE_CH"]
+            aValues = [10.0, 6, 0, 199]
 
         # Write the analog inputs' negative channels (when applicable), ranges,
         # stream settling time and stream resolution configuration.
