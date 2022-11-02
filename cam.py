@@ -1,9 +1,8 @@
 import os
-import matplotlib.pyplot as plt
 import queue, threading
+import numpy as np
 import matplotlib.pyplot as plt
 import time
-import numpy as np
 import cv2
 import json
 from simple_pyspin import Camera
@@ -16,6 +15,10 @@ class JFCam:
         self.cam = Camera(index=serial_number)
         self.cam.init()
         self.serial_number = self.get_cam_serial_number()
+        self.release_trigger_on_start = False
+        self.release_trigger_delay = 0
+        self.restore_trigger_mode_on_stop = False
+
         if attrs_json_fn is not None:
             self.set_cam_attrs_from_json(attrs_json_fn, n_repeat=3)
 
@@ -67,9 +70,17 @@ class JFCam:
         '''
         with open(json_path, 'r') as f:
             attrs_dict = json.load(f)
-        for _ in range(n_repeat):
-            for (k,v) in attrs_dict.items():
-                attr_value_result = self.set_cam_attr(k, v)
+        if 'camera_attrs' in attrs_dict:
+            cam_attrs = attrs_dict['camera_attrs']
+            for _ in range(n_repeat):
+                for (k,v) in cam_attrs.items():
+                    attr_value_result = self.set_cam_attr(k, v)
+        if 'control_attrs' in attrs_dict:
+            control_attrs = attrs_dict['control_attrs']
+            if 'ReleaseTriggerModeOnStart' in control_attrs and control_attrs['ReleaseTriggerModeOnStart']:
+                self.release_trigger_on_start = True
+            if 'ReleaseTriggerModeDelay' in control_attrs:
+                self.release_trigger_delay = control_attrs['ReleaseTriggerModeDelay']
 
     def set_cam_attr(self, attr_name, attr_val):
         cam = self.cam
@@ -115,9 +126,24 @@ class JFCam:
 
     def start(self):
         self.cam.start()
+        if self.release_trigger_on_start and self.cam.__getattr__('TriggerMode') == 'On':
+            self.release_trigger_mode_after_delay()
+            self.restore_trigger_mode_on_stop = True
+
+    def release_trigger_mode_after_delay(self):
+        def helper():
+            time.sleep(self.release_trigger_delay)
+            self.set_cam_attr('TriggerMode', 'Off')
+        threading.Thread(target=helper, daemon=True).start()
 
     def stop(self):
+        if self.cam.__getattr__('TriggerMode') == 'On':
+            self.set_cam_attr('TriggerMode', 'Off')
+            self.restore_trigger_mode_on_stop = True
         self.cam.stop()
+        if self.restore_trigger_mode_on_stop:
+            self.set_cam_attr('TriggerMode', 'On')
+            self.restore_trigger_mode_on_stop = False
 
     def get_img_framerate(self):
         if self.cam.__getattr__('TriggerMode') == 'On':

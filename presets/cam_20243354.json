@@ -1,35 +1,37 @@
 {
-"PixelFormat": "Mono8",
+"camera_attrs": {
+    "PixelFormat": "Mono8",
 
-"BinningHorizontal": 4,
-"BinningVertical": 4,
+    "BinningHorizontal": 2,
+    "BinningVertical": 2,
 
-"ExposureMode": "Timed",
-"ExposureAuto": "Off",
-"ExposureTime": 3801.0,
+    "ExposureMode": "Timed",
+    "ExposureAuto": "Off",
+    "ExposureTime": 2500.0,
 
-"Width": 360,
-"Height": 270,
+    "Width": 720,
+    "Height": 540,
 
-"LineSelector": "Line1",
-"LineMode": "Output",
-"LineSource": "ExposureActive",
+    "LineSelector": "Line1",
+    "LineMode": "Output",
+    "LineSource": "ExposureActive",
 
-"GainAuto": "Off",
-"Gain": 25.0,
+    "GainAuto": "Off",
+    "Gain": 0.0,
 
-"BlackLevelClampingEnable": false,
+    "BlackLevelClampingEnable": false,
 
-"GammaEnable": false,
+    "GammaEnable": false,
 
-"SharpeningEnable": false,
-"SharpeningAuto": false,
+    "SharpeningEnable": false,
+    "SharpeningAuto": false,
 
-"TriggerMode": "Off",
-"TriggerSource": "Line0",
-"TriggerSelector": "FrameStart",
-"TriggerActivation": "RisingEdge",
+    "TriggerMode": "On",
+    "TriggerSource": "Line0",
+    "TriggerSelector": "AcquisitionStart",
+    "TriggerActivation": "RisingEdge",
 
-"AcquisitionFrameRateEnable": true,
-"AcquisitionFrameRate": 253.0
+    "AcquisitionFrameRateEnable": true,
+    "AcquisitionFrameRate": 350.0
+    }
 }

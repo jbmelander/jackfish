@@ -1,7 +1,8 @@
 {
-    "PixelFormat": "Mono8",
-      
+"camera_attrs": {
+    "PixelFormat": "Mono8",      
     "AcquisitionFrameRateAuto": "Off",
     "AcquisitionFrameRateEnabled": true,
     "AcquisitionFrameRate": 20.0
     }
+}
