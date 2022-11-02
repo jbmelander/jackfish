@@ -120,8 +120,12 @@ class JFCam:
         self.cam.stop()
 
     def get_img_framerate(self):
-        # Reversed from numpy convension
-        self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
+        if self.cam.__getattr__('TriggerMode') == 'On':
+            self.set_cam_attr('TriggerMode', 'Off')
+            self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
+            self.set_cam_attr('TriggerMode', 'On')
+        else:
+            self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
 
     def get_img_dimensions(self):
         # Reversed from numpy convension
