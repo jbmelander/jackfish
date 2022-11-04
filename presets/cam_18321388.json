@@ -1,4 +1,5 @@
 {
+"camera_attrs": {
     "PixelFormat": "Mono8",
     
     "BinningHorizontal": 1,
@@ -34,3 +35,4 @@
     "AcquisitionFrameRateEnabled": true,
     "AcquisitionFrameRate": 60.0
     }
+}
