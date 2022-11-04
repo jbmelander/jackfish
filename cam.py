@@ -156,21 +156,40 @@ class JFCam:
         print("Camera preview ended.")
 
     def start_rec(self):
+        self.img_queue = queue.Queue()
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # self.video_out_path = '/home/baccuslab/aaa.mp4'
         self.writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
 
         self.fn = 0
         self.do_record = True
         self.record_thread = threading.Thread(target=self.rec_callback, daemon=True).start()
+        self.worker_thread = threading.Thread(target=self.worker, daemon=True).start()
         print("Camera record started.")
+         
+    def worker(self):
+        print('worker started')
+        while self.do_record:
+            frame = self.img_queue.get(block=True)
+
+            frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+            self.writer.write(frame_color)
+            
+            # try:
+            #     print(self.img_queue.get().shape)
+            # except:
+            #     pass
 
     def rec_callback(self):
         while self.do_record:
-            self.grab_frame()
-            t = time.time()
-            frame_color = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
-            self.writer.write(frame_color)
-            self.fn += 1
+            frame = self.cam.get_array(wait=True)
+            self.img_queue.put(frame)
+
+            # print(self.img_queue)
+            # t = time.time()
+            # frame_color = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
+            # self.writer.write(frame_color)
+            # self.fn += 1
                 # print(self.fn)
     
     def stop_rec(self):
@@ -181,4 +200,20 @@ class JFCam:
 
     def close(self):
         self.cam.close()
+
+# t = time.time()
+# cam = JFCam()
+# cam.start()
+
+# cam.start_rec()
+# cam.do_record= True
+# time.sleep(20)
+# cam.do_record=False
+# cam.stop_rec()
+# cam.close()
+# # cam.start_rec()
+# # time.sleep(30)
+
+# cam.stop_rec()
+
 
