@@ -22,7 +22,7 @@ class JFCam:
         if attrs_json_fn is not None:
             self.set_cam_attrs_from_json(attrs_json_fn, n_repeat=3)
 
-        self.start()
+        self.start(release_trigger_mode=False)
         self.get_img_dtype()
         self.get_img_dimensions()
         self.get_img_framerate()
@@ -124,9 +124,9 @@ class JFCam:
         cam.__setattr__(attr_name, attr_val)
         return cam.__getattr__(attr_name)
 
-    def start(self):
+    def start(self, release_trigger_mode=True):
         self.cam.start()
-        if self.release_trigger_on_start and self.cam.__getattr__('TriggerMode') == 'On':
+        if release_trigger_mode and self.release_trigger_on_start and self.cam.__getattr__('TriggerMode') == 'On':
             self.release_trigger_mode_after_delay()
             self.restore_trigger_mode_on_stop = True
 
