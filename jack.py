@@ -67,6 +67,10 @@ class Jack():
     def start_stream(self, do_record=True, record_filepath="", aScanListNames=["AIN0", "AIN1"], scanRate=3000, scansPerRead=1000, dataQ_len_sec=15, socket_target=None):
         self.aScanListNames = aScanListNames
         self.numAddresses = len(aScanListNames)
+
+        if self.numAddresses == 0:
+            return
+
         self.aScanList = ljm.namesToAddresses(self.numAddresses, aScanListNames)[0]
 
         dataQ_len = int(dataQ_len_sec * scanRate * self.numAddresses)
@@ -124,27 +128,28 @@ class Jack():
             print(e)
 
     def stop_stream(self):
-        self.stream_start_time = datetime.now() # maybe not the best
-        try:
-            print("\nLabjack stream stopping")
-            self.streaming = False
-            ljm.eStreamStop(self.handle)
-            self.stream_end_time = datetime.now()
-            
-            recording_duration = self.stream_end_time - self.stream_start_time
-            tt = recording_duration.seconds + float(recording_duration.microseconds) / 1000000
-            print("Time taken = %f seconds" % (tt))
-            print("LJM Scan Rate = %f scans/second" % (self.scanRate))
-            print("Timed Scan Rate = %f scans/second" % (self.totScans / tt))
-            print("Timed Sample Rate = %f samples/second" % (self.totScans * self.numAddresses / tt))
-            print("Skipped scans = %0.0f" % (self.totSkip / self.numAddresses))
+        # self.stream_start_time = datetime.now() # maybe not the best
+        if self.streaming:
+            try:
+                print("\nLabjack stream stopping")
+                self.streaming = False
+                ljm.eStreamStop(self.handle)
+                self.stream_end_time = datetime.now()
+                
+                recording_duration = self.stream_end_time - self.stream_start_time
+                tt = recording_duration.seconds + float(recording_duration.microseconds) / 1000000
+                print("Time taken = %f seconds" % (tt))
+                print("LJM Scan Rate = %f scans/second" % (self.scanRate))
+                print("Timed Scan Rate = %f scans/second" % (self.totScans / tt))
+                print("Timed Sample Rate = %f samples/second" % (self.totScans * self.numAddresses / tt))
+                print("Skipped scans = %0.0f" % (self.totSkip / self.numAddresses))
 
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            print(ljme)
-        except Exception:
-            e = sys.exc_info()[1]
-            print(e)
+            except ljm.LJMError:
+                ljme = sys.exc_info()[1]
+                print(ljme)
+            except Exception:
+                e = sys.exc_info()[1]
+                print(e)
         
     def stream_callback(self, arg):
         self.totScans = 0
