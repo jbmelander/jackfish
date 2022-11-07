@@ -81,26 +81,29 @@ class Jack():
         self.socket_target = socket_target
         if self.socket_target is not None:
             host, port = self.socket_target
-
+            self.host = host
+            self.port = port
             # set defaults
             if host is None:
                 host = '127.0.0.1'
 
             assert port is not None, 'The port must be specified when creating a client.'
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            addr = (host,port)
 
-            conn = socket.create_connection((host, port))
+            # conn = socket.create_connection((host, port))
 
             # make sure that connection is closed on
             def cleanup():
                 try:
-                    conn.shutdown(socket.SHUT_RDWR)
-                    conn.close()
+                    self.client_socket.shutdown(socket.SHUT_RDWR)
+                    self.client_socket.close()
                 except (OSError, ConnectionResetError):
                     pass
 
             atexit.register(cleanup)
 
-            self.socket_outfile = conn.makefile('wb')
+            # self.socket_outfile = self.client_socket.makefile('wb')
         ####
 
         try:
@@ -156,6 +159,8 @@ class Jack():
                 self.totScans += scans
 
                 data_to_send = np.sum(data[::self.numAddresses])
+                data_to_send = '{}'.format(data_to_send)
+                print(data_to_send)
                 # Count the skipped samples which are indicated by -9999 values. Missed
                 # samples occur after a device's stream buffer overflows and are
                 # reported after auto-recover mode ends.
@@ -167,8 +172,10 @@ class Jack():
 
                 if self.socket_target is not None:
                     try:
-                        self.socket_outfile.write(str(data_to_send) + "\n")
-                        self.socket_outfile.flush()
+                        data_to_send = bytes(data_to_send,'utf-8')
+                        self.client_socket.sendto(data_to_send,('127.0.0.1',self.port))
+                        # self.socket_outfile.write(bytes(str(data_to_send) + "\n"),'utf-8')
+                        # self.socket_outfile.flush()
                     except BrokenPipeError:
                         # will happen if the other side disconnected
                         pass
@@ -190,7 +197,8 @@ class Jack():
         else:
             print("Shutting off Stream Callback")
             if self.socket_target is not None:
-                self.socket_outfile.close()
+                self.client_socket.close()
+                # self.socket_outfile.close()
             if self.do_record:
                 self.record_outfile.close()
     

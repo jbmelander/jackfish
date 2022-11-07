@@ -87,6 +87,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.timer.start()
         if record:
             self.daq.start_stream(do_record=record, record_filepath=self.write_path, aScanListNames=self.chans, scanRate=self.scanrate, dataQ_len_sec=15)
+            # self.daq.start_stream(do_record=record, record_filepath=self.write_path, aScanListNames=self.chans, scanRate=self.scanrate, dataQ_len_sec=15, socket_target=(None,25025))
         else:
             self.daq.start_stream(do_record=False, aScanListNames=self.chans, scanRate=self.scanrate, dataQ_len_sec=15)
 
