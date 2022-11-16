@@ -113,7 +113,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         if daq_attrs_json == "": daq_attrs_json = None
 
         barcode = random.randint(0, 2**31-1)
-        daqUI = DAQUI(serial_number=daq_serial_number, attrs_json_path=daq_attrs_json, parent=self, barcode=barcode)
+        daqUI = DAQUI(serial_number=daq_serial_number, device_name=daq_name, attrs_json_path=daq_attrs_json, parent=self, barcode=barcode)
         daqUI.set_write_path(dir=self.exp_path)
         daqUI.show()
         self.daqUIs[barcode] = daqUI
@@ -127,7 +127,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         if cam_attrs_json == "": cam_attrs_json = None
 
         barcode = random.randint(0, 2**31-1)
-        camUI = CamUI(serial_number=cam_serial_number, attrs_json_path=cam_attrs_json, parent=self, barcode=barcode)
+        camUI = CamUI(serial_number=cam_serial_number, device_name=cam_name, attrs_json_path=cam_attrs_json, parent=self, barcode=barcode)
         camUI.set_video_out_path(dir=self.exp_path)
         camUI.show()
         self.camUIs[barcode] = camUI

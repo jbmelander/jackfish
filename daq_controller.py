@@ -11,7 +11,7 @@ from jack import Jack
 from daq_gui import Ui_DAQWindow
 
 class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
-    def __init__(self, serial_number=None, attrs_json_path=None, parent=None, barcode=None):
+    def __init__(self, serial_number=None, device_name=None, attrs_json_path=None, parent=None, barcode=None):
         super(DAQUI, self).__init__(None)
         self.setupUi(self)
 
@@ -21,7 +21,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         # Initialize Labjack
         self.daq = Jack(serial_number=serial_number)
 
-        self.setWindowTitle(f'DAQ {self.daq.serial_number}')
+        self.setWindowTitle(f'DAQ {device_name} ({self.daq.serial_number})')
 
         # Parse attrs
         if attrs_json_path is not None:

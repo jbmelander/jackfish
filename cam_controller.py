@@ -8,7 +8,7 @@ from cam import JFCam
 from cam_gui import Ui_CamWindow
 
 class CamUI(QtWidgets.QFrame, Ui_CamWindow):
-    def __init__(self, serial_number=None, attrs_json_path=None, parent=None, barcode=None):
+    def __init__(self, serial_number=None, device_name=None, attrs_json_path=None, parent=None, barcode=None):
         super(CamUI, self).__init__(None)
         self.setupUi(self)
 
@@ -19,7 +19,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if serial_number is None: serial_number = 0
         self.cam = JFCam(serial_number=serial_number, attrs_json_fn=attrs_json_path)
 
-        self.setWindowTitle(f'Camera {self.cam.serial_number}')
+        self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.preview_updater)
