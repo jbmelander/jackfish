@@ -48,10 +48,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.set_scanrate()
 
         # Labjack Scan channels
-        self.chans = self.read_chan_edit.text().split(',')
         self.read_chan_edit.editingFinished.connect(self.set_chans)
-
-        self.chan_preview_drop.addItems(['None'] + self.chans)
+        self.set_chans()
 
         # Set Labjack Trigger channels
         self.trigger_chan_edit.editingFinished.connect(self.set_trigger_chans)
@@ -86,10 +84,10 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
     def start(self, record=False):
         self.timer.start()
         if record:
-            self.daq.start_stream(do_record=record, record_filepath=self.write_path, aScanListNames=self.chans, scanRate=self.scanrate, dataQ_len_sec=15)
-            # self.daq.start_stream(do_record=record, record_filepath=self.write_path, aScanListNames=self.chans, scanRate=self.scanrate, dataQ_len_sec=15, socket_target=(None,25025))
+            self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15)
+            # self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15, socket_target=(None,25025))
         else:
-            self.daq.start_stream(do_record=False, aScanListNames=self.chans, scanRate=self.scanrate, dataQ_len_sec=15)
+            self.daq.start_stream(do_record=False, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15)
 
     def stop(self):
         self.timer.stop()
@@ -106,12 +104,47 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.scanrate = int(self.sr_edit.text())
 
     def set_trigger_chans(self):
-        self.trigger_chans = self.trigger_chan_edit.text().split(',')
+        channel_candidates = self.trigger_chan_edit.text().split(',')
+        self.trigger_chans = {}
+        for cc in channel_candidates:
+            nickname_opening_bracket_idx = cc.find('<')
+            nickname_closing_bracket_idx = cc.find('>')
+
+            if nickname_opening_bracket_idx != -1:
+                assert nickname_closing_bracket_idx != -1, "Improper closure of nickname for channel."
+                assert nickname_closing_bracket_idx > nickname_opening_bracket_idx, "Nickname closure should come after opening."
+                channel_name = cc[0:nickname_opening_bracket_idx].replace(" ", "")
+                nickname = cc[nickname_opening_bracket_idx+1:nickname_closing_bracket_idx]
+            else:
+                assert nickname_closing_bracket_idx == -1
+                channel_name = cc.replace(" ", "")
+                nickname = channel_name
+            assert channel_name not in self.trigger_chans.keys()
+            assert nickname not in self.trigger_chans.values()
+            self.trigger_chans[channel_name] = nickname
 
     def set_chans(self):
-        self.chans = self.read_chan_edit.text().split(',')
+        channel_candidates = self.read_chan_edit.text().split(',')
+        self.input_channels = {}
+        for cc in channel_candidates:
+            nickname_opening_bracket_idx = cc.find('<')
+            nickname_closing_bracket_idx = cc.find('>')
+
+            if nickname_opening_bracket_idx != -1:
+                assert nickname_closing_bracket_idx != -1, "Improper closure of nickname for channel."
+                assert nickname_closing_bracket_idx > nickname_opening_bracket_idx, "Nickname closure should come after opening."
+                channel_name = cc[0:nickname_opening_bracket_idx].replace(" ", "")
+                nickname = cc[nickname_opening_bracket_idx+1:nickname_closing_bracket_idx]
+            else:
+                assert nickname_closing_bracket_idx == -1
+                channel_name = cc.replace(" ", "")
+                nickname = channel_name
+            assert channel_name not in self.input_channels.keys()
+            assert nickname not in self.input_channels.values()
+            self.input_channels[channel_name] = nickname
+
         self.chan_preview_drop.clear()
-        self.chan_preview_drop.addItems(['None'] + self.chans)
+        self.chan_preview_drop.addItems(['None'] + [f'{k} <{v}>' for k,v in self.input_channels.items()])
 
     def set_slider(self):
         # self.cam_timer.stop()
@@ -134,7 +167,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
     def preview_updater(self):
         if self.show_preview:
 
-            self.data = list(self.daq.dataQ)[self.chan_preview_idx:-1:len(self.chans)]
+            self.data = list(self.daq.dataQ)[self.chan_preview_idx:-1:len(self.input_channels)]
             try:
                 data_to_plot = self.data[-self.slider_val:]
                 curve_t = np.arange(0, len(data_to_plot)) / self.scanrate * 1000 # ms

@@ -5,6 +5,7 @@ import sys
 from labjack import ljm
 from collections import deque
 import socket, atexit
+import json
 
 #%%
 class Jack():
@@ -64,22 +65,30 @@ class Jack():
             "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
             (self.info[0], self.info[1], self.info[2], ljm.numberToIP(self.info[3]), self.info[4], self.info[5]))
 
-    def start_stream(self, do_record=True, record_filepath="", aScanListNames=["AIN0", "AIN1"], scanRate=3000, scansPerRead=1000, dataQ_len_sec=15, socket_target=None):
-        self.aScanListNames = aScanListNames
-        self.numAddresses = len(aScanListNames)
+    def start_stream(self, do_record=True, record_filepath="", input_channels={"AIN0": "Input 0", "AIN1": "Input 1"}, scanRate=3000, scansPerRead=1000, dataQ_len_sec=15, socket_target=None):
+        self.input_channels = input_channels
+        if isinstance(self.input_channels, list):
+             self.input_channels = {chan:chan for chan in self.input_channels}
+        self.n_input_channels = len(self.input_channels)
 
-        if self.numAddresses == 0:
+        if self.n_input_channels == 0:
             return
 
-        self.aScanList = ljm.namesToAddresses(self.numAddresses, aScanListNames)[0]
+        self.aScanList = ljm.namesToAddresses(self.n_input_channels, list(self.input_channels.keys()))[0]
 
-        dataQ_len = int(dataQ_len_sec * scanRate * self.numAddresses)
+        dataQ_len = int(dataQ_len_sec * scanRate * self.n_input_channels)
         self.dataQ = deque([0]*dataQ_len, maxlen=dataQ_len) #only for visualization; not for storing whole data
 
         self.do_record = do_record
         self.record_filepath = record_filepath
         if self.do_record:
             self.record_outfile = open(self.record_filepath, "a")
+
+            header = {'input_channels':self.input_channels, 'scan_rate':scanRate}
+
+            self.record_outfile.write(json.dumps(header) + "\n")
+            self.record_outfile.flush()
+
 
         #### Socket stream ####
         self.socket_target = socket_target
@@ -112,7 +121,7 @@ class Jack():
 
         try:
             # Configure and start stream
-            scanRate = ljm.eStreamStart(self.handle, scansPerRead, self.numAddresses, self.aScanList, scanRate)
+            scanRate = ljm.eStreamStart(self.handle, scansPerRead, self.n_input_channels, self.aScanList, scanRate)
             print("\nLabjack stream started with a scan rate of %0.0f Hz." % scanRate)
             self.scanRate = scanRate
             self.scansPerRead = scansPerRead
@@ -141,8 +150,8 @@ class Jack():
                 print("Time taken = %f seconds" % (tt))
                 print("LJM Scan Rate = %f scans/second" % (self.scanRate))
                 print("Timed Scan Rate = %f scans/second" % (self.totScans / tt))
-                print("Timed Sample Rate = %f samples/second" % (self.totScans * self.numAddresses / tt))
-                print("Skipped scans = %0.0f" % (self.totSkip / self.numAddresses))
+                print("Timed Sample Rate = %f samples/second" % (self.totScans * self.n_input_channels / tt))
+                print("Skipped scans = %0.0f" % (self.totSkip / self.n_input_channels))
 
             except ljm.LJMError:
                 ljme = sys.exc_info()[1]
@@ -160,12 +169,9 @@ class Jack():
             try:
                 ret = ljm.eStreamRead(self.handle)
                 data = ret[0]
-                scans = len(data) / self.numAddresses
+                scans = len(data) / self.n_input_channels
                 self.totScans += scans
 
-                data_to_send = np.sum(data[::self.numAddresses])
-                data_to_send = '{}'.format(data_to_send)
-                print(data_to_send)
                 # Count the skipped samples which are indicated by -9999 values. Missed
                 # samples occur after a device's stream buffer overflows and are
                 # reported after auto-recover mode ends.
@@ -173,10 +179,11 @@ class Jack():
                 self.totSkip += curSkip
                 
                 print("  Scans Skipped = %0.0f, Scan Backlogs: Device = %i, LJM = "
-                    "%i" % (curSkip/self.numAddresses, ret[1], ret[2]))
+                    "%i" % (curSkip/self.n_input_channels, ret[1], ret[2]))
 
                 if self.socket_target is not None:
                     try:
+                        data_to_send = data # should be changed as appropriate for use
                         data_to_send = bytes(data_to_send,'utf-8')
                         self.client_socket.sendto(data_to_send,('127.0.0.1',self.port))
                         # self.socket_outfile.write(bytes(str(data_to_send) + "\n"),'utf-8')
@@ -187,8 +194,10 @@ class Jack():
 
                 if self.do_record:
                     # print('Writing')
-                    self.record_outfile.write("\n" + str(data))
-                    self.record_outfile.flush()
+                    data_2d = np.asarray(data).reshape((-1, self.n_input_channels))
+                    np.savetxt(self.record_outfile, data_2d, fmt='%.18e', delimiter=',', newline='\n')
+                    # self.record_outfile.write(str(data)[1:-1] + "\n") # [1:-1] removes square brackets
+                    # self.record_outfile.flush()
                 
                 if self.collect_dataQ:
                     self.dataQ.extend(data)
