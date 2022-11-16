@@ -171,56 +171,43 @@ class JFCam:
         self.frame = self.cam.get_array(wait=wait)
 
     def start_preview(self):
+        def preview_callback():
+            while self.do_preview:
+                self.grab_frame()
+                self.fn += 1
+
         self.fn = 0
         self.do_preview = True
-        self.preview_thread = threading.Thread(target=self.preview_callback, daemon=True).start()
+        self.preview_thread = threading.Thread(target=preview_callback, daemon=True).start()
         print("Camera preview started.")
-
-    def preview_callback(self):
-        while self.do_preview:
-            self.grab_frame()
-            self.fn += 1
 
     def stop_preview(self):
         self.do_preview = False
         print("Camera preview ended.")
 
     def start_rec(self):
+        def rec_callback():
+            while self.do_record:
+                self.frame = self.cam.get_array(wait=True)
+                self.img_queue.put(self.frame)
+
+        def rec_writer():
+            print('worker started')
+            while self.do_record:
+                frame = self.img_queue.get(block=True)
+
+                frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+                self.writer.write(frame_color)
+                
         self.img_queue = queue.Queue()
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        # self.video_out_path = '/home/baccuslab/aaa.mp4'
         self.writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
 
         self.fn = 0
         self.do_record = True
-        self.record_thread = threading.Thread(target=self.rec_callback, daemon=True).start()
-        self.worker_thread = threading.Thread(target=self.worker, daemon=True).start()
+        self.record_thread = threading.Thread(target=rec_callback, daemon=True).start()
+        self.writer_thread = threading.Thread(target=rec_writer, daemon=True).start()
         print("Camera record started.")
-         
-    def worker(self):
-        print('worker started')
-        while self.do_record:
-            frame = self.img_queue.get(block=True)
-
-            frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-            self.writer.write(frame_color)
-            
-            # try:
-            #     print(self.img_queue.get().shape)
-            # except:
-            #     pass
-
-    def rec_callback(self):
-        while self.do_record:
-            frame = self.cam.get_array(wait=True)
-            self.img_queue.put(frame)
-
-            # print(self.img_queue)
-            # t = time.time()
-            # frame_color = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
-            # self.writer.write(frame_color)
-            # self.fn += 1
-                # print(self.fn)
     
     def stop_rec(self):
         self.do_record = False
