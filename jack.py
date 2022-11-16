@@ -195,7 +195,7 @@ class Jack():
                 if self.do_record:
                     # print('Writing')
                     data_2d = np.asarray(data).reshape((-1, self.n_input_channels))
-                    np.savetxt(self.record_outfile, data_2d, fmt='%.18e', delimiter=',', newline='\n')
+                    np.savetxt(self.record_outfile, data_2d, fmt='%.18e', newline='\n')
                     # self.record_outfile.write(str(data)[1:-1] + "\n") # [1:-1] removes square brackets
                     # self.record_outfile.flush()
                 
