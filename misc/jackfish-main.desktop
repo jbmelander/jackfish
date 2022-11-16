@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=Jackfish
+Icon=/home/clandinin/src/jackfish/assets/jf.jpg
+Exec=bash -c "source /home/clandinin/venvs/flyvis/bin/activate; /home/clandinin/venvs/flyvis/bin/python /home/clandinin/src/jackfish/main_controller.py"
