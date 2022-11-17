@@ -19,9 +19,9 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.barcode = barcode
 
         # Initialize Labjack
-        self.daq = Jack(serial_number=serial_number)
+        self.daq = Jack(serial_number=serial_number, name=device_name)
 
-        self.setWindowTitle(f'DAQ {device_name} ({self.daq.serial_number})')
+        self.setWindowTitle(f'DAQ {self.daq.name} ({self.daq.serial_number})')
 
         # Parse attrs
         if attrs_json_path is not None:
@@ -96,7 +96,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
     def set_write_path(self, dir, file_name=None):
         self.timer.stop()
         if file_name is None:
-            file_name = f'daq_{self.daq.serial_number}.csv'
+            file_name = f'daq_{self.daq.name}_{self.daq.serial_number}.jfdaqdata'
         self.write_path = os.path.join(dir, file_name)
         print(f"DAQ write path: {self.write_path}")
 

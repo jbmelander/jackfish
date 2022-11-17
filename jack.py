@@ -13,7 +13,9 @@ class Jack():
     Initializes and controls input for Labjack T4/T7.
     '''
     
-    def __init__(self, serial_number=None):
+    def __init__(self, serial_number=None, name=None):
+        self.name = name
+        
         # Store initialization arguments
         self.dataQ = []
         self.collect_dataQ = False
