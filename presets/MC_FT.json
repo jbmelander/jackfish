@@ -1,0 +1,19 @@
+{
+    "main": {
+        "default_dir": "~/Niyathi/jackfish/"
+    },
+    
+    "cameras": {
+        "Fictrac": {
+            "serial_number": "20243355",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/cam_20243355.json"
+        }
+
+    },
+    "DAQs": {
+        "Server": {
+            "serial_number": "440017544",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/daq_440017544.json"
+        }
+    }
+}
