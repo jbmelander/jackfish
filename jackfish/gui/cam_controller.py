@@ -4,7 +4,7 @@ import os
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
-from cam import JFCam
+from jackfish.devices.cameras.flir import FlirCam
 from cam_gui import Ui_CamWindow
 
 class CamUI(QtWidgets.QFrame, Ui_CamWindow):
@@ -17,7 +17,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.attrs_json_path = attrs_json_path
 
         if serial_number is None: serial_number = 0
-        self.cam = JFCam(serial_number=serial_number, attrs_json_fn=attrs_json_path)
+        self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path)
 
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
 
@@ -51,7 +51,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def init_cam(self):
         if self.cam is not None:
             self.cam.close()
-        self.cam = JFCam(serial_number=0) # TODO
+        self.cam = FlirCam(serial_number=0) # TODO
 
     def start(self, record=False):
         self.fn_preview = 0

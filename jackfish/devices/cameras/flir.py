@@ -7,7 +7,7 @@ import cv2
 import json
 from simple_pyspin import Camera
 
-class JFCam:
+class FlirCam:
     def __init__(self, serial_number=0, attrs_json_fn=None):
         '''
         serial_number: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.

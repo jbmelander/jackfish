@@ -8,7 +8,7 @@ import socket, atexit
 import json
 
 #%%
-class Jack():
+class LabJack():
     '''
     Initializes and controls input for Labjack T4/T7.
     '''

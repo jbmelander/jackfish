@@ -7,7 +7,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication
 
-from jack import Jack
+from jackfish.devices.daqs.labjack import LabJack
 from daq_gui import Ui_DAQWindow
 
 class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
@@ -19,7 +19,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.barcode = barcode
 
         # Initialize Labjack
-        self.daq = Jack(serial_number=serial_number, name=device_name)
+        self.daq = LabJack(serial_number=serial_number, name=device_name)
 
         self.setWindowTitle(f'DAQ {self.daq.name} ({self.daq.serial_number})')
 
