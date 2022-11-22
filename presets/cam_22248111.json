@@ -18,6 +18,7 @@
     "LineSelector": "Line1",
     "LineMode": "Output",
     "LineSource": "ExposureActive",
+    "LineInverter": true,
 
     "GainAuto": "Off",
     "Gain": 0.0,
