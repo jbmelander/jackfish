@@ -1,5 +1,4 @@
 {
-"read_chs": ["AIN0", "AIN1", "AIN2", "FIO0", "FIO2"],
-"sample_rate": 5000,
-"trigger_chs": ["FIO1", "FIO3"]
+"read_chs": ["AIN0 <LEFT_PD>", "AIN1 <CENTER_PD>", "AIN2", "FIO0 <RW_A>", "FIO1 <RW_B>"],
+"sample_rate": 5000
 }

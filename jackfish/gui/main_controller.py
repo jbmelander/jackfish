@@ -45,6 +45,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.preview_push.clicked.connect(self.preview)
 
         self.record_push.setCheckable(True)
+        self.record_push.setStyleSheet("background-color : red; color: black;")
         self.record_push.clicked.connect(self.record)
     
         self.daq_init_push.clicked.connect(self.init_daq)
@@ -97,6 +98,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
             # Enable record button
             self.record_push.setEnabled(True)
+            self.record_push.setStyleSheet("background-color: black; color : white")
 
     def set_module_write_paths(self):
         for daqUI in self.daqUIs.values():
@@ -154,6 +156,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     def record(self):
         state = self.record_push.isChecked()
         if state:
+            self.record_push.setStyleSheet('background-color: green')
             if self.preview_push.isChecked(): # preview was on
                 self.preview_push.click()
 
