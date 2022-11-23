@@ -171,12 +171,12 @@ class FlirCam:
 
     def grab_frame(self, wait=True):
         self.frame = self.cam.get_array(wait=wait)
+        self.fn+=1
 
     def start_preview(self):
         def preview_callback():
             while self.do_preview:
                 self.grab_frame()
-                self.fn += 1
 
         self.fn = 0
         self.do_preview = True
@@ -190,7 +190,7 @@ class FlirCam:
     def start_rec(self):
         def rec_callback():
             while self.do_record:
-                self.frame = self.cam.get_array(wait=True)
+                self.grab_frame()
                 self.img_queue.put(self.frame)
 
         def rec_writer():
