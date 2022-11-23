@@ -40,6 +40,8 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.exposure_edit.editingFinished.connect(self.edit_exposure)
         self.exposure_edit.setText('Auto' if self.cam.cam.ExposureAuto == 'Continuous' else f'{self.cam.cam.ExposureTime:.2f}')
 
+        self.fr_edit.returnPressed.connect(self.change_framerate)
+
         self.hist = self.preview.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.lev_changed)
 
@@ -69,6 +71,14 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         else:
             self.cam.stop_preview()
         self.cam.stop()
+
+    def change_framerate(self):
+        new_fr = self.fr_edit.text()
+        new_fr = int(new_fr)
+        
+        self.cam.cam.AcquisitionFrameRate = new_fr
+        print('Changed fr')
+
 
     def set_video_out_path(self, dir, file_name=None):
         self.timer.stop()

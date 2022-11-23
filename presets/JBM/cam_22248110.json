@@ -3,6 +3,7 @@
     "PixelFormat": "Mono8",      
     "AcquisitionFrameRateAuto": "Off",
     "AcquisitionFrameRateEnabled": true,
-    "AcquisitionFrameRate": 20.0
+    "AcquisitionFrameRate": 40.0,
+    "ExposureAuto": "Once"
     }
 }

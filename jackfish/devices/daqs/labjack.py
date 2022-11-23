@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 from datetime import datetime
 import sys
@@ -27,6 +28,7 @@ class LabJack():
         self.deviceType = self.info[0]
         self.serial_number = self.info[2]
         self.print_handle_info()
+
         
         if self.deviceType == ljm.constants.dtT4:
             # LabJack T4 configuration
@@ -167,12 +169,18 @@ class LabJack():
         self.totSkip = 0  # Total skipped samples
 
         self.stream_start_time = datetime.now()
+        t = time.time()
         while self.streaming:
             try:
                 ret = ljm.eStreamRead(self.handle)
                 data = ret[0]
+
+
                 scans = len(data) / self.n_input_channels
                 self.totScans += scans
+
+                print(time.time()-t)
+                t = time.time()
 
                 # Count the skipped samples which are indicated by -9999 values. Missed
                 # samples occur after a device's stream buffer overflows and are

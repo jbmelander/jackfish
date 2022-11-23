@@ -4,6 +4,7 @@
       
     "AcquisitionFrameRateAuto": "Off",
     "AcquisitionFrameRateEnabled": true,
-    "AcquisitionFrameRate": 60.0
+    "AcquisitionFrameRate": 60.0,
+    "VideoMode": "Mode0"
     }
 }

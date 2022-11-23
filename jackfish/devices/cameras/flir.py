@@ -28,6 +28,8 @@ class FlirCam:
         self.get_img_framerate()
         self.stop()
 
+
+
         assert self.dtype[-1] == '8', 'Data should be in proper bit depth'
         
         self.video_out_path = None
@@ -44,20 +46,20 @@ class FlirCam:
             return serial_number
 
 
-    # def gen_cam_attrs_json(self):
-    #     cam = self.cam
+    def gen_cam_attrs_json(self):
+        cam = self.cam
 
-    #     attrs_dict = {}
-    #     for k in cam.camera_attributes.keys():
-    #         print(k)
-    #         if 'power' not in k.lower() and 'pwr' not in k.lower():
-    #             access_info = cam.get_info(k)['access']
-    #             if isinstance(access_info, str) and 'read' in access_info:
-    #                 attrs_dict[k] = cam.get_info(k)['value']
+        attrs_dict = {}
+        for k in cam.camera_attributes.keys():
+            print(k)
+            if 'power' not in k.lower() and 'pwr' not in k.lower():
+                access_info = cam.get_info(k)['access']
+                if isinstance(access_info, str) and 'read' in access_info:
+                    attrs_dict[k] = cam.get_info(k)['value']
 
-    #     out_fn = f"{self.serial_number}_attrs.json" if self.serial_number is not None else "cam_attrs.json"
-    #     with open(out_fn, "w") as outfile:
-    #         json.dump(attrs_dict, outfile)
+        out_fn = f"{self.serial_number}_attrs.json" if self.serial_number is not None else "cam_attrs.json"
+        with open(out_fn, "w") as outfile:
+            json.dump(attrs_dict, outfile)
 
     def gen_cam_doc(self):
         cam = self.cam
