@@ -4,6 +4,7 @@
     "AcquisitionFrameRateAuto": "Off",
     "AcquisitionFrameRateEnabled": true,
     "AcquisitionFrameRate": 40.0,
-    "ExposureAuto": "Once"
-    }
+    "ExposureAuto": "Off",
+    "BlackLevel": 0.0
+}
 }

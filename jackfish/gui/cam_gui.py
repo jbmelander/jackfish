@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/baccuslab/src/jackfish/cam_gui.ui'
+# Form implementation generated from reading ui file '/home/baccuslab/src/jackfish/jackfish/gui/cam_gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -165,12 +165,12 @@ class Ui_CamWindow(object):
         self.preview.setGeometry(QtCore.QRect(20, 20, 451, 271))
         self.preview.setObjectName("preview")
         self.trigger_toggle = QtWidgets.QCheckBox(CamWindow)
-        self.trigger_toggle.setGeometry(QtCore.QRect(622, 200, 16, 23))
+        self.trigger_toggle.setGeometry(QtCore.QRect(622, 240, 16, 23))
         self.trigger_toggle.setText("")
         self.trigger_toggle.setChecked(False)
         self.trigger_toggle.setObjectName("trigger_toggle")
         self.label_3 = QtWidgets.QLabel(CamWindow)
-        self.label_3.setGeometry(QtCore.QRect(492, 160, 81, 40))
+        self.label_3.setGeometry(QtCore.QRect(492, 200, 81, 40))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(13)
@@ -202,7 +202,7 @@ class Ui_CamWindow(object):
         self.fr_edit.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.fr_edit.setObjectName("fr_edit")
         self.label_4 = QtWidgets.QLabel(CamWindow)
-        self.label_4.setGeometry(QtCore.QRect(492, 190, 101, 40))
+        self.label_4.setGeometry(QtCore.QRect(492, 230, 101, 40))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(13)
@@ -210,7 +210,7 @@ class Ui_CamWindow(object):
         self.label_4.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label_4.setObjectName("label_4")
         self.label_2 = QtWidgets.QLabel(CamWindow)
-        self.label_2.setGeometry(QtCore.QRect(492, 130, 81, 40))
+        self.label_2.setGeometry(QtCore.QRect(492, 170, 81, 40))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(13)
@@ -218,7 +218,7 @@ class Ui_CamWindow(object):
         self.label_2.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label_2.setObjectName("label_2")
         self.gain_edit = QtWidgets.QLineEdit(CamWindow)
-        self.gain_edit.setGeometry(QtCore.QRect(592, 140, 91, 25))
+        self.gain_edit.setGeometry(QtCore.QRect(592, 180, 91, 25))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(13)
@@ -226,7 +226,7 @@ class Ui_CamWindow(object):
         self.gain_edit.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.gain_edit.setObjectName("gain_edit")
         self.strobe_edit = QtWidgets.QLineEdit(CamWindow)
-        self.strobe_edit.setGeometry(QtCore.QRect(592, 170, 91, 25))
+        self.strobe_edit.setGeometry(QtCore.QRect(592, 210, 91, 25))
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(13)
@@ -249,7 +249,7 @@ class Ui_CamWindow(object):
         self.init_push.setFont(font)
         self.init_push.setObjectName("init_push")
         self.preview_toggle = QtWidgets.QCheckBox(CamWindow)
-        self.preview_toggle.setGeometry(QtCore.QRect(490, 250, 121, 23))
+        self.preview_toggle.setGeometry(QtCore.QRect(490, 270, 121, 23))
         self.preview_toggle.setChecked(True)
         self.preview_toggle.setObjectName("preview_toggle")
         self.load_attrs_push = QtWidgets.QPushButton(CamWindow)
@@ -259,6 +259,13 @@ class Ui_CamWindow(object):
         font.setPointSize(13)
         self.load_attrs_push.setFont(font)
         self.load_attrs_push.setObjectName("load_attrs_push")
+        self.exposure_push = QtWidgets.QPushButton(CamWindow)
+        self.exposure_push.setGeometry(QtCore.QRect(490, 140, 191, 31))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(10)
+        self.exposure_push.setFont(font)
+        self.exposure_push.setObjectName("exposure_push")
 
         self.retranslateUi(CamWindow)
         QtCore.QMetaObject.connectSlotsByName(CamWindow)
@@ -278,4 +285,5 @@ class Ui_CamWindow(object):
         self.init_push.setText(_translate("CamWindow", "Re-init"))
         self.preview_toggle.setText(_translate("CamWindow", "Show live cam"))
         self.load_attrs_push.setText(_translate("CamWindow", "Load attributes"))
+        self.exposure_push.setText(_translate("CamWindow", "Single Use Auto Exposure"))
 from pyqtgraph import ImageView

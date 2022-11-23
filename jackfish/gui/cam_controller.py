@@ -37,9 +37,13 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.gain_edit.editingFinished.connect(self.edit_gain)
         self.gain_edit.setText('Auto' if self.cam.cam.GainAuto == 'Continuous' else f'{self.cam.cam.Gain:.2f}')
 
-        self.exposure_edit.editingFinished.connect(self.edit_exposure)
-        self.exposure_edit.setText('Auto' if self.cam.cam.ExposureAuto == 'Continuous' else f'{self.cam.cam.ExposureTime:.2f}')
+        self.exposure_edit.returnPressed.connect(self.edit_exposure)
+        self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime)/1000} ms')
 
+        self.exposure_push.setEnabled(True)
+        self.exposure_push.clicked.connect(self.auto_expose)
+
+        self.fr_edit.setText(f'{self.cam.cam.AcquisitionFrameRate}')
         self.fr_edit.returnPressed.connect(self.change_framerate)
 
         self.hist = self.preview.getHistogramWidget()
@@ -108,18 +112,22 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             self.gain_edit.setText(f'{self.cam.cam.Gain:.2f}')
         else:
             self.gain_edit.setText(f'{self.cam.cam.Gain:.2f}')
+    
+    def auto_expose(self):
+        self.cam.cam.ExposureAuto='Once'
+        self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime/1000)} ms')
 
     def edit_exposure(self):
         exposure_txt = self.exposure_edit.text()
-        if exposure_txt.lower()=='auto':
-            self.cam.cam.ExposureAuto = 'Continuous'
-            self.exposure_edit.setText('Auto')
-        elif exposure_txt.isnumeric():
+
+        if exposure_txt.isnumeric():
+            exposure_txt = int(exposure_txt)*1000
+            print(float(exposure_txt))
             self.cam.cam.ExposureAuto = 'Off'
             self.cam.cam.ExposureTime = float(exposure_txt)
-            self.exposure_edit.setText(f'{self.cam.cam.ExposureTime:.2f}')
+            self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime)/1000} ms')
         else:
-            self.exposure_edit.setText(f'{self.cam.cam.ExposureTime:.2f}')
+            self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime)/1000} ms')
 
     def lev_changed(self):
         levels = self.hist.getLevels()

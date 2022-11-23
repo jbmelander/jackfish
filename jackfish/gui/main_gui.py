@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/baccuslab/src/jackfish/main_gui.ui'
+# Form implementation generated from reading ui file '/home/baccuslab/src/jackfish/jackfish/gui/main_gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -276,7 +276,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy)
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap("/home/baccuslab/src/jackfish/assets/jf.jpg"))
+        self.label.setPixmap(QtGui.QPixmap("/home/baccuslab/src/jackfish/jackfish/gui/assets/jf.jpg"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.title_gif_label = QtWidgets.QLabel(self.centralwidget)
