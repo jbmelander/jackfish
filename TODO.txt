@@ -1,1 +1,3 @@
-Enable setting save directory then having subsequent recordings save with incremental titles (001, 002,03...)
+1. Enable setting save directory then having subsequent recordings save with incremental titles (001, 002,03...). This way don't need to reset path every time you want to run another.
+
+2. Strobe settings in Cam window. 

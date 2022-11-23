@@ -2,6 +2,7 @@ import sys
 import os
 
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
 from jackfish.devices.cameras.flir import FlirCam
@@ -15,8 +16,14 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.parent = parent
         self.barcode = barcode
         self.attrs_json_path = attrs_json_path
+        
+        img_path = '../../assets/pach.jpg'
+        self.pachanoi.setPixmap(QPixmap(img_path))
+        self.pachanoi.setScaledContents(True)
+        self.pachanoi.setObjectName("label")
 
         if serial_number is None: serial_number = 0
+
         self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path)
 
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
@@ -26,10 +33,10 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
         self.fn_prev = 0
 
-        self.init_push.setCheckable(True)
-        self.init_push.clicked.connect(self.init_cam)
-        self.load_attrs_push.setCheckable(True)
-        self.load_attrs_push.clicked.connect(self.load_attrs)
+        # self.init_push.setCheckable(True)
+        # self.init_push.clicked.connect(self.init_cam)
+        # self.load_attrs_push.setCheckable(True)
+        # self.load_attrs_push.clicked.connect(self.load_attrs)
 
         self.trigger_toggle.stateChanged.connect(self.toggle_trigger)
         self.trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'On')
@@ -90,10 +97,10 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             file_name = f'cam_{self.cam.serial_number}.mp4'
         self.cam.set_video_out_path(os.path.join(dir, file_name))
 
-    def load_attrs(self):
-        self.attrs_json_path,_ = QFileDialog.getOpenFileName(self, "Open json file", filter="JSON files (*.json)")
-        print(self.attrs_json_path)
-        self.cam.set_cam_attrs_from_json(self.attrs_json_path, n_repeat=3)
+    # def load_attrs(self):
+    #     self.attrs_json_path,_ = QFileDialog.getOpenFileName(self, "Open json file", filter="JSON files (*.json)")
+    #     print(self.attrs_json_path)
+    #     self.cam.set_cam_attrs_from_json(self.attrs_json_path, n_repeat=3)
 
     def toggle_preview(self):
         self.preview_on = self.preview_toggle.isChecked()

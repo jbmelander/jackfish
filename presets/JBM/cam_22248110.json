@@ -1,10 +1,17 @@
 {
 "camera_attrs": {
+    "TriggerMode": "Off",
     "PixelFormat": "Mono8",      
     "AcquisitionFrameRateAuto": "Off",
     "AcquisitionFrameRateEnabled": true,
     "AcquisitionFrameRate": 40.0,
     "ExposureAuto": "Off",
-    "BlackLevel": 0.0
+    "BlackLevel": 0.0,
+    "LineSelector": "Line1",
+    "LineMode": "Output",
+    "LineSource": "ExposureActive",
+    "StrobeDuration": 3000.0
+
 }
+
 }

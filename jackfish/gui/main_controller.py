@@ -17,12 +17,8 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         super(MainUI, self).__init__(parent)
         self.setupUi(self)
         jackfish_dir = os.path.realpath(os.path.dirname(__file__))
-        title_path = os.path.join(jackfish_dir,'../../assets/title.gif')
-        gif = QMovie(title_path)
-        self.title_gif_label.setMovie(gif)
-        gif.start()
         
-        image_dir = os.path.join(jackfish_dir,'../../assets/jf.jpg')
+        image_dir = os.path.join(jackfish_dir,'../../assets/pike.jpg')
         self.label.setPixmap(QPixmap(image_dir))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
@@ -90,7 +86,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.expt_name = ""
             
         if not (self.main_dir == "" or self.expt_name == ""):
-            self.filepath_label.setText(f'{self.main_dir} >>> {self.expt_name}')
+            self.filepath_label.setText(f'{self.main_dir} - {self.expt_name}')
             self.exp_path = os.path.join(self.main_dir,self.expt_name)
             os.makedirs(self.exp_path, exist_ok=True)
 
@@ -175,7 +171,8 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
                 camUI.stop(record=True)
 
             self.record_push.setEnabled(False)
-
+            
+            self.record_push.setStyleSheet("background-color : red;")
             print('Experiment Finished')
 
     def closeEvent(self, event): # do not change name, super override
@@ -193,4 +190,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()
