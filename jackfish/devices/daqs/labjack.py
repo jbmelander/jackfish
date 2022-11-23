@@ -53,7 +53,7 @@ class LabJack():
             # All analog input ranges are +/-1 V, stream settling is 6 
             # and stream resolution index is 0 (default).
             aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX", "AIN_ALL_NEGATIVE_CH"]
-            aValues = [10.0, 6, 0, 199]
+            aValues = [1.0, 6, 0, 199]
 
         # Write the analog inputs' negative channels (when applicable), ranges,
         # stream settling time and stream resolution configuration.
