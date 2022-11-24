@@ -89,11 +89,12 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             else:
                 save_dir = QFileDialog.getExistingDirectory(self,"Select save directory", self.save_dir)
 
-                    
         if save_dir != "" and os.path.isdir(save_dir):
             self.save_dir = save_dir
             self.filepath_label.setText(f'{self.save_dir}')
             self.new_path_set = False
+            self.expt_name_label.setText('')
+            self.expt_name = ""
 
             self.set_expt_push.setEnabled(True)
             self.update_preview_record_push_styles()
