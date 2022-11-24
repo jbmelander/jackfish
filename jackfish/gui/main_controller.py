@@ -9,23 +9,25 @@ from PyQt5.QtGui import QMovie, QPixmap
 from PyQt5.QtCore import QSize
 from cam_controller import CamUI
 from daq_controller import DAQUI
-
 import main_gui
+
+from jackfish.utils import ROOT_DIR
+
 
 class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainUI, self).__init__(parent)
         self.setupUi(self)
-        jackfish_dir = os.path.realpath(os.path.dirname(__file__))
         
-        image_dir = os.path.join(jackfish_dir,'../../assets/pike.jpg')
+        image_dir = os.path.join(ROOT_DIR,'assets/pike.jpg')
         self.label.setPixmap(QPixmap(image_dir))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
 
-        self.main_dir = os.environ['HOME']
+        self.save_dir = os.environ['HOME']
         self.expt_name = ""
-        self.exp_path = os.environ['HOME']
+        self.expt_path = os.environ['HOME']
+        self.new_path_set = False
 
         self.daqUIs = {}
         self.camUIs = {}
@@ -35,14 +37,17 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         #### UI ####
         self.load_preset_push.clicked.connect(self.load_preset)
-        self.set_path_push.clicked.connect(self.query_and_set_module_write_paths)
+        self.set_save_dir_push.clicked.connect(self.set_save_dir)
+        self.set_expt_push.clicked.connect(self.set_experiment_name)
+        self.set_expt_push.setEnabled(False)
 
         self.preview_push.setCheckable(True)
         self.preview_push.clicked.connect(self.preview)
 
         self.record_push.setCheckable(True)
-        self.record_push.setStyleSheet("background-color : red; color: black;")
         self.record_push.clicked.connect(self.record)
+        
+        self.update_preview_record_push_styles()
     
         self.daq_init_push.clicked.connect(self.init_daq)
         self.cam_init_push.clicked.connect(self.init_cam)
@@ -51,8 +56,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         if init:
             preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
         else:
-            jackfish_dir = os.path.realpath(os.path.dirname(__file__))
-            presets_dir = os.path.join(jackfish_dir,'presets')
+            presets_dir = os.path.join(ROOT_DIR,'presets')
 
             json_fn, _ = QFileDialog.getOpenFileName(self, "Select preset json file.", presets_dir, "JSON files (*.json)")
 
@@ -64,7 +68,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         main_presets = preset_dict['main']
         if "default_dir" in main_presets.keys():
-            self.main_dir = main_presets['default_dir']
+            self.save_dir = main_presets['default_dir']
 
         self.cam_presets = preset_dict['cameras']
         self.cam_names = list(self.cam_presets.keys())
@@ -77,30 +81,69 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.cam_names_drop.clear()
         self.cam_names_drop.addItems(self.cam_names)
 
-    def query_and_set_module_write_paths(self):
+    def set_save_dir(self):
         # options = QFileDialog.Options()
-        self.main_dir = QFileDialog.getExistingDirectory(self,"Select save directory")
-        
-        self.expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
+        self.save_dir = QFileDialog.getExistingDirectory(self,"Select save directory")
+                    
+        if self.save_dir != "":
+            self.filepath_label.setText(f'{self.save_dir}')
+            self.new_path_set = False
+
+            self.set_expt_push.setEnabled(True)
+            self.update_preview_record_push_styles()
+    
+    def set_experiment_name(self):
+        expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
         if not ok:
-            self.expt_name = ""
-            
-        if not (self.main_dir == "" or self.expt_name == ""):
-            self.filepath_label.setText(f'{self.main_dir} - {self.expt_name}')
-            self.exp_path = os.path.join(self.main_dir,self.expt_name)
-            os.makedirs(self.exp_path, exist_ok=True)
+            return                        
+        if expt_name == "":
+            return
+        
+        self.expt_name = expt_name
+
+        if not (self.save_dir == "" or self.expt_name == ""):
+            self.expt_name_label.setText(f'{self.expt_name}')
+            self.expt_path = os.path.join(self.save_dir, self.expt_name)
+            os.makedirs(self.expt_path, exist_ok=True)
 
             self.set_module_write_paths()
 
+            self.new_path_set = True
+
             # Enable record button
+            self.update_preview_record_push_styles()
+
+    def update_preview_record_push_styles(self):
+        # Preview Push
+        if self.record_push.isChecked(): # If recording...
+            self.preview_push.setEnabled(False)
+            self.preview_push.setStyleSheet("background-color: grey")
+        elif self.preview_push.isChecked(): # If previewing...
+            self.preview_push.setEnabled(True)
+            self.preview_push.setStyleSheet("background-color: red")
+        elif len(self.daqUIs) > 0 or len(self.camUIs) > 0: # If a camUI or daqUI is up...
+            self.preview_push.setEnabled(True)
+            self.preview_push.setStyleSheet("background-color: green")
+        else:
+            self.preview_push.setEnabled(False)
+            self.preview_push.setStyleSheet("background-color: grey")
+
+        # Record Push
+        if self.record_push.isChecked(): # If recording...
             self.record_push.setEnabled(True)
-            self.record_push.setStyleSheet("background-color: black; color : white")
+            self.record_push.setStyleSheet("background-color: red")
+        elif (len(self.daqUIs) > 0 or len(self.camUIs) > 0) and self.new_path_set: # If a camUI or daqUI is up and path is set...
+            self.record_push.setEnabled(True)
+            self.record_push.setStyleSheet("background-color: green")
+        else:
+            self.record_push.setEnabled(False)
+            self.record_push.setStyleSheet("background-color: grey")
 
     def set_module_write_paths(self):
         for daqUI in self.daqUIs.values():
-            daqUI.set_write_path(dir=self.exp_path)
+            daqUI.set_write_path(dir=self.expt_path)
         for camUI in self.camUIs.values():
-            camUI.set_video_out_path(dir=self.exp_path)
+            camUI.set_video_out_path(dir=self.expt_path)
 
     def init_daq(self):
         daq_drop_index = self.daq_names_drop.currentIndex()
@@ -112,9 +155,11 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         barcode = random.randint(0, 2**31-1)
         daqUI = DAQUI(serial_number=daq_serial_number, device_name=daq_name, attrs_json_path=daq_attrs_json, parent=self, barcode=barcode)
-        daqUI.set_write_path(dir=self.exp_path)
+        daqUI.set_write_path(dir=self.expt_path)
         daqUI.show()
         self.daqUIs[barcode] = daqUI
+
+        self.update_preview_record_push_styles()
 
     def init_cam(self):
         cam_drop_index = self.cam_names_drop.currentIndex()
@@ -126,9 +171,11 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         barcode = random.randint(0, 2**31-1)
         camUI = CamUI(serial_number=cam_serial_number, device_name=cam_name, attrs_json_path=cam_attrs_json, parent=self, barcode=barcode)
-        camUI.set_video_out_path(dir=self.exp_path)
+        camUI.set_video_out_path(dir=self.expt_path)
         camUI.show()
         self.camUIs[barcode] = camUI
+
+        self.update_preview_record_push_styles()
 
     def preview(self):
         state = self.preview_push.isChecked()
@@ -139,20 +186,21 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             for camUI in self.camUIs.values():
                 camUI.start(record=False)
 
+            self.update_preview_record_push_styles()
             print("Preview Started")
         else: 
             for daqUI in self.daqUIs.values():
                 daqUI.stop()
 
             for camUI in self.camUIs.values():
-                camUI.stop(record=False)
+                camUI.stop()
 
+            self.update_preview_record_push_styles()
             print("Preview Finished")
 
     def record(self):
         state = self.record_push.isChecked()
         if state:
-            self.record_push.setStyleSheet('background-color: green')
             if self.preview_push.isChecked(): # preview was on
                 self.preview_push.click()
 
@@ -162,18 +210,21 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             for camUI in self.camUIs.values():
                 camUI.start(record=True)
 
+            self.update_preview_record_push_styles()
             print('Experiment Started')
         else:
             for daqUI in self.daqUIs.values():
                 daqUI.stop()
 
             for camUI in self.camUIs.values():
-                camUI.stop(record=True)
+                camUI.stop()
 
-            self.record_push.setEnabled(False)
-            
-            self.record_push.setStyleSheet("background-color : red;")
+            self.new_path_set = False
+            self.update_preview_record_push_styles()
             print('Experiment Finished')
+
+    def child_close_event(self):
+        self.update_preview_record_push_styles()
 
     def closeEvent(self, event): # do not change name, super override
         for camUI in list(self.camUIs.values()): #list avoids runtime error of dict changing size during close

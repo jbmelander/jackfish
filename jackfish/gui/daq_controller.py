@@ -188,6 +188,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.daq.close()
         if self.barcode is not None:
             self.parent.daqUIs.pop(self.barcode)
+        self.parent.child_close_event()
 
 def main():
     app = QApplication(sys.argv)
