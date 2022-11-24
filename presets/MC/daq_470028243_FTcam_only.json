@@ -1,0 +1,6 @@
+{
+"read_chs": ["AIN0 <frame_monitor_R>", "AIN2 <frame_monitor_C>", "AIN4 <frame_monitor_L>", "FIO0 <cam_strobe_Fictrac>"],
+"sample_rate": 5000,
+"trigger_chs": [],
+"labjack_settings": {"AIN_ALL_RANGE": 10.0}
+}

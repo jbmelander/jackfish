@@ -18,11 +18,6 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.parent = parent
         self.barcode = barcode
 
-        # Initialize Labjack
-        self.daq = LabJack(serial_number=serial_number, name=device_name)
-
-        self.setWindowTitle(f'DAQ {self.daq.name} ({self.daq.serial_number})')
-
         # Parse attrs
         if attrs_json_path is not None:
             with open(attrs_json_path, 'r') as f:
@@ -42,6 +37,14 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
                 if isinstance(trigger_chs, list):
                     trigger_chs = ", ".join(trigger_chs)
                 self.trigger_chan_edit.setText(trigger_chs)
+
+            if 'labjack_settings' in attrs_dict.keys():
+                labjack_settings = attrs_dict['labjack_settings']
+
+        # Initialize Labjack
+        self.daq = LabJack(serial_number=serial_number, name=device_name, settings_to_write=labjack_settings)
+
+        self.setWindowTitle(f'DAQ {self.daq.name} ({self.daq.serial_number})')
 
         # Set Labjack Scanrate
         self.sr_edit.editingFinished.connect(self.set_scanrate)

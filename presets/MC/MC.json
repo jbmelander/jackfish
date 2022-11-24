@@ -17,7 +17,7 @@
     "DAQs": {
         "Main": {
             "serial_number": "470028243",
-            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/daq_470028243.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/daq_470028243_FTcam_only.json"
         }
     }
 }

@@ -14,7 +14,7 @@ class LabJack():
     Initializes and controls input for Labjack T4/T7.
     '''
     
-    def __init__(self, serial_number=None, name=None):
+    def __init__(self, serial_number=None, name=None, settings_to_write=None):
         self.name = name
         
         # Store initialization arguments
@@ -33,14 +33,14 @@ class LabJack():
         if self.deviceType == ljm.constants.dtT4:
             # LabJack T4 configuration
 
+            # Configure FIO4 to FIO7 as digital I/O.
+            ljm.eWriteName(self.handle, "DIO_INHIBIT", 0xFFF0F)
+            ljm.eWriteName(self.handle, "DIO_ANALOG_ENABLE", 0x00000)
+
             # All analog input ranges are +/-1 V, stream settling is 0 (default) and
             # stream resolution index is 0 (default).
             aNames = ["AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
             aValues = [10.0, 0, 0]
-
-            # Configure FIO4 to FIO7 as digital I/O.
-            ljm.eWriteName(self.handle, "DIO_INHIBIT", 0xFFF0F)
-            ljm.eWriteName(self.handle, "DIO_ANALOG_ENABLE", 0x00000)
         else:
             # LabJack T7 and other devices configuration
 
@@ -59,6 +59,13 @@ class LabJack():
         # stream settling time and stream resolution configuration.
         numFrames = len(aNames)
         ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
+
+        # Write additional settings from initialization argument
+        if settings_to_write is not None:
+            aNames = list(settings_to_write.keys())
+            aValues = list(settings_to_write.values())
+            numFrames = len(aNames)
+            ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
 
     def write(self, names, vals):
         ljm.eWriteNames(self.handle, len(names), names, vals)
