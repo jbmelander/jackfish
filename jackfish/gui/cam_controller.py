@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from jackfish.devices.cameras.flir import FlirCam
 from cam_gui import Ui_CamWindow
 
+from jackfish.utils import ROOT_DIR
+
 class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def __init__(self, serial_number=None, device_name=None, attrs_json_path=None, parent=None, barcode=None):
         super(CamUI, self).__init__(None)
@@ -16,8 +18,10 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.parent = parent
         self.barcode = barcode
         self.attrs_json_path = attrs_json_path
+
+        self.recording = False
         
-        img_path = '../../assets/pach.jpg'
+        img_path = os.path.join(ROOT_DIR, 'assets/pach.jpg')
         self.pachanoi.setPixmap(QPixmap(img_path))
         self.pachanoi.setScaledContents(True)
         self.pachanoi.setObjectName("label")
@@ -50,7 +54,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.exposure_push.setEnabled(True)
         self.exposure_push.clicked.connect(self.auto_expose)
 
-        self.fr_edit.setText(f'{self.cam.cam.AcquisitionFrameRate}')
+        self.fr_edit.setText(f'{self.cam.framerate}')
         self.fr_edit.returnPressed.connect(self.change_framerate)
 
         self.hist = self.preview.getHistogramWidget()
@@ -72,13 +76,15 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.cam.start()
         if record:
             self.cam.start_rec()
+            self.recording = True
         else:
             self.cam.start_preview()
 
-    def stop(self, record=False):
+    def stop(self):
         self.timer.stop()
-        if record:
+        if self.recording:
             self.cam.stop_rec()
+            self.recording = False
         else:
             self.cam.stop_preview()
         self.cam.stop()
@@ -87,7 +93,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         new_fr = self.fr_edit.text()
         new_fr = int(new_fr)
         
-        self.cam.cam.AcquisitionFrameRate = new_fr
+        self.cam.set_cam_attr('AcquisitionFrameRate', new_fr)
         print('Changed fr')
 
 
@@ -121,20 +127,20 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             self.gain_edit.setText(f'{self.cam.cam.Gain:.2f}')
     
     def auto_expose(self):
-        self.cam.cam.ExposureAuto='Once'
-        self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime/1000)} ms')
+        self.cam.set_cam_attr('ExposureAuto', 'Once')
+        self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f} ms')
 
     def edit_exposure(self):
         exposure_txt = self.exposure_edit.text()
 
         if exposure_txt.isnumeric():
-            exposure_txt = int(exposure_txt)*1000
-            print(float(exposure_txt))
-            self.cam.cam.ExposureAuto = 'Off'
-            self.cam.cam.ExposureTime = float(exposure_txt)
-            self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime)/1000} ms')
+            new_exposure = float(exposure_txt*1000)
+            print(new_exposure)
+            self.cam.set_cam_attr('ExposureAuto', 'Off')
+            self.cam.set_cam_attr('ExposureTime', new_exposure)
+            self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f} ms')
         else:
-            self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime)/1000} ms')
+            self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f} ms')
 
     def lev_changed(self):
         levels = self.hist.getLevels()
@@ -154,6 +160,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.cam.close()
         if self.barcode is not None:
             self.parent.camUIs.pop(self.barcode)
+        self.parent.child_close_event()
 
 def main():
     app = QApplication(sys.argv)
