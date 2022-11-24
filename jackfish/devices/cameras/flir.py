@@ -89,6 +89,12 @@ class FlirCam:
 
         print(f'Trying to write {attr_name}...')
 
+        restore_trigger_mode = False
+        if attr_name == 'AcquisitionFrameRate' and self.cam.__getattr__('TriggerMode') == 'On':
+            print(f'Temporarily turning off TriggerMode to set AcquisitionFrameRate')
+            self.set_cam_attr('TriggerMode', 'Off')
+            restore_trigger_mode = True
+
         # check that attr_name is in cam.camera_attributes
         if attr_name not in cam.camera_attributes.keys():
             print('Attribute not in camera.')
@@ -124,6 +130,11 @@ class FlirCam:
         
         print('Setting attribute.')
         cam.__setattr__(attr_name, attr_val)
+
+        if restore_trigger_mode:
+            print(f'Restoring TriggerMode.')
+            self.set_cam_attr('TriggerMode', 'On')
+
         return cam.__getattr__(attr_name)
 
     def start(self, release_trigger_mode=True):
