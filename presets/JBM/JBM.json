@@ -1,6 +1,6 @@
 {
     "main": {
-        "default_dir": "~/src/jackfish/"
+        "save_dir": "~/src/jackfish/"
     },
     
     "cameras": {

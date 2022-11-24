@@ -4,7 +4,7 @@ import random
 import json
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog
+from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QMessageBox
 from PyQt5.QtGui import QMovie, QPixmap
 from PyQt5.QtCore import QSize
 from cam_controller import CamUI
@@ -32,12 +32,9 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.daqUIs = {}
         self.camUIs = {}
 
-        #### Import presets ####
-        self.load_preset(init=True)
-
         #### UI ####
         self.load_preset_push.clicked.connect(self.load_preset)
-        self.set_save_dir_push.clicked.connect(self.set_save_dir)
+        self.set_save_dir_push.clicked.connect(lambda: self.set_save_dir(save_dir=None))
         self.set_expt_push.clicked.connect(self.set_experiment_name)
         self.set_expt_push.setEnabled(False)
 
@@ -51,6 +48,9 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     
         self.daq_init_push.clicked.connect(self.init_daq)
         self.cam_init_push.clicked.connect(self.init_cam)
+
+        #### Import presets ####
+        self.load_preset(init=True)
 
     def load_preset(self, init=False):
         if init:
@@ -67,8 +67,8 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
                     preset_dict = json.load(f)
 
         main_presets = preset_dict['main']
-        if "default_dir" in main_presets.keys():
-            self.save_dir = main_presets['default_dir']
+        if "save_dir" in main_presets.keys():
+            self.set_save_dir(save_dir=main_presets['save_dir'])
 
         self.cam_presets = preset_dict['cameras']
         self.cam_names = list(self.cam_presets.keys())
@@ -81,11 +81,17 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.cam_names_drop.clear()
         self.cam_names_drop.addItems(self.cam_names)
 
-    def set_save_dir(self):
+    def set_save_dir(self, save_dir=None):
         # options = QFileDialog.Options()
-        self.save_dir = QFileDialog.getExistingDirectory(self,"Select save directory")
+        if save_dir is None:
+            if self.save_dir is None:
+                save_dir = QFileDialog.getExistingDirectory(self,"Select save directory")
+            else:
+                save_dir = QFileDialog.getExistingDirectory(self,"Select save directory", self.save_dir)
+
                     
-        if self.save_dir != "":
+        if save_dir != "" and os.path.isdir(save_dir):
+            self.save_dir = save_dir
             self.filepath_label.setText(f'{self.save_dir}')
             self.new_path_set = False
 
@@ -93,10 +99,17 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.update_preview_record_push_styles()
     
     def set_experiment_name(self):
-        expt_name,ok = QInputDialog.getText(self,'Enter experiment name','Experiment name:')
+        expt_name,ok = QInputDialog.getText(self,'Enter unique experiment name','Experiment name:')
         if not ok:
-            return                        
+            return
         if expt_name == "":
+            return
+
+        if expt_name in os.listdir(self.save_dir):
+            msg = QMessageBox()
+            msg.setWindowTitle("Redundant experiment name!")
+            msg.setText(f"'{expt_name}' already exists as an experiment name in {self.save_dir}.")
+            msg.exec_()
             return
         
         self.expt_name = expt_name
@@ -104,7 +117,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         if not (self.save_dir == "" or self.expt_name == ""):
             self.expt_name_label.setText(f'{self.expt_name}')
             self.expt_path = os.path.join(self.save_dir, self.expt_name)
-            os.makedirs(self.expt_path, exist_ok=True)
+            os.makedirs(self.expt_path, exist_ok=False)
 
             self.set_module_write_paths()
 

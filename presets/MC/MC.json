@@ -1,6 +1,6 @@
 {
     "main": {
-        "default_dir": "~/Niyathi/jackfish/"
+        "save_dir": "/home/clandinin/Niyathi/fortyhr_data/"
     },
     
     "cameras": {
