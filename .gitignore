@@ -131,6 +131,6 @@ dmypy.json
 *.swp
 
 # Automatically generated gui.py files
-gui/cam_gui.py
-gui/daq_gui.py
-gui/main_gui.py
+jackfish/gui/cam_gui.py
+jackfish/gui/daq_gui.py
+jackfish/gui/main_gui.py
