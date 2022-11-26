@@ -10,6 +10,9 @@ from PyQt5.QtWidgets import QApplication
 from jackfish.devices.daqs.labjack import LabJack
 from daq_gui import Ui_DAQWindow
 
+from jackfish import utils
+from jackfish.utils import Status
+
 class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
     def __init__(self, serial_number=None, device_name=None, attrs_json_path=None, parent=None, barcode=None):
         super(DAQUI, self).__init__(None)
@@ -17,6 +20,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
         self.parent = parent
         self.barcode = barcode
+
+        self.status = Status.STANDBY
 
         # Parse attrs
         if attrs_json_path is not None:
@@ -43,6 +48,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
         # Initialize Labjack
         self.daq = LabJack(serial_number=serial_number, name=device_name, settings_to_write=labjack_settings)
+        self.serial_number = self.daq.serial_number
 
         self.setWindowTitle(f'DAQ {self.daq.name} ({self.daq.serial_number})')
 
@@ -85,16 +91,25 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.timer.timeout.connect(self.preview_updater)
 
     def start(self, record=False):
+        if self.status != Status.STANDBY:
+            utils.message_window("Error", "Currently recording or previewing.")
         self.timer.start()
         if record:
+            self.status = Status.RECORDING
             self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15)
             # self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15, socket_target=(None,25025))
         else:
+            self.status = Status.PREVIEWING
             self.daq.start_stream(do_record=False, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15)
 
+        self.update_ui()
+
     def stop(self):
+        if self.status == Status.STANDBY:
+            utils.message_window("Error", "Already on standby.")
         self.timer.stop()
         self.daq.stop_stream()
+        self.status = Status.STANDBY
 
     def set_write_path(self, dir, file_name=None):
         self.timer.stop()
@@ -102,6 +117,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
             file_name = f'daq_{self.daq.name}_{self.daq.serial_number}.jfdaqdata'
         self.write_path = os.path.join(dir, file_name)
         print(f"DAQ write path: {self.write_path}")
+
+        self.update_ui()
 
     def set_scanrate(self):
         self.scanrate = int(self.sr_edit.text())
@@ -187,11 +204,31 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         time.sleep(0.05)
         self.daq.write(self.trigger_chans, (write_states*0).tolist())
 
+    def update_ui(self):
+        if self.status == Status.RECORDING: # If recording...
+            pass
+        elif self.status == Status.PREVIEWING: # If previewing...
+            pass
+        elif self.status == Status.STANDBY: # If standby...
+            pass
+        else:
+            utils.message_window(text="Invalid status.")
+
     def closeEvent(self, event): # do not change name, super override
-        self.daq.close()
-        if self.barcode is not None:
-            self.parent.daqUIs.pop(self.barcode)
-        self.parent.child_close_event()
+        if self.status == Status.RECORDING: # If recording...
+            event.ignore()
+        elif self.status == Status.PREVIEWING: # If previewing...
+            event.ignore()
+        elif self.status == Status.STANDBY: # If standby...
+            self.daq.close()
+            self.parent.child_close_event(self.barcode)
+        else:
+            utils.message_window(text="Invalid status.")
+
+        # if self.status != Status.STANDBY:
+        #     self.stop()
+        # self.daq.close()
+        # self.parent.child_close_event(self.barcode)
 
 def main():
     app = QApplication(sys.argv)

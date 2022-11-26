@@ -8,7 +8,8 @@ from PyQt5.QtWidgets import QApplication, QFileDialog
 from jackfish.devices.cameras.flir import FlirCam
 from cam_gui import Ui_CamWindow
 
-from jackfish.utils import ROOT_DIR
+from jackfish import utils
+from jackfish.utils import Status
 
 class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def __init__(self, serial_number=None, device_name=None, attrs_json_path=None, parent=None, barcode=None):
@@ -19,9 +20,9 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.barcode = barcode
         self.attrs_json_path = attrs_json_path
 
-        self.recording = False
+        self.status = Status.STANDBY
         
-        img_path = os.path.join(ROOT_DIR, 'assets/pach.jpg')
+        img_path = os.path.join(utils.ROOT_DIR, 'assets/pach.jpg')
         self.pachanoi.setPixmap(QPixmap(img_path))
         self.pachanoi.setScaledContents(True)
         self.pachanoi.setObjectName("label")
@@ -29,7 +30,8 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if serial_number is None: serial_number = 0
 
         self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path)
-
+        self.serial_number = self.cam.serial_number
+        
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
 
         self.timer = QtCore.QTimer()
@@ -71,23 +73,30 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.cam = FlirCam(serial_number=0) # TODO
 
     def start(self, record=False):
+        if self.status != Status.STANDBY:
+            utils.message_window("Error", "Currently recording or previewing.")
         self.fn_preview = 0
         self.timer.start()
         self.cam.start()
         if record:
             self.cam.start_rec()
-            self.recording = True
+            self.status = Status.RECORDING
         else:
             self.cam.start_preview()
+            self.status = Status.PREVIEWING
+        self.update_ui()
 
     def stop(self):
+        if self.status == Status.STANDBY:
+            utils.message_window("Error", "Already on standby.")
         self.timer.stop()
-        if self.recording:
+        if self.status == Status.RECORDING:
             self.cam.stop_rec()
-            self.recording = False
-        else:
+        elif self.status == Status.PREVIEWING:
             self.cam.stop_preview()
         self.cam.stop()
+        self.status = Status.STANDBY
+        self.update_ui()
 
     def change_framerate(self):
         new_fr = self.fr_edit.text()
@@ -96,8 +105,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.cam.set_cam_attr('AcquisitionFrameRate', new_fr)
         print('Changed fr')
 
-
-    def set_video_out_path(self, dir, file_name=None):
+    def set_write_path(self, dir, file_name=None):
         self.timer.stop()
         if file_name is None:
             file_name = f'cam_{self.cam.serial_number}.mp4'
@@ -156,11 +164,31 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             self.preview.setLevels(self.levels[0],self.levels[1])
             self.fn_preview = self.cam.fn
 
+    def update_ui(self):
+        if self.status == Status.RECORDING: # If recording...
+            pass
+        elif self.status == Status.PREVIEWING: # If previewing...
+            pass
+        elif self.status == Status.STANDBY: # If standby...
+            pass
+        else:
+            utils.message_window(text="Invalid status.")
+
     def closeEvent(self, event): # do not change name, super override
-        self.cam.close()
-        if self.barcode is not None:
-            self.parent.camUIs.pop(self.barcode)
-        self.parent.child_close_event()
+        if self.status == Status.RECORDING: # If recording...
+            event.ignore()
+        elif self.status == Status.PREVIEWING: # If previewing...
+            event.ignore()
+        elif self.status == Status.STANDBY: # If standby...
+            self.cam.close()
+            self.parent.child_close_event(self.barcode)
+        else:
+            utils.message_window(text="Invalid status.")
+
+        # if self.status != Status.STANDBY:
+        #     self.stop()
+        # self.cam.close()
+        # self.parent.child_close_event(self.barcode)
 
 def main():
     app = QApplication(sys.argv)
