@@ -12,6 +12,7 @@ from jackfish import utils
 from jackfish.utils import Status
 
 class CamUI(QtWidgets.QFrame, Ui_CamWindow):
+
     def __init__(self, serial_number=None, device_name=None, attrs_json_path=None, parent=None, barcode=None):
         super(CamUI, self).__init__(None)
         self.setupUi(self)
@@ -66,6 +67,8 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
         self.preview_toggle.stateChanged.connect(self.toggle_preview)
         self.toggle_preview()
+
+        self.resizeEvent(None)
 
     def init_cam(self):
         if self.cam is not None:
@@ -164,6 +167,19 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             self.preview.setLevels(self.levels[0],self.levels[1])
             self.fn_preview = self.cam.fn
 
+    def resizeEvent(self, event):
+        frame_size = self.frameGeometry()
+        frame_width = frame_size.width ()
+        frame_height = frame_size.height()
+
+        preview_width = frame_width-240
+        preview_height = frame_height-60
+        
+        self.preview.setGeometry(QtCore.QRect(10, 10, preview_width, preview_height))
+        self.control_frame.setGeometry(QtCore.QRect(preview_width+20, 10, self.control_frame.width(), preview_height))
+
+        QtWidgets.QFrame.resizeEvent(self, event)
+        
     def update_ui(self):
         if self.status == Status.RECORDING: # If recording...
             pass
