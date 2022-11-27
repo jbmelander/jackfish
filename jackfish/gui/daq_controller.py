@@ -5,7 +5,7 @@ import json
 import numpy as np
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QFileDialog
 
 from jackfish.devices.daqs.labjack import LabJack
 from daq_gui import Ui_DAQWindow
@@ -23,53 +23,30 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
         self.status = Status.STANDBY
 
-        # Parse attrs
-        if attrs_json_path is not None:
-            with open(attrs_json_path, 'r') as f:
-                attrs_dict = json.load(f)
-
-            if 'sample_rate' in attrs_dict.keys():
-                self.sr_edit.setText(str(attrs_dict['sample_rate']))
-
-            if 'read_chs' in attrs_dict.keys():
-                read_chs = attrs_dict['read_chs']
-                if isinstance(read_chs, list):
-                    read_chs = ", ".join(read_chs)
-                self.read_chan_edit.setText(read_chs)
-            
-            if 'trigger_chs' in attrs_dict.keys():
-                trigger_chs = attrs_dict['trigger_chs']
-                if isinstance(trigger_chs, list):
-                    trigger_chs = ", ".join(trigger_chs)
-                self.trigger_chan_edit.setText(trigger_chs)
-
-            if 'labjack_settings' in attrs_dict.keys():
-                labjack_settings = attrs_dict['labjack_settings']
-
         # Initialize Labjack
-        self.daq = LabJack(serial_number=serial_number, name=device_name, settings_to_write=labjack_settings)
+        self.daq = LabJack(serial_number=serial_number, name=device_name)
         self.serial_number = self.daq.serial_number
 
+        ### UI ###
         self.setWindowTitle(f'DAQ {self.daq.name} ({self.daq.serial_number})')
-
+        # Parse attributes
+        self.load_preset_push.clicked.connect(lambda: self.parse_attrs_json(attrs_json_path=None))
         # Set Labjack Scanrate
         self.sr_edit.editingFinished.connect(self.set_scanrate)
-        self.set_scanrate()
-
         # Labjack Scan channels
         self.read_chan_edit.editingFinished.connect(self.set_chans)
-        self.set_chans()
-
         # Set Labjack Trigger channels
         self.trigger_chan_edit.editingFinished.connect(self.set_trigger_chans)
-        self.set_trigger_chans()
-
         # LJ Cam Trigger button
         self.trigger_push.clicked.connect(self.trigger)
-
-
         # Labjack preview drop change
         self.chan_preview_drop.currentIndexChanged.connect(self.set_chan_preview)
+        ###
+
+        self.parse_attrs_json(attrs_json_path)
+        self.set_scanrate()
+        self.set_chans()
+        self.set_trigger_chans()
 
         # Write path
         self.write_path = ""
@@ -89,6 +66,45 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.preview_updater)
+
+        self.update_ui()
+
+    def parse_attrs_json(self, attrs_json_path=None):
+        if attrs_json_path is None:
+            presets_dir = os.path.join(utils.ROOT_DIR,'presets')
+
+            attrs_json_path, _ = QFileDialog.getOpenFileName(self, "Select DAQ preset json file.", presets_dir, "JSON files (*.json)")
+
+            if attrs_json_path == "":
+                return
+
+        if attrs_json_path is not None:
+            with open(attrs_json_path, 'r') as f:
+                attrs_dict = json.load(f)
+
+            if 'sample_rate' in attrs_dict.keys():
+                self.sr_edit.setText(str(attrs_dict['sample_rate']))
+                self.set_scanrate()
+
+            if 'read_chs' in attrs_dict.keys():
+                read_chs = attrs_dict['read_chs']
+                if isinstance(read_chs, list):
+                    read_chs = ", ".join(read_chs)
+                self.read_chan_edit.setText(read_chs)
+                self.set_chans()
+            
+            if 'trigger_chs' in attrs_dict.keys():
+                trigger_chs = attrs_dict['trigger_chs']
+                if isinstance(trigger_chs, list):
+                    trigger_chs = ", ".join(trigger_chs)
+                self.trigger_chan_edit.setText(trigger_chs)
+                self.set_trigger_chans()
+
+            if 'labjack_settings' in attrs_dict.keys():
+                labjack_settings = attrs_dict['labjack_settings']
+                # Write additional settings from attrs_json
+                if labjack_settings is not None:
+                    self.daq.set_attrs(labjack_settings)
 
     def start(self, record=False):
         if self.status != Status.STANDBY:
@@ -110,6 +126,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.timer.stop()
         self.daq.stop_stream()
         self.status = Status.STANDBY
+
+        self.update_ui()
 
     def set_write_path(self, dir, file_name=None):
         self.timer.stop()
@@ -206,11 +224,22 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
     def update_ui(self):
         if self.status == Status.RECORDING: # If recording...
-            pass
+            self.load_preset_push.setEnabled(False)
+            self.sr_edit.setEnabled(False)
+            self.read_chan_edit.setEnabled(False)
+            self.trigger_chan_edit.setEnabled(False)
+
         elif self.status == Status.PREVIEWING: # If previewing...
-            pass
+            self.load_preset_push.setEnabled(False)
+            self.sr_edit.setEnabled(False)
+            self.read_chan_edit.setEnabled(False)
+            self.trigger_chan_edit.setEnabled(False)
+
         elif self.status == Status.STANDBY: # If standby...
-            pass
+            self.load_preset_push.setEnabled(True)
+            self.sr_edit.setEnabled(True)
+            self.read_chan_edit.setEnabled(True)
+            self.trigger_chan_edit.setEnabled(True)
         else:
             utils.message_window(text="Invalid status.")
 

@@ -14,7 +14,7 @@ class LabJack():
     Initializes and controls input for Labjack T4/T7.
     '''
     
-    def __init__(self, serial_number=None, name=None, settings_to_write=None):
+    def __init__(self, serial_number=None, name=None):
         self.name = name
         
         # Store initialization arguments
@@ -29,7 +29,6 @@ class LabJack():
         self.serial_number = self.info[2]
         self.print_handle_info()
 
-        
         if self.deviceType == ljm.constants.dtT4:
             # LabJack T4 configuration
 
@@ -60,12 +59,10 @@ class LabJack():
         numFrames = len(aNames)
         ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
 
-        # Write additional settings from initialization argument
-        if settings_to_write is not None:
-            aNames = list(settings_to_write.keys())
-            aValues = list(settings_to_write.values())
-            numFrames = len(aNames)
-            ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
+    def set_attrs(self, attrs_dict):
+        aNames = list(attrs_dict.keys())
+        aValues = list(attrs_dict.values())
+        self.write(aNames, aValues)
 
     def write(self, names, vals):
         ljm.eWriteNames(self.handle, len(names), names, vals)

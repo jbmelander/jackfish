@@ -548,7 +548,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="init_push">
+  <widget class="QPushButton" name="load_preset_push">
    <property name="geometry">
     <rect>
      <x>370</x>
@@ -564,7 +564,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Re-init</string>
+    <string>Load Preset</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
