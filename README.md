@@ -1,8 +1,6 @@
 # jackfish
-
-----
-1. Installation and Build
-2. Quickstart
+1. Installation and Build[#Installation-and-Build]
+2. Quickstart[#Quickstart[
 3. Contributing
 4. Feature Request
 ---
