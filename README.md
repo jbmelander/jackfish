@@ -6,7 +6,7 @@
 ---
 
 
-## 1. Installation and Build
+## Installation and Build
 1. Download this repository and install `jackfish` in developer mode with `pip`. Then build the guis with the included `build.sh` script. Assuming your download is at PATH_TO_JF (for example, `~/jackfish` or `~/src/jackfish`):
 
 ```bash
@@ -22,7 +22,7 @@ python3 PATH_TO_JF/jackfish/gui/main_controller.py
 
 Optional: I like to set a an alias so that opening jackfish is as simple as typing `jackfish` in a terminal. Edit your `~/.bashrc` and append the line `alias jackfish='python3 PATH_TO_JF/jackfish/gui/main_controller.py`. Restart the terminal for changes to take effect.
 
-## 2. Quickstart
+## Quickstart
 1. Click `Load Preset` and load `JBM.json`
 2. Click `Init DAQ` and `Init Cam` for all cameras you wish to use.
 3. Clicking `Preview` should start streaming any initialized cameras and DAQ windows. Make sure everything looks appropriate. 
