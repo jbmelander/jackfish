@@ -9,17 +9,20 @@
 
 
 ## 1. Installation and Build
-1. Download this repository and install `jackfish` in developer mode with `pip` via:
+1. Download this repository and install `jackfish` in developer mode with `pip`. Then build the guis with the included `build.sh` script. Assuming your download is at PATH_TO_JF (for example, `~/jackfish` or `~/src/jackfish`):
 
-> git clone https://github.com/jbmelander/jackfish.git
-> cd PATH_TO_JF/jackfish/
-> pip3 install -e .
-> sh build.sh PATH_TO_JF # Compiles *_gui.py files
-
+```bash
+git clone https://github.com/jbmelander/jackfish.git
+cd PATH_TO_JF/
+pip3 install -e .
+sh build.sh PATH_TO_JF
+```
 2. Run jackfish via:
-> python3 PATH_TO_JF/jackfish/jackfish/gui/main_controller.py
+```bash
+python3 PATH_TO_JF/jackfish/gui/main_controller.py
+```
 
-(I like to set a .bashrc alias so that opening jackfish is as simple as typing `jackfish`. Edit ~/.bashrc and append the line `alias jackfish='python3 PATH_TO_JF/jackfish/jackfish/gui/main_controller.py`
+Optional: I like to set a an alias so that opening jackfish is as simple as typing `jackfish` in a terminal. Edit your `~/.bashrc` and append the line `alias jackfish='python3 PATH_TO_JF/jackfish/gui/main_controller.py`. Restart the terminal for changes to take effect.
 
 ## 2. Quickstart
 1. Click `Load Preset` and load `JBM.json`
