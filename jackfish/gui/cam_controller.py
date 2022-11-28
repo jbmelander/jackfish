@@ -103,7 +103,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
     def change_framerate(self):
         new_fr = self.fr_edit.text()
-        new_fr = int(new_fr)
+        new_fr = float(int(new_fr))
         
         self.cam.set_cam_attr('AcquisitionFrameRate', new_fr)
         print('Changed fr')
