@@ -21,14 +21,13 @@ class FlirCam:
 
         if attrs_json_fn is not None:
             self.set_cam_attrs_from_json(attrs_json_fn, n_repeat=3)
-
-        self.start(release_trigger_mode=False)
-        self.get_img_dtype()
-        self.get_img_dimensions()
-        self.get_img_framerate()
-        self.stop()
-
-
+        else:
+            # Following lines are run in set_cam_attrs_from_json in above case.
+            self.start(release_trigger_mode=False)
+            self.get_img_dtype()
+            self.get_img_dimensions()
+            self.get_img_framerate()
+            self.stop()
 
         assert self.dtype[-1] == '8', 'Data should be in proper bit depth'
         
@@ -44,7 +43,6 @@ class FlirCam:
         else:
             serial_number = cam.__getattr__(serial_number_candidates[0])
             return serial_number
-
 
     def gen_cam_attrs_json(self):
         cam = self.cam
@@ -83,6 +81,13 @@ class FlirCam:
                 self.release_trigger_on_start = True
             if 'ReleaseTriggerModeDelay' in control_attrs:
                 self.release_trigger_delay = control_attrs['ReleaseTriggerModeDelay']
+
+        # Get key attributes from camera
+        self.start(release_trigger_mode=False)
+        self.get_img_dtype()
+        self.get_img_dimensions()
+        self.get_img_framerate()
+        self.stop()
 
     def set_cam_attr(self, attr_name, attr_val):
         cam = self.cam
