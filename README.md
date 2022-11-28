@@ -28,6 +28,7 @@
 4. Click `Save Dir` and select the directory you will save data to
 5. Click `Expt Name` and give your experiment a unique experiment name
 6. Make sure `Preview` is off, click `Record`. To minimize frame drops turn off live viewing for any cameras and select channel `None` in the DAQ UI.
+7. If you wish to capture the start and stop strobes from a camera, make sure it is "frozen" before beginning recording (Freeze checkbox in Cam UI). After recording begins, unfreeze the camera and once again freeze it at the end.
 
 
 
