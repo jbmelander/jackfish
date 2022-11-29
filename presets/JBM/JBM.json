@@ -6,11 +6,11 @@
     "cameras": {
         "BodyCam": {
             "serial_number": "20489161",
-            "attrs_json": "/home/baccuslab/src/jackfish/presets/JBM/cam_20489161.json"
+            "attrs_json": "/home/baccuslab/src/jackfish/presets/JBM/flea.json"
         },
         "EyeTracker": {
             "serial_number": "22248110",
-            "attrs_json": "/home/baccuslab/src/jackfish/presets/JBM/cam_22248110.json"
+            "attrs_json": "/home/baccuslab/src/jackfish/presets/JBM/grasshopper.json"
         }
     },
 

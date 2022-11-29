@@ -2,6 +2,7 @@
 "camera_attrs": {
     "TriggerMode": "Off",
     "PixelFormat": "Mono8",      
+    "VideoMode": "Mode1",
     "AcquisitionFrameRateAuto": "Off",
     "AcquisitionFrameRateEnabled": true,
     "AcquisitionFrameRate": 40.0,

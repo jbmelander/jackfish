@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>281</width>
-    <height>493</height>
+    <width>280</width>
+    <height>513</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -472,7 +472,7 @@
     <property name="geometry">
      <rect>
       <x>180</x>
-      <y>90</y>
+      <y>50</y>
       <width>81</width>
       <height>31</height>
      </rect>
@@ -572,7 +572,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>90</y>
+      <y>50</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -588,7 +588,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>50</y>
+      <y>10</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -604,7 +604,7 @@
     <property name="geometry">
      <rect>
       <x>180</x>
-      <y>50</y>
+      <y>10</y>
       <width>81</width>
       <height>31</height>
      </rect>
@@ -625,38 +625,13 @@
      <string>Init DAQ</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="load_preset_push">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>241</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>13</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Load Preset</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>140</y>
-      <width>221</width>
-      <height>171</height>
+      <x>40</x>
+      <y>130</y>
+      <width>191</width>
+      <height>181</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -762,8 +737,61 @@
      <double>179.990000000000009</double>
     </property>
    </widget>
+   <widget class="QLabel" name="preset_label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>241</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="text">
+     <string>No Preset Loaded</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>280</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="load_preset_menu"/>
+    <addaction name="set_default_preset"/>
+    <addaction name="clear_default_preset"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="set_default_preset">
+   <property name="text">
+    <string>Set Default Preset</string>
+   </property>
+  </action>
+  <action name="clear_default_preset">
+   <property name="text">
+    <string>Clear Default Preset</string>
+   </property>
+  </action>
+  <action name="load_preset_menu">
+   <property name="text">
+    <string>Load Preset</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

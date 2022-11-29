@@ -34,7 +34,6 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.status = Status.STANDBY
 
         #### UI ####
-        self.load_preset_push.clicked.connect(self.load_preset)
         self.set_save_dir_push.clicked.connect(lambda: self.set_save_dir(save_dir=None))
         self.set_expt_push.clicked.connect(self.set_experiment_name)
         self.set_expt_push.setEnabled(False)
@@ -51,26 +50,63 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         self.record_push.setCheckable(True)
         self.record_push.clicked.connect(self.control)
-        
-        self.update_ui()
-    
-        #### Import presets ####
+
+        self.set_default_preset.setStatusTip('Saves current preset as default')
+        self.set_default_preset.triggered.connect(self.save_default)
+
+        self.clear_default_preset.setStatusTip('Clears default preset')
+        self.clear_default_preset.triggered.connect(self.clear_default)
+
+        self.load_preset_menu.setStatusTip('Load a preset')
+        self.load_preset_menu.triggered.connect(self.load_preset)
+
         self.load_preset(init=True)
+        
+
+        #### Import presets ####
+    
+    def clear_default(self):
+        if os.path.exists(os.path.expanduser('~/.config/jackfish/default.jkfh')):
+            os.remove(os.path.expanduser('~/.config/jackfish/default.jkfh'))
+            self.preset_path = None
+        self.update_ui()
+
+    def save_default(self):
+        # Checks for jackfish config directory
+        if not os.path.exists(os.path.expanduser('~/.config/jackfish')):
+            os.mkdir(os.path.expanduser('~/.config/jackfish'))
+        
+        # Overwrites default
+        with open(os.path.expanduser('~/.config/jackfish/default.jkfh'), 'w') as f:
+            f.write(self.preset_path)
+
+        self.update_ui()
 
     def load_preset(self, init=False):
         if init:
-            preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
+            if os.path.exists(os.path.expanduser('~/.config/jackfish/default.jkfh')):
+                with open(os.path.expanduser('~/.config/jackfish/default.jkfh'),'r') as f:
+                    self.preset_path = f.readline()
+                self.initialize_preset(self.preset_path)
+            else:
+                preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
+                self.preset_path = None
         else:
             presets_dir = os.path.join(utils.ROOT_DIR,'presets')
 
             json_fn, _ = QFileDialog.getOpenFileName(self, "Select preset json file.", presets_dir, "JSON files (*.json)")
+            self.preset_path = json_fn
 
             if json_fn == "":
                 return
             else:
-                with open(json_fn, 'r') as f:
-                    preset_dict = json.load(f)
+                self.initialize_preset(json_fn)
 
+        self.update_ui()
+
+    def initialize_preset(self,filepath):
+        with open(filepath, 'r') as f:
+            preset_dict = json.load(f)
         main_presets = preset_dict['main']
         if "save_dir" in main_presets.keys():
             self.set_save_dir(save_dir=main_presets['save_dir'])
@@ -233,8 +269,11 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.update_ui()
 
     def update_ui(self):
+        if self.preset_path is not None:
+            self.preset_label.setText(self.preset_path.split('/')[-1])
+        else:
+            self.preset_label.setText('No Preset Loaded')
         if self.status == Status.RECORDING: # If recording...
-            self.load_preset_push.setEnabled(False)
             self.cam_init_push.setEnabled(False)
             self.daq_init_push.setEnabled(False)
             self.set_save_dir_push.setEnabled(False)
@@ -255,7 +294,6 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.record_push.setStyleSheet("background-color: red")
 
         elif self.status == Status.PREVIEWING: # If previewing...
-            self.load_preset_push.setEnabled(False)
             self.cam_init_push.setEnabled(False)
             self.daq_init_push.setEnabled(False)
             self.set_save_dir_push.setEnabled(True)
@@ -276,7 +314,6 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.record_push.setStyleSheet("background-color: green")
 
         elif self.status == Status.STANDBY: # If standby...
-            self.load_preset_push.setEnabled(True)
             self.cam_init_push.setEnabled(True)
             self.daq_init_push.setEnabled(True)
             self.set_save_dir_push.setEnabled(True)
