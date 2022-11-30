@@ -9,6 +9,7 @@ from PyQt5.QtGui import QMovie, QPixmap
 from PyQt5.QtCore import QTimer
 from cam_controller import CamUI
 from daq_controller import DAQUI
+from review_controller import REVUI
 import main_gui
 
 from jackfish import utils
@@ -59,6 +60,8 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
         self.load_preset_menu.setStatusTip('Load a preset')
         self.load_preset_menu.triggered.connect(self.load_preset)
+
+        # self.load_file_menu.triggered.connect(self.init_review)
 
         self.load_preset(init=True)
         
@@ -171,6 +174,10 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     def set_module_write_paths(self):
         for module in self.modules.values():
             module.set_write_path(dir=self.expt_path)
+    
+    # def init_review(self):
+    #     reviewUI = REVUI()
+    #     reviewUI.show()
 
     def init_daq(self):
         daq_drop_index = self.daq_names_drop.currentIndex()

@@ -771,6 +771,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="load_file_menu"/>
     <addaction name="load_preset_menu"/>
     <addaction name="set_default_preset"/>
     <addaction name="clear_default_preset"/>
@@ -790,6 +791,11 @@
   <action name="load_preset_menu">
    <property name="text">
     <string>Load Preset</string>
+   </property>
+  </action>
+  <action name="load_file_menu">
+   <property name="text">
+    <string>Review Datafile</string>
    </property>
   </action>
  </widget>
