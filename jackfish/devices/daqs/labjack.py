@@ -73,7 +73,7 @@ class LabJack():
             "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
             (self.info[0], self.info[1], self.info[2], ljm.numberToIP(self.info[3]), self.info[4], self.info[5]))
 
-    def start_stream(self, do_record=True, record_filepath="", input_channels={"AIN0": "Input 0", "AIN1": "Input 1"}, scanRate=3000, scansPerRead=1000, dataQ_len_sec=15, socket_target=None):
+    def start_stream(self, do_record=True, record_filepath="", input_channels={"AIN0": "Input 0", "AIN1": "Input 1"}, scanRate=3000, scansPerRead=1000, dataQ_len_sec=10, socket_target=None):
         self.input_channels = input_channels
         if isinstance(self.input_channels, list):
              self.input_channels = {chan:chan for chan in self.input_channels}

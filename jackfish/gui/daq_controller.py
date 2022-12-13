@@ -107,12 +107,17 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
                     self.daq.set_attrs(labjack_settings)
 
     def start(self, record=False):
+
+        n_channels = len(self.input_channels.keys())
+        print(n_channels)
+        print('0000')
+        scansPerRead = int(self.scanrate/n_channels)
         if self.status != Status.STANDBY:
             utils.message_window("Error", "Currently recording or previewing.")
         self.timer.start()
         if record:
             self.status = Status.RECORDING
-            self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15)
+            self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, scansPerRead = scansPerRead, dataQ_len_sec=15)
             # self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15, socket_target=(None,25025))
         else:
             self.status = Status.PREVIEWING
