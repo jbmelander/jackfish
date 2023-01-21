@@ -62,7 +62,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
         self.hist = self.preview.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.lev_changed)
-        self.hist.fillHistogram(False)
+        self.hist.fillHistogram(True)
 
         self.levels = [0,255]
 
