@@ -94,11 +94,11 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if self.status == Status.STANDBY:
             utils.message_window("Error", "Already on standby.")
         self.timer.stop()
+        self.cam.stop()
         if self.status == Status.RECORDING:
             self.cam.stop_rec()
         elif self.status == Status.PREVIEWING:
             self.cam.stop_preview()
-        self.cam.stop()
         self.status = Status.STANDBY
         self.update_ui()
 
