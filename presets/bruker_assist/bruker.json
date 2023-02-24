@@ -1,0 +1,19 @@
+{
+    "main": {
+        "save_dir": "/data/"
+    },
+    
+    "cameras": {
+        "364": {
+            "serial_number": "18384364",
+            "attrs_json": "/home/clandininlab/lib/jackfish/presets/bruker_assist/cam_bruker_364.json"
+        },
+        "364_ft": {
+            "serial_number": "18384364",
+            "attrs_json": "/home/clandininlab/lib/jackfish/presets/bruker_assist/cam_bruker_364_ft.json"
+        }
+
+    },
+    "DAQs": {
+    }
+}
