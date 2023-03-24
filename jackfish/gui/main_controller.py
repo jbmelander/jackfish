@@ -43,8 +43,14 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.cam_init_push.clicked.connect(self.init_cam)
 
         self.timer = QTimer()
+        self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.stop)
-        self.timer_checkBox.clicked.connect(self.stop_timer)
+        self.timer_checkBox.clicked.connect(self.control_timer)
+
+        self.timer_updater = QTimer()
+        self.timer_updater.setSingleShot(False)
+        self.timer_updater.setInterval(1000)
+        self.timer_updater.timeout.connect(self.update_timer)
 
         self.preview_push.setCheckable(True)
         self.preview_push.clicked.connect(self.control)
@@ -250,15 +256,15 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.status = Status.PREVIEWING
         
         if self.timer_checkBox.isChecked():
-            timer_dur_in_min = float(self.timer_doubleSpinBox.value())
-            timer_dur_in_ms = int(timer_dur_in_min * 60 * 1000)
-            self.timer.start(timer_dur_in_ms)
+            self.start_timer()
+
         self.update_ui()
 
     def stop(self):
         for module in self.modules.values():
             module.stop()
-        self.timer.stop()
+        if self.timer_checkBox.isChecked():
+            self.stop_timer()
 
         if self.status == Status.PREVIEWING: 
             print("Preview Finished")
@@ -268,12 +274,36 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             print('Record Finished')
         
         self.status = Status.STANDBY
+        
         self.update_ui()
+
+    def start_timer(self):
+        timer_dur_in_s = int(self.timer_spinBox.value())
+        timer_dur_in_ms = int(timer_dur_in_s * 1000)
+        self.timer.setInterval(timer_dur_in_ms)
+        self.timer.start()
+        self.timer_updater.start()
 
     def stop_timer(self):
         self.timer.stop()
+        self.timer_updater.stop()
+        self.timer_spinBox.setValue(self.timer.interval() / 1000)
+
+    def control_timer(self):
+        if self.timer_checkBox.isChecked():
+            # Start timer only if previewing or recording
+            # Otherwise, wait until previewing or recording to start timer
+            if self.status == Status.PREVIEWING or self.status == Status.RECORDING:
+                self.start_timer()
+        else:
+            self.stop_timer()
 
         self.update_ui()
+
+    def update_timer(self):
+        time_left_in_ms = self.timer.remainingTime()
+        time_left_in_s = int(time_left_in_ms / 1000)
+        self.timer_spinBox.setValue(time_left_in_s + 1)
 
     def update_ui(self):
         if self.preset_path is not None:
@@ -286,11 +316,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.set_save_dir_push.setEnabled(False)
             self.set_expt_push.setEnabled(False)
 
-            self.timer_doubleSpinBox.setEnabled(False)
-            if self.timer.isActive():
-                self.timer_checkBox.setEnabled(True)
-            else:
-                self.timer_checkBox.setEnabled(False)
+            self.timer_checkBox.setEnabled(True)
 
             self.preview_push.setChecked(False)
             self.preview_push.setEnabled(False)
@@ -306,11 +332,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.set_save_dir_push.setEnabled(True)
             self.set_expt_push.setEnabled(True)
 
-            self.timer_doubleSpinBox.setEnabled(False)
-            if self.timer.isActive():
-                self.timer_checkBox.setEnabled(True)
-            else:
-                self.timer_checkBox.setEnabled(False)
+            self.timer_checkBox.setEnabled(True)
 
             self.preview_push.setChecked(True)
             self.preview_push.setEnabled(True)
@@ -327,7 +349,6 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             self.set_expt_push.setEnabled(True)
 
             self.timer_checkBox.setEnabled(True)
-            self.timer_doubleSpinBox.setEnabled(True)
 
             if len(self.modules) > 0: # If a camUI or daqUI is up...
                 self.preview_push.setChecked(False)
@@ -348,6 +369,11 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
                 self.record_push.setStyleSheet("background-color: grey")
         else:
             utils.message_window(text="Invalid status.")
+
+        if self.timer.isActive():
+            self.timer_spinBox.setEnabled(False)
+        else:
+            self.timer_spinBox.setEnabled(True)
 
     def child_close_event(self, barcode):
         if barcode is not None and barcode in self.modules:

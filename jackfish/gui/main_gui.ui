@@ -721,10 +721,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>minutes</string>
+     <string>seconds</string>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="timer_doubleSpinBox">
+   <widget class="QSpinBox" name="timer_spinBox">
     <property name="geometry">
      <rect>
       <x>127</x>
@@ -732,9 +732,6 @@
       <width>69</width>
       <height>26</height>
      </rect>
-    </property>
-    <property name="maximum">
-     <double>179.990000000000009</double>
     </property>
    </widget>
    <widget class="QLabel" name="preset_label">
