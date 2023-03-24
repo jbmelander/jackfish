@@ -2,6 +2,9 @@ import os
 import sys
 import random
 import json
+import time
+from datetime import timedelta
+
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QMessageBox
@@ -42,16 +45,6 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.daq_init_push.clicked.connect(self.init_daq)
         self.cam_init_push.clicked.connect(self.init_cam)
 
-        self.timer = QTimer()
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.stop)
-        self.timer_checkBox.clicked.connect(self.control_timer)
-
-        self.timer_updater = QTimer()
-        self.timer_updater.setSingleShot(False)
-        self.timer_updater.setInterval(1000)
-        self.timer_updater.timeout.connect(self.update_timer)
-
         self.preview_push.setCheckable(True)
         self.preview_push.clicked.connect(self.control)
 
@@ -67,12 +60,28 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.load_preset_menu.setStatusTip('Load a preset')
         self.load_preset_menu.triggered.connect(self.load_preset)
 
-        # self.load_file_menu.triggered.connect(self.init_review)
+        # Elapsed time
+        self.elapsed_timer = QTimer()
+        self.elapsed_timer.setSingleShot(False)
+        self.elapsed_timer.setInterval(1000)
+        self.elapsed_timer.timeout.connect(self.update_elapsed_timer)
 
-        self.load_preset(init=True)
-        
+        # Timer
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.stop)
+        self.timer_checkBox.clicked.connect(self.control_timer)
+
+        self.timer_updater = QTimer()
+        self.timer_updater.setSingleShot(False)
+        self.timer_updater.setInterval(1000)
+        self.timer_updater.timeout.connect(self.update_timer)
 
         #### Import presets ####
+
+        # self.load_file_menu.triggered.connect(self.init_review)
+        self.load_preset(init=True)
+        
     
     def clear_default(self):
         if os.path.exists(os.path.expanduser('~/.config/jackfish/default.jkfh')):
@@ -255,6 +264,8 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
             print("Preview Started")
             self.status = Status.PREVIEWING
         
+        self.start_elapsed_timer()
+
         if self.timer_checkBox.isChecked():
             self.start_timer()
 
@@ -263,8 +274,6 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     def stop(self):
         for module in self.modules.values():
             module.stop()
-        if self.timer_checkBox.isChecked():
-            self.stop_timer()
 
         if self.status == Status.PREVIEWING: 
             print("Preview Finished")
@@ -275,19 +284,37 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         
         self.status = Status.STANDBY
         
+        self.elapsed_timer.stop()
+        if self.timer_checkBox.isChecked():
+            self.stop_timer()
+
         self.update_ui()
+
+    def start_elapsed_timer(self):
+        self.start_time = time.time()
+        self.elapsed_timer.start()
+        self.update_elapsed_timer()
+
+    def stop_elapsed_timer(self):
+        self.elapsed_timer.stop()
+        self.update_elapsed_timer()
+
+    def update_elapsed_timer(self):
+        elapsed_time = round(time.time() - self.start_time)
+        self.elapsed_time_lineEdit.setText(str(timedelta(seconds=elapsed_time)))
 
     def start_timer(self):
         timer_dur_in_s = int(self.timer_spinBox.value())
         timer_dur_in_ms = int(timer_dur_in_s * 1000)
         self.timer.setInterval(timer_dur_in_ms)
         self.timer.start()
+        self.update_timer()
         self.timer_updater.start()
 
     def stop_timer(self):
         self.timer.stop()
         self.timer_updater.stop()
-        self.timer_spinBox.setValue(self.timer.interval() / 1000)
+        self.timer_spinBox.setValue(round(self.timer.interval() / 1000))
 
     def control_timer(self):
         if self.timer_checkBox.isChecked():
@@ -302,8 +329,8 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
 
     def update_timer(self):
         time_left_in_ms = self.timer.remainingTime()
-        time_left_in_s = int(time_left_in_ms / 1000)
-        self.timer_spinBox.setValue(time_left_in_s + 1)
+        time_left_in_s = round(time_left_in_ms / 1000)
+        self.timer_spinBox.setValue(time_left_in_s)
 
     def update_ui(self):
         if self.preset_path is not None:
