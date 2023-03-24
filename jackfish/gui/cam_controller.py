@@ -35,10 +35,10 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
 
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.preview_updater)
+        self.preview_update_timer = QtCore.QTimer()
+        self.preview_update_timer.timeout.connect(self.preview_updater)
 
-        self.fn_prev = 0
+        self.frame_num_preview = 0
 
         # self.init_push.setCheckable(True)
         # self.init_push.clicked.connect(self.init_cam)
@@ -79,27 +79,34 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def start(self, record=False):
         if self.status != Status.STANDBY:
             utils.message_window("Error", "Currently recording or previewing.")
-        self.fn_preview = 0
-        self.timer.start()
-        self.cam.start()
+        self.frame_num_preview = 0
+        self.preview_update_timer.start()
+
+        # Start rec/preview before camera, so that no frames are missed.
         if record:
             self.cam.start_rec()
             self.status = Status.RECORDING
         else:
             self.cam.start_preview()
             self.status = Status.PREVIEWING
+        self.cam.start()
+
         self.update_ui()
 
     def stop(self):
         if self.status == Status.STANDBY:
             utils.message_window("Error", "Already on standby.")
-        self.timer.stop()
+        self.preview_update_timer.stop()
+
+        # Stop rec/preview after camera, so that no frames are missed.
         self.cam.stop()
         if self.status == Status.RECORDING:
             self.cam.stop_rec()
         elif self.status == Status.PREVIEWING:
             self.cam.stop_preview()
+            
         self.status = Status.STANDBY
+
         self.update_ui()
 
     def change_framerate(self):
@@ -110,7 +117,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         print('Changed fr')
 
     def set_write_path(self, dir, file_name=None):
-        self.timer.stop()
+        self.preview_update_timer.stop()
         if file_name is None:
             file_name = f'cam_{self.cam.serial_number}.mp4'
         self.cam.set_video_out_path(os.path.join(dir, file_name))
@@ -162,11 +169,11 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.hist.setLevels(min_level, max_level)
 
     def preview_updater(self):
-        if self.preview_on and self.cam.fn > self.fn_preview:
+        if self.preview_on and self.cam.frame_num > self.frame_num_preview:
             self.preview.clear()
             self.preview.setImage(self.cam.frame.T, autoLevels=False, levels=self.levels, autoHistogramRange=False)
             self.preview.setLevels(self.levels[0],self.levels[1])
-            self.fn_preview = self.cam.fn
+            self.frame_num_preview = self.cam.frame_num
 
     def resizeEvent(self, event):
         frame_size = self.frameGeometry()

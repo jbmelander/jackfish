@@ -6,6 +6,7 @@ import time
 import cv2
 import json
 from simple_pyspin import Camera
+import PySpin
 
 class FlirCam:
     def __init__(self, serial_number=0, attrs_json_fn=None):
@@ -186,15 +187,27 @@ class FlirCam:
         print(f"Cam video out path: {self.video_out_path}")
 
     def grab_frame(self, wait=True):
-        self.frame = self.cam.get_array(wait=wait)
-        self.fn+=1
+        try:
+            # PySpin image contains information about the frame, such as timestamp, gain, exposure, etc.
+            image = self.cam.get_image(wait=wait)
+            self.frame = image.GetNDArray()
+            self.frame_ts = image.GetTimeStamp() / 1e9 # in seconds
+            self.frame_ts_cpu = time.time()
+            self.frame_num += 1
+            
+            return self.frame, self.frame_num, self.frame_ts, self.frame_ts_cpu
+        
+        except PySpin.SpinnakerException as e:
+            # print(f'Error: {e}')
+            print('Awaiting frame...')
+            return None
 
     def start_preview(self):
         def preview_callback():
             while self.do_preview:
                 self.grab_frame()
 
-        self.fn = 0
+        self.frame_num = 0
         self.do_preview = True
         self.preview_thread = threading.Thread(target=preview_callback, daemon=True).start()
         print("Camera preview started.")
@@ -205,23 +218,31 @@ class FlirCam:
 
     def start_rec(self):
         def rec_callback():
+            # Assume this loop is fast enough to keep up with framerate
             while self.do_record:
-                self.grab_frame()
-                self.img_queue.put(self.frame)
+                # grab_frame() returns None if there is no frame to grab
+                result = self.grab_frame()
+                if result is not None:
+                    frame, frame_num, frame_ts, frame_ts_cpu = result
+                    self.img_queue.put((frame, frame_num, frame_ts, frame_ts_cpu))
+                else:
+                    pass
 
         def rec_writer():
             print('worker started')
             while self.do_record:
-                frame = self.img_queue.get(block=True)
+                frame, frame_num, frame_ts, frame_ts_cpu = self.img_queue.get(block=True)
 
                 frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-                self.writer.write(frame_color)
+                self.video_writer.write(frame_color)
+                self.frame_info_writer.write(f'{frame_num} {frame_ts} {frame_ts_cpu}\n')
                 
         self.img_queue = queue.Queue()
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        self.writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
+        self.video_writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
+        self.frame_info_writer = open(self.video_out_path.replace('.mp4', '.txt'), 'w')
 
-        self.fn = 0
+        self.frame_num = 0
         self.do_record = True
         self.record_thread = threading.Thread(target=rec_callback, daemon=True).start()
         self.writer_thread = threading.Thread(target=rec_writer, daemon=True).start()
@@ -230,7 +251,8 @@ class FlirCam:
     def stop_rec(self):
         self.do_record = False
         time.sleep(2) # give rec_callback time to finish writing frame
-        self.writer.release()
+        self.video_writer.release()
+        self.frame_info_writer.close()
         print("Camera record finished.")
 
     def close(self):
