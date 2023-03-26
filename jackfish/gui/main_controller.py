@@ -356,8 +356,8 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         elif self.status == Status.PREVIEWING: # If previewing...
             self.cam_init_push.setEnabled(False)
             self.daq_init_push.setEnabled(False)
-            self.set_save_dir_push.setEnabled(True)
-            self.set_expt_push.setEnabled(True)
+            self.set_save_dir_push.setEnabled(False)
+            self.set_expt_push.setEnabled(False)
 
             self.timer_checkBox.setEnabled(True)
 
