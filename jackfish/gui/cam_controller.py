@@ -63,7 +63,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.hist = self.preview.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.lev_changed)
 
-        self.levels = [0,255]
+        self.levels = [0,2**16-1]
 
         self.preview_toggle.stateChanged.connect(self.toggle_preview)
         self.toggle_preview()
@@ -156,7 +156,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def lev_changed(self):
         levels = self.hist.getLevels()
         min_level = max(levels[0], 0)
-        max_level = min(levels[1], 255)
+        max_level = min(levels[1], 2**16-1)
         self.levels = (min_level, max_level)
         self.hist.setLevels(min_level, max_level)
 
