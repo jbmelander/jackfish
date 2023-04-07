@@ -23,10 +23,6 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
         self.status = Status.STANDBY
         
-        img_path = os.path.join(utils.ROOT_DIR, 'assets/pach.jpg')
-        self.pachanoi.setPixmap(QPixmap(img_path))
-        self.pachanoi.setScaledContents(True)
-        self.pachanoi.setObjectName("label")
 
         if serial_number is None: serial_number = 0
 
@@ -152,14 +148,11 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def edit_exposure(self):
         exposure_txt = self.exposure_edit.text()
 
-        if exposure_txt.isnumeric():
-            new_exposure = float(exposure_txt*1000)
-            print(new_exposure)
-            self.cam.set_cam_attr('ExposureAuto', 'Off')
-            self.cam.set_cam_attr('ExposureTime', new_exposure)
-            self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f} ms')
-        else:
-            self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f} ms')
+        new_exposure = float(exposure_txt)*1000
+        print(new_exposure)
+        self.cam.set_cam_attr('ExposureAuto', 'Off')
+        self.cam.set_cam_attr('ExposureTime', new_exposure)
+        # self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f}')
 
     def lev_changed(self):
         levels = self.hist.getLevels()
