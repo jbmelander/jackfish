@@ -33,6 +33,10 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.expt_path = os.environ['HOME']
         self.new_path_set = False
 
+        self.nvidia_gpu = utils.check_nvidia_gpu()
+        self.max_nvenc_sessions = 2
+        self.ffmpeg_location = utils.get_ffmpeg_location()
+
         self.modules = {}
 
         self.status = Status.STANDBY
@@ -128,6 +132,10 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         main_presets = preset_dict['main']
         if "save_dir" in main_presets.keys():
             self.set_save_dir(save_dir=main_presets['save_dir'])
+        if "ffmpeg_location" in main_presets.keys():
+            self.ffmpeg_location = main_presets['ffmpeg_location']
+        if "max_nvenc_sessions" in main_presets.keys():
+            self.max_nvenc_sessions = main_presets['max_nvenc_sessions']
 
         self.cam_presets = preset_dict['cameras']
         self.cam_names = list(self.cam_presets.keys())
@@ -239,6 +247,9 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.modules[barcode] = camUI
 
         self.update_ui()
+
+    def get_modules_of_type(self, mod_class=CamUI):
+        return {barcode:module for barcode, module in self.modules.items() if isinstance(module, mod_class)}
 
     def control(self):
         record = (self.sender().text() == "Record")

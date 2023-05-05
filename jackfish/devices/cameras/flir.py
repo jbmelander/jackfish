@@ -3,13 +3,15 @@ import queue, threading
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-import cv2
+# import cv2
+import skvideo
+import skvideo.io
 import json
 from simple_pyspin import Camera
 import PySpin
 
 class FlirCam:
-    def __init__(self, serial_number=0, attrs_json_fn=None):
+    def __init__(self, serial_number=0, attrs_json_fn=None, ffmpeg_location='/usr/bin'):
         '''
         serial_number: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.
         '''
@@ -19,6 +21,8 @@ class FlirCam:
         self.release_trigger_on_start = False
         self.release_trigger_delay = 0
         self.restore_trigger_mode_on_stop = False
+
+        skvideo.setFFmpegPath(ffmpeg_location)
 
         if attrs_json_fn is not None:
             self.set_cam_attrs_from_json(attrs_json_fn, n_repeat=3)
@@ -89,6 +93,9 @@ class FlirCam:
         self.get_img_dimensions()
         self.get_img_framerate()
         self.stop()
+
+    def get_cam_attr(self, attr_name):
+        return self.cam.__getattr__(attr_name)
 
     def set_cam_attr(self, attr_name, attr_val):
         cam = self.cam
@@ -167,10 +174,10 @@ class FlirCam:
     def get_img_framerate(self):
         if self.cam.__getattr__('TriggerMode') == 'On':
             self.set_cam_attr('TriggerMode', 'Off')
-            self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
+            self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
             self.set_cam_attr('TriggerMode', 'On')
         else:
-            self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
+            self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
 
     def get_img_dimensions(self):
         # Reversed from numpy convension
@@ -184,7 +191,7 @@ class FlirCam:
         if path is None:
             path = os.path.expanduser(f'~/cam_{self.serial_number}.mp4')
         self.video_out_path = path
-        print(f"Cam video out path: {self.video_out_path}")
+        print(f"Cam {str(self.serial_number)} video out path: {self.video_out_path}")
 
     def grab_frame(self, wait=True):
         try:
@@ -199,7 +206,7 @@ class FlirCam:
         
         except PySpin.SpinnakerException as e:
             # print(f'Error: {e}')
-            print('Awaiting frame...')
+            print(f"Cam {str(self.serial_number)}: Awaiting frame...")
             return None
 
     def start_preview(self):
@@ -210,13 +217,13 @@ class FlirCam:
         self.frame_num = 0
         self.do_preview = True
         self.preview_thread = threading.Thread(target=preview_callback, daemon=True).start()
-        print("Camera preview started.")
+        print(f"Cam {str(self.serial_number)}: Camera preview started.")
 
     def stop_preview(self):
         self.do_preview = False
-        print("Camera preview ended.")
+        print(f"Cam {str(self.serial_number)}: Camera preview ended.")
 
-    def start_rec(self):
+    def start_rec(self, use_nvenc=False):
         def rec_callback():
             # Assume this loop is fast enough to keep up with framerate
             while self.do_record:
@@ -225,35 +232,65 @@ class FlirCam:
                 if result is not None:
                     frame, frame_num, frame_ts, frame_ts_cpu = result
                     self.img_queue.put((frame, frame_num, frame_ts, frame_ts_cpu))
+                    self.total_frames_grabbed += 1
                 else:
                     pass
 
         def rec_writer():
-            print('worker started')
-            while self.do_record:
-                frame, frame_num, frame_ts, frame_ts_cpu = self.img_queue.get(block=True)
+            print(f"Cam {str(self.serial_number)}: writer started")
+            while self.do_record or self.img_queue.qsize()>0:
+                # If recording has ended and still writing, OR queue size is abnormally large (> 1000)
+                if not self.do_record or self.img_queue.qsize() > 1000:
+                    print(f"Cam {str(self.serial_number)}: Number of images remaining in queue: {self.img_queue.qsize()}")
+                try:
+                    # block=True is important for preventing the writer thread from taking too much
+                    #    clock time away from other threads
+                    frame, frame_num, frame_ts, frame_ts_cpu = self.img_queue.get(block=True, timeout=(1/self.framerate)*10)
 
-                frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-                self.video_writer.write(frame_color)
-                self.frame_info_writer.write(f'{frame_num} {frame_ts} {frame_ts_cpu}\n')
-                
+                    # frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+                    # self.video_writer.write(frame_color)
+                    self.video_writer.writeFrame(frame)
+                    self.frame_info_writer.write(f'{frame_num} {frame_ts} {frame_ts_cpu}\n')
+                    self.total_frames_written += 1
+                except queue.Empty:
+                    continue
+                except Exception as e:
+                    print(f"Cam {str(self.serial_number)}: Unexpected exception {e} occurred in rec writer thread.")
+
+        self.total_frames_grabbed = 0
+        self.total_frames_written = 0
+
         self.img_queue = queue.Queue()
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        self.video_writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
+        # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # self.video_writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
+        self.video_writer = skvideo.io.FFmpegWriter(self.video_out_path, 
+                                                    inputdict={'-framerate':str(int(self.framerate))}, 
+                                                    outputdict={'-vcodec': 'h264_nvenc' if use_nvenc else 'libx264'})
         self.frame_info_writer = open(self.video_out_path.replace('.mp4', '.txt'), 'w')
 
         self.frame_num = 0
         self.do_record = True
-        self.record_thread = threading.Thread(target=rec_callback, daemon=True).start()
-        self.writer_thread = threading.Thread(target=rec_writer, daemon=True).start()
-        print("Camera record started.")
+        self.record_thread = threading.Thread(target=rec_callback, daemon=True)
+        self.writer_thread = threading.Thread(target=rec_writer, daemon=True)
+        self.writer_thread.start()
+        self.record_thread.start()
+        print(f"Cam {str(self.serial_number)}: Camera record started.")
     
     def stop_rec(self):
+        print(f"Cam {str(self.serial_number)}: Stopping camera record.")
+
         self.do_record = False
-        time.sleep(2) # give rec_callback time to finish writing frame
-        self.video_writer.release()
+
+        self.record_thread.join()
+        print(f"Cam {str(self.serial_number)}: Record thread completed.")
+        self.writer_thread.join()
+        print(f"Cam {str(self.serial_number)}: Writer thread completed.")
+
+        self.video_writer.close()
         self.frame_info_writer.close()
-        print("Camera record finished.")
+        print(f"Cam {str(self.serial_number)}: Total frames grabbed = {self.total_frames_grabbed}")
+        print(f"Cam {str(self.serial_number)}: Total frames written = {self.total_frames_written}")
+        print(f"Cam {str(self.serial_number)}: Camera record finished.")
 
     def close(self):
         self.cam.close()
