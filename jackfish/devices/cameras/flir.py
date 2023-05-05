@@ -94,6 +94,9 @@ class FlirCam:
         self.get_img_framerate()
         self.stop()
 
+    def get_cam_attr(self, attr_name):
+        return self.cam.__getattr__(attr_name)
+
     def set_cam_attr(self, attr_name, attr_val):
         cam = self.cam
 
@@ -171,10 +174,10 @@ class FlirCam:
     def get_img_framerate(self):
         if self.cam.__getattr__('TriggerMode') == 'On':
             self.set_cam_attr('TriggerMode', 'Off')
-            self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
+            self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
             self.set_cam_attr('TriggerMode', 'On')
         else:
-            self.framerate = self.cam.__getattr__('AcquisitionFrameRate')
+            self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
 
     def get_img_dimensions(self):
         # Reversed from numpy convension
@@ -188,7 +191,7 @@ class FlirCam:
         if path is None:
             path = os.path.expanduser(f'~/cam_{self.serial_number}.mp4')
         self.video_out_path = path
-        print(f"Cam video out path: {self.video_out_path}")
+        print(f"Cam {str(self.serial_number)} video out path: {self.video_out_path}")
 
     def grab_frame(self, wait=True):
         try:
@@ -203,7 +206,7 @@ class FlirCam:
         
         except PySpin.SpinnakerException as e:
             # print(f'Error: {e}')
-            print('Awaiting frame...')
+            print(f"Cam {str(self.serial_number)}: Awaiting frame...")
             return None
 
     def start_preview(self):
@@ -214,11 +217,11 @@ class FlirCam:
         self.frame_num = 0
         self.do_preview = True
         self.preview_thread = threading.Thread(target=preview_callback, daemon=True).start()
-        print("Camera preview started.")
+        print(f"Cam {str(self.serial_number)}: Camera preview started.")
 
     def stop_preview(self):
         self.do_preview = False
-        print("Camera preview ended.")
+        print(f"Cam {str(self.serial_number)}: Camera preview ended.")
 
     def start_rec(self, use_nvenc=False):
         def rec_callback():
@@ -234,11 +237,11 @@ class FlirCam:
                     pass
 
         def rec_writer():
-            print('writer started')
+            print(f"Cam {str(self.serial_number)}: writer started")
             while self.do_record or self.img_queue.qsize()>0:
                 # If recording has ended and still writing, OR queue size is abnormally large (> 1000)
                 if not self.do_record or self.img_queue.qsize() > 1000:
-                    print(f'Number of images remaining in queue: {self.img_queue.qsize()}')
+                    print(f"Cam {str(self.serial_number)}: Number of images remaining in queue: {self.img_queue.qsize()}")
                 try:
                     # block=True is important for preventing the writer thread from taking too much
                     #    clock time away from other threads
@@ -271,23 +274,23 @@ class FlirCam:
         self.writer_thread = threading.Thread(target=rec_writer, daemon=True)
         self.writer_thread.start()
         self.record_thread.start()
-        print("Camera record started.")
+        print(f"Cam {str(self.serial_number)}: Camera record started.")
     
     def stop_rec(self):
-        print("Stopping camera record.")
+        print(f"Cam {str(self.serial_number)}: Stopping camera record.")
 
         self.do_record = False
 
         self.record_thread.join()
-        print('Record thread completed.')
+        print(f"Cam {str(self.serial_number)}: Record thread completed.")
         self.writer_thread.join()
-        print('Writer thread completed.')
+        print(f"Cam {str(self.serial_number)}: Writer thread completed.")
 
         self.video_writer.close()
         self.frame_info_writer.close()
-        print(f'Total frames grabbed = {self.total_frames_grabbed}')
-        print(f'Total frames written = {self.total_frames_written}')
-        print("Camera record finished.")
+        print(f"Cam {str(self.serial_number)}: Total frames grabbed = {self.total_frames_grabbed}")
+        print(f"Cam {str(self.serial_number)}: Total frames written = {self.total_frames_written}")
+        print(f"Cam {str(self.serial_number)}: Camera record finished.")
 
     def close(self):
         self.cam.close()

@@ -7,7 +7,7 @@
 
     "ExposureMode": "Timed",
     "ExposureAuto": "Off",
-    "ExposureTime": 50000.0,
+    "ExposureTime": 32000.0,
 
     "Width": 360,
     "Height": 270,
@@ -32,6 +32,6 @@
     "TriggerActivation": "RisingEdge",
 
     "AcquisitionFrameRateEnable": true,
-    "AcquisitionFrameRate": 60.0
+    "AcquisitionFrameRate": 30.0
     }
 }

@@ -1,5 +1,6 @@
 import sys
 import os
+from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QPixmap
@@ -45,16 +46,16 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'On')
 
         self.gain_edit.editingFinished.connect(self.edit_gain)
-        self.gain_edit.setText('Auto' if self.cam.cam.GainAuto == 'Continuous' else f'{self.cam.cam.Gain:.2f}')
+        self.change_gain_display()
 
         self.exposure_edit.returnPressed.connect(self.edit_exposure)
-        self.exposure_edit.setText(f'{int(self.cam.cam.ExposureTime)/1000} ms')
+        self.change_exposure_display()
 
         self.exposure_push.setEnabled(True)
         self.exposure_push.clicked.connect(self.auto_expose)
 
-        self.fr_edit.setText(f'{self.cam.framerate}')
         self.fr_edit.returnPressed.connect(self.change_framerate)
+        self.change_framerate_display()
 
         self.hist = self.preview.getHistogramWidget()
         self.hist.sigLevelsChanged.connect(self.lev_changed)
@@ -83,7 +84,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             # use nvenc only if the camera's order is less than max nvenc sessions
             cam_number = list(self.parent.get_modules_of_type(self.__class__).keys()).index(self.barcode)
             use_nvenc = self.parent.nvidia_gpu and cam_number<self.parent.max_nvenc_sessions
-            print("Using nvenc" if use_nvenc else "NOT using nvenc")
+            print(f"Cam {self.cam.serial_number}:" + "Using nvenc" if use_nvenc else "NOT using nvenc")
             self.cam.start_rec(use_nvenc=use_nvenc)
             self.status = Status.RECORDING
         else:
@@ -110,11 +111,13 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.update_ui()
 
     def change_framerate(self):
-        new_fr = self.fr_edit.text()
-        new_fr = float(int(new_fr))
-        
+        new_fr = float(self.fr_edit.text())
         self.cam.set_cam_attr('AcquisitionFrameRate', new_fr)
-        print('Changed fr')
+        self.change_framerate_display()
+
+    def change_framerate_display(self):
+        fr = self.cam.get_cam_attr('AcquisitionResultingFrameRate')
+        self.fr_edit.setText(f'{fr:.02f}')
 
     def set_write_path(self, dir, file_name=None):
         self.preview_update_timer.stop()
@@ -132,31 +135,45 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
     def toggle_trigger(self):
         self.cam.cam.TriggerMode = 'On' if self.trigger_toggle.isChecked() else 'Off'
+        self.change_framerate_display()
 
     def edit_gain(self):
         gain_txt = self.gain_edit.text()
         if gain_txt.lower()=='auto':
-            self.cam.cam.GainAuto = 'Continuous'
-            self.gain_edit.setText('Auto')
-        elif gain_txt.isnumeric():
+            self.cam.set_cam_attr('GainAuto', 'Continuous')
+            self.change_gain_display()
+        elif gain_txt.isnumeric(): # TODO: better handling of numeric text
             self.cam.cam.GainAuto = 'Off'
-            self.cam.cam.Gain = float(gain_txt)
-            self.gain_edit.setText(f'{self.cam.cam.Gain:.2f}')
+            self.cam.set_cam_attr('GainAuto', 'Off')
+            self.cam.set_cam_attr('Gain', float(gain_txt))
+            self.change_gain_display()
         else:
-            self.gain_edit.setText(f'{self.cam.cam.Gain:.2f}')
-    
+            self.change_gain_display()
+
+    def change_gain_display(self):
+        self.gain_edit.setText('Auto' if self.cam.get_cam_attr('GainAuto') == 'Continuous' else f'{self.cam.cam.Gain:.2f}')
+
+    def change_exposure_display(self):
+        exposure_us = float(self.cam.get_cam_attr('ExposureTime'))
+        exposure_ms = exposure_us / 1000
+        self.exposure_edit.setText(f'{exposure_ms:.03f}')
+
     def auto_expose(self):
         self.cam.set_cam_attr('ExposureAuto', 'Once')
-        self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f} ms')
+        sleep(0.5)
+        self.cam.set_cam_attr('ExposureAuto', 'Off')
+        self.change_exposure_display()
+        self.change_framerate_display()
 
     def edit_exposure(self):
-        exposure_txt = self.exposure_edit.text()
+        exposure_ms = float(self.exposure_edit.text())
+        exposure_us = exposure_ms * 1000
 
-        new_exposure = float(exposure_txt)*1000
-        print(new_exposure)
+        print(exposure_us)
         self.cam.set_cam_attr('ExposureAuto', 'Off')
-        self.cam.set_cam_attr('ExposureTime', new_exposure)
-        # self.exposure_edit.setText(f'{float(self.cam.cam.ExposureTime)/1000:.3f}')
+        self.cam.set_cam_attr('ExposureTime', exposure_us)
+        self.change_exposure_display()
+        self.change_framerate_display()
 
     def lev_changed(self):
         levels = self.hist.getLevels()
