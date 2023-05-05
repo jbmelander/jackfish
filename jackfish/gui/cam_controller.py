@@ -26,7 +26,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
         if serial_number is None: serial_number = 0
 
-        self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path)
+        self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path, ffmpeg_location=parent.ffmpeg_location)
         self.serial_number = self.cam.serial_number
         
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
@@ -80,7 +80,11 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
         # Start rec/preview before camera, so that no frames are missed.
         if record:
-            self.cam.start_rec()
+            # use nvenc only if the camera's order is less than max nvenc sessions
+            cam_number = list(self.parent.get_modules_of_type(self.__class__).keys()).index(self.barcode)
+            use_nvenc = self.parent.nvidia_gpu and cam_number<self.parent.max_nvenc_sessions
+            print("Using nvenc" if use_nvenc else "NOT using nvenc")
+            self.cam.start_rec(use_nvenc=use_nvenc)
             self.status = Status.RECORDING
         else:
             self.cam.start_preview()

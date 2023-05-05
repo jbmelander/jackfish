@@ -1,6 +1,8 @@
 {
     "main": {
-        "save_dir": "/home/clandinin/Niyathi/fortyhr_data/"
+        "save_dir": "/home/clandinin/Niyathi/fortyhr_data/",
+        "ffmpeg_location": "/usr/bin",
+        "max_nvenc_sessions": 1
     },
     
     "cameras": {
