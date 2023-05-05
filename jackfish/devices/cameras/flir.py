@@ -240,15 +240,19 @@ class FlirCam:
                 if not self.do_record or self.img_queue.qsize() > 1000:
                     print(f'Number of images remaining in queue: {self.img_queue.qsize()}')
                 try:
-                    frame, frame_num, frame_ts, frame_ts_cpu = self.img_queue.get(block=False)
+                    # block=True is important for preventing the writer thread from taking too much
+                    #    clock time away from other threads
+                    frame, frame_num, frame_ts, frame_ts_cpu = self.img_queue.get(block=True, timeout=(1/self.framerate)*10)
 
                     # frame_color = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
                     # self.video_writer.write(frame_color)
                     self.video_writer.writeFrame(frame)
                     self.frame_info_writer.write(f'{frame_num} {frame_ts} {frame_ts_cpu}\n')
                     self.total_frames_written += 1
-                except:
+                except queue.Empty:
                     continue
+                except Exception as e:
+                    print(f"Cam {str(self.serial_number)}: Unexpected exception {e} occurred in rec writer thread.")
 
         self.total_frames_grabbed = 0
         self.total_frames_written = 0
