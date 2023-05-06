@@ -1,5 +1,6 @@
 import os
 import queue, threading
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -29,9 +30,9 @@ class FlirCam:
         else:
             # Following lines are run in set_cam_attrs_from_json in above case.
             self.start(release_trigger_mode=False)
-            self.get_img_dtype()
-            self.get_img_dimensions()
-            self.get_img_framerate()
+            self.dtype = self.get_img_dtype()
+            self.x, self.y = self.get_img_dimensions()
+            self.framerate = self.get_acquisition_framerate()
             self.stop()
 
         assert self.dtype[-1] == '8', 'Data should be in proper bit depth'
@@ -89,9 +90,9 @@ class FlirCam:
 
         # Get key attributes from camera
         self.start(release_trigger_mode=False)
-        self.get_img_dtype()
-        self.get_img_dimensions()
-        self.get_img_framerate()
+        self.dtype = self.get_img_dtype()
+        self.x, self.y = self.get_img_dimensions()
+        self.framerate = self.get_acquisition_framerate()
         self.stop()
 
     def get_cam_attr(self, attr_name):
@@ -171,21 +172,34 @@ class FlirCam:
             self.set_cam_attr('TriggerMode', 'On')
             self.restore_trigger_mode_on_stop = False
 
-    def get_img_framerate(self):
-        if self.cam.__getattr__('TriggerMode') == 'On':
+    def get_acquisition_framerate(self):
+        framerate = None
+        if 'AcquisitionResultingFrameRate' in self.cam.camera_attributes and PySpin.IsReadable(self.cam.camera_attributes['AcquisitionResultingFrameRate']):
+            framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
+        elif 'AcquisitionFrameRate' in self.cam.camera_attributes and PySpin.IsReadable(self.cam.camera_attributes['AcquisitionFrameRate']):
+            framerate = self.cam.__getattr__('AcquisitionFrameRate')
+        elif self.cam.__getattr__('TriggerMode') == 'On':
             self.set_cam_attr('TriggerMode', 'Off')
-            self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
+            if 'AcquisitionResultingFrameRate' in self.cam.camera_attributes and PySpin.IsReadable(self.cam.camera_attributes['AcquisitionResultingFrameRate']):
+                framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
+            elif 'AcquisitionFrameRate' in self.cam.camera_attributes and PySpin.IsReadable(self.cam.camera_attributes['AcquisitionFrameRate']):
+                framerate = self.cam.__getattr__('AcquisitionFrameRate')
+            else:
+                warnings.warn('Could not find framerate attribute.')
             self.set_cam_attr('TriggerMode', 'On')
         else:
-            self.framerate = self.cam.__getattr__('AcquisitionResultingFrameRate')
+            warnings.warn('Could not find framerate attribute.')
+        
+        return framerate
 
     def get_img_dimensions(self):
         # Reversed from numpy convension
-        self.x = self.cam.__getattr__('Width')
-        self.y = self.cam.__getattr__('Height')
+        x = self.cam.__getattr__('Width')
+        y = self.cam.__getattr__('Height')
+        return x, y
 
     def get_img_dtype(self):
-        self.dtype = self.cam.__getattr__('PixelFormat')
+        return self.cam.__getattr__('PixelFormat')
     
     def set_video_out_path(self, path=None):
         if path is None:
