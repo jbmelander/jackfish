@@ -116,7 +116,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.change_framerate_display()
 
     def change_framerate_display(self):
-        fr = self.cam.get_cam_attr('AcquisitionResultingFrameRate')
+        fr = self.cam.get_acquisition_framerate()
         self.fr_edit.setText(f'{fr:.02f}')
 
     def set_write_path(self, dir, file_name=None):
