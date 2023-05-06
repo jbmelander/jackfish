@@ -20,7 +20,7 @@ setup(
         'spinnaker-python',
         'numpy',
         'labjack-ljm',
-        'opencv-python'],
+        'scikit-video'],
     include_package_data=True,
     zip_safe=False,
     entry_points={
