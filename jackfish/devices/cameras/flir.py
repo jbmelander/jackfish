@@ -279,7 +279,7 @@ class FlirCam:
         # self.video_writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
         self.video_writer = skvideo.io.FFmpegWriter(self.video_out_path, 
                                                     inputdict={'-framerate':str(int(self.framerate))}, 
-                                                    outputdict={'-vcodec': 'h264_nvenc' if use_nvenc else 'libx264'})
+                                                    outputdict={'-vcodec': 'h264_nvenc' if use_nvenc else 'libx264', '-tune': 'film'})
         self.frame_info_writer = open(self.video_out_path.replace('.mp4', '.txt'), 'w')
 
         self.frame_num = 0
