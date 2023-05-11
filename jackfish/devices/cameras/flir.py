@@ -250,6 +250,8 @@ class FlirCam:
                 else:
                     pass
 
+            print(f"Cam {str(self.serial_number)}: Record thread completed.")
+
         def rec_writer():
             print(f"Cam {str(self.serial_number)}: writer started")
             while self.do_record or self.img_queue.qsize()>0:
@@ -270,6 +272,13 @@ class FlirCam:
                     continue
                 except Exception as e:
                     print(f"Cam {str(self.serial_number)}: Unexpected exception {e} occurred in rec writer thread.")
+
+            self.video_writer.close()
+            self.frame_info_writer.close()
+        
+            print(f"Cam {str(self.serial_number)}: Writer thread completed.")
+            print(f"Cam {str(self.serial_number)}: Total frames grabbed = {self.total_frames_grabbed}")
+            print(f"Cam {str(self.serial_number)}: Total frames written = {self.total_frames_written}")
 
         self.total_frames_grabbed = 0
         self.total_frames_written = 0
@@ -294,17 +303,6 @@ class FlirCam:
         print(f"Cam {str(self.serial_number)}: Stopping camera record.")
 
         self.do_record = False
-
-        self.record_thread.join()
-        print(f"Cam {str(self.serial_number)}: Record thread completed.")
-        self.writer_thread.join()
-        print(f"Cam {str(self.serial_number)}: Writer thread completed.")
-
-        self.video_writer.close()
-        self.frame_info_writer.close()
-        print(f"Cam {str(self.serial_number)}: Total frames grabbed = {self.total_frames_grabbed}")
-        print(f"Cam {str(self.serial_number)}: Total frames written = {self.total_frames_written}")
-        print(f"Cam {str(self.serial_number)}: Camera record finished.")
 
     def close(self):
         self.cam.close()
