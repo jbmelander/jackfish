@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Terminal=false
+Terminal=true
 Name=Jackfish
-Icon=/home/clandinin/src/jackfish/assets/jf.jpg
-Exec=bash -c "source /home/clandinin/venvs/flyvis/bin/activate; /home/clandinin/venvs/flyvis/bin/python /home/clandinin/src/jackfish/main_controller.py"
+Icon=/home/lm/src/jackfish/assets/jf.jpg
+Exec=bash -c "source /home/lm/venvs/lm310/bin/activate; bash /home/lm/src/jackfish/build.sh /home/lm/src/jackfish; python /home/lm/src/jackfish/jackfish/gui/main_controller.py"
