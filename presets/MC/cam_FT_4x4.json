@@ -2,15 +2,17 @@
 "camera_attrs": {
     "PixelFormat": "Mono8",
 
-    "BinningHorizontal": 2,
-    "BinningVertical": 2,
+    "BinningHorizontal": 4,
+    "BinningVertical": 4,
 
     "ExposureMode": "Timed",
     "ExposureAuto": "Off",
-    "ExposureTime": 2500.0,
+    "ExposureTime": 998.0,
 
-    "Width": 720,
-    "Height": 540,
+    "Width": 228,
+    "Height": 240,
+    "OffsetX": 32,
+    "OffsetY": 16,
 
     "LineSelector": "Line1",
     "LineMode": "Output",
@@ -32,6 +34,6 @@
     "TriggerActivation": "RisingEdge",
 
     "AcquisitionFrameRateEnable": true,
-    "AcquisitionFrameRate": 350.0
+    "AcquisitionFrameRate": 300.0
     }
 }
