@@ -76,6 +76,11 @@ class FlirCam:
         '''
         with open(json_path, 'r') as f:
             attrs_dict = json.load(f)
+        
+        # Change offsets to 0 to ensure that change in binning can occur
+        self.set_cam_attr('OffsetX', 0)
+        self.set_cam_attr('OffsetY', 0)
+
         if 'camera_attrs' in attrs_dict:
             cam_attrs = attrs_dict['camera_attrs']
             for _ in range(n_repeat):
