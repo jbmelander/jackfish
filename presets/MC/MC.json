@@ -1,8 +1,8 @@
 {
     "main": {
-        "save_dir": "/home/clandinin/Niyathi/fortyhr_data/",
+        "save_dir": "/fastdata/minseung/fortyhr_data",
         "ffmpeg_location": "/usr/bin",
-        "max_nvenc_sessions": 1
+        "max_nvenc_sessions": 5
     },
     
     "cameras": {
@@ -19,7 +19,7 @@
     "DAQs": {
         "Main": {
             "serial_number": "470028243",
-            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/daq_470028243_FTcam_only.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/daq_470028243_all_cams.json"
         }
     }
 }
