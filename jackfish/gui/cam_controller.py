@@ -83,7 +83,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if record:
             # use nvenc only if the camera's order is less than max nvenc sessions
             cam_number = list(self.parent.get_modules_of_type(self.__class__).keys()).index(self.barcode)
-            use_nvenc = self.parent.nvidia_gpu and cam_number<self.parent.max_nvenc_sessions
+            use_nvenc = self.parent.n_nvidia_gpus > 0 and cam_number<self.parent.max_nvenc_sessions
             print(f"Cam {self.cam.serial_number}:" + "Using nvenc" if use_nvenc else "NOT using nvenc")
             self.cam.start_rec(use_nvenc=use_nvenc)
             self.status = Status.RECORDING

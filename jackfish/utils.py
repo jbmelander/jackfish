@@ -13,14 +13,18 @@ def message_window(title="Alert", text=""):
     msg.setText(text)
     msg.exec_()
 
-def check_nvidia_gpu():
+def count_nvidia_gpus():
     try:
-        subprocess.check_output('nvidia-smi')
-        print('Nvidia GPU detected!')
-        return True
+        ps = subprocess.Popen(('nvidia-smi', '--query-gpu=name', '--format=csv,noheader'), stdout=subprocess.PIPE)
+        output = subprocess.check_output(('wc', '-l'), stdin=ps.stdout).decode()
+        ps.wait()
+        n_gpus = int(output)
+
+        print(f'{n_gpus} Nvidia GPUs detected!')
+        return n_gpus
     except Exception: # this command not being found can raise quite a few different errors depending on the configuration
         print('No Nvidia GPU in system!')
-        return False
+        return 0
 
 def get_ffmpeg_location():
     try:

@@ -22,6 +22,7 @@ class FlirCam:
         self.release_trigger_on_start = False
         self.release_trigger_delay = 0
         self.restore_trigger_mode_on_stop = False
+        self.writer_gpu = -1
 
         skvideo.setFFmpegPath(ffmpeg_location)
 
@@ -92,6 +93,8 @@ class FlirCam:
                 self.release_trigger_on_start = True
             if 'ReleaseTriggerModeDelay' in control_attrs:
                 self.release_trigger_delay = control_attrs['ReleaseTriggerModeDelay']
+            if 'writer_gpu' in control_attrs:
+                self.writer_gpu = control_attrs['writer_gpu']
 
         # Get key attributes from camera
         self.start(release_trigger_mode=False)
@@ -293,7 +296,7 @@ class FlirCam:
         # self.video_writer = cv2.VideoWriter(self.video_out_path, fourcc, int(self.framerate), (self.x, self.y))
         self.video_writer = skvideo.io.FFmpegWriter(self.video_out_path, 
                                                     inputdict={'-framerate':str(int(self.framerate))}, 
-                                                    outputdict={'-vcodec': 'h264_nvenc', '-tune': 'hq'} if use_nvenc else {'-vcodec': 'libx264', '-tune': 'film'})
+                                                    outputdict={'-vcodec': 'h264_nvenc', '-tune': 'hq', '-gpu': str(self.writer_gpu)} if use_nvenc else {'-vcodec': 'libx264', '-tune': 'film'})
         self.frame_info_writer = open(self.video_out_path.replace('.mp4', '.txt'), 'w')
 
         self.frame_num = 0

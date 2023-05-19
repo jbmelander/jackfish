@@ -33,7 +33,7 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         self.expt_path = os.environ['HOME']
         self.new_path_set = False
 
-        self.nvidia_gpu = utils.check_nvidia_gpu()
+        self.n_nvidia_gpus = utils.count_nvidia_gpus()
         self.max_nvenc_sessions = 2
         self.ffmpeg_location = utils.get_ffmpeg_location()
 
