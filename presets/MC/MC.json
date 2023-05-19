@@ -6,13 +6,17 @@
     },
     
     "cameras": {
-        "Top": {
-            "serial_number": "22248111",
-            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/cam_22248111.json"
-        },
         "Left": {
             "serial_number": "20243354",
-            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/cam_20243354.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/cam_Left.json"
+        },
+        "Top": {
+            "serial_number": "22248111",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/cam_Top_cropped.json"
+        },
+        "Top_View": {
+            "serial_number": "22248111",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/cam_Top_full.json"
         }
     },
 

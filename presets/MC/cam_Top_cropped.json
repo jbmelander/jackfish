@@ -1,0 +1,48 @@
+{
+"camera_attrs": {
+    "PixelFormat": "Mono8",
+
+    "VideoMode": "Mode0",
+    "BinningHorizontal": 1,
+    "BinningVertical": 1,
+
+    "Width": 1024,
+    "Height": 700,
+    "OffsetY": 674,
+    "OffsetX": 488,
+
+    "ExposureMode": "Timed",
+    "ExposureAuto": "Off",
+    "ExposureTime": 2500.0,
+    "ExposureCompensationAuto": "Off",
+
+    "LineSelector": "Line1",
+    "LineMode": "Output",
+    "LineSource": "ExposureActive",
+    "LineInverter": true,
+
+    "GainAuto": "Off",
+    "Gain": 0.0,
+
+    "BlackLevelClampingEnable": false,
+
+    "GammaEnabled": false,
+
+    "SharpnessEnabled": false,
+    "HueEnabled": false,
+    "SaturationEnabled": false,
+
+    "AcquisitionFrameRateControl": true,
+    "AcquisitionFrameRate": 257.0,
+
+    "TriggerMode": "On",
+    "TriggerSource": "Line0",
+    "TriggerSelector": "FrameStart",
+    "TriggerActivation": "RisingEdge"
+    },
+"control_attrs": {
+    "ReleaseTriggerModeOnStart": true,
+    "ReleaseTriggerModeDelay": 1,
+    "writer_gpu": 0
+    }
+}

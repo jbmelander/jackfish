@@ -7,12 +7,13 @@
     "BinningVertical": 1,
 
     "Width": 2048,
-    "Height": 700,
-    "OffsetY": 674,
+    "Height": 2048,
+    "OffsetX": 0,
+    "OffsetY": 0,
 
     "ExposureMode": "Timed",
     "ExposureAuto": "Off",
-    "ExposureTime": 1500.0,
+    "ExposureTime": 2500.0,
     "ExposureCompensationAuto": "Off",
 
     "LineSelector": "Line1",
@@ -32,7 +33,7 @@
     "SaturationEnabled": false,
 
     "AcquisitionFrameRateControl": true,
-    "AcquisitionFrameRate": 257.0,
+    "AcquisitionFrameRate": 90.0,
 
     "TriggerMode": "On",
     "TriggerSource": "Line0",
@@ -41,6 +42,7 @@
     },
 "control_attrs": {
     "ReleaseTriggerModeOnStart": true,
-    "ReleaseTriggerModeDelay": 1
+    "ReleaseTriggerModeDelay": 1,
+    "writer_gpu": 0
     }
 }
