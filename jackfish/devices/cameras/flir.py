@@ -47,12 +47,15 @@ class FlirCam:
     def get_cam_serial_number(self):
         cam = self.cam
         serial_number_candidates = [x for x in cam.camera_attributes.keys() if "serialnumber" in x.lower()]
-        if len(serial_number_candidates) != 1:
-            print(f'Found {len(serial_number_candidates)} serial number candidates.')
-            return None
-        else:
-            serial_number = cam.__getattr__(serial_number_candidates[0])
-            return serial_number
+        if len(serial_number_candidates) == 0:
+            if 'DeviceID' in cam.camera_attributes.keys():
+                print('Using DeviceID instead of SerialNumber.')
+                return cam.__getattr__('DeviceID')
+        elif len(serial_number_candidates) > 1:
+            print(f'Found {len(serial_number_candidates)} serial number candidates; using first one.')
+        
+        serial_number = cam.__getattr__(serial_number_candidates[0])
+        return serial_number
 
     def gen_cam_attrs_json(self):
         cam = self.cam
