@@ -24,7 +24,10 @@ class FlirCam:
         self.restore_trigger_mode_on_stop = False
         self.writer_gpu = -1
 
-        skvideo.setFFmpegPath(ffmpeg_location)
+        if ffmpeg_location is not None and os.path.exists(ffmpeg_location):
+            skvideo.setFFmpegPath(ffmpeg_location)
+        else:
+            print(f'FFMPEG directory {ffmpeg_location} does not exist')
 
         if attrs_json_fn is not None:
             self.set_cam_attrs_from_json(attrs_json_fn, n_repeat=3)
