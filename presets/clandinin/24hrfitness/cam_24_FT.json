@@ -1,0 +1,30 @@
+{
+"camera_attrs": {
+    "BinningHorizontal": 1,
+    "BinningVertical": 1,
+
+    "ExposureMode": "Timed",
+    "ExposureAuto": "Off",
+    "ExposureTime": 1015.73,
+
+    "Width": 512,
+    "Height": 492,
+    "OffsetX": 504,
+    "OffsetY": 274,
+    
+    "GainAuto": "Off",
+    "Gain": 15.86,
+
+    "BlackLevelClampingEnable": false,
+
+    "GammaEnable": false,
+
+    "SharpeningEnable": false,
+    "SharpeningAuto": false,
+
+    "TriggerMode": "Off",
+
+    "AcquisitionFrameRateEnable": true,
+    "AcquisitionFrameRate": 305.0
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "main": {
+        "save_dir": "~/jackfish_data/"
+    },
+    
+    "cameras": {
+        "Fictrac": {
+            "serial_number": "18299643",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/24hrfitness/cam_24_FT.json"
+        }
+    },
+    "DAQs": {
+    }
+}
