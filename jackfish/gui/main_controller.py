@@ -108,10 +108,13 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
         if init:
             if os.path.exists(os.path.expanduser('~/.config/jackfish/default.jkfh')):
                 with open(os.path.expanduser('~/.config/jackfish/default.jkfh'),'r') as f:
-                    self.preset_path = f.readline()
-                self.initialize_preset(self.preset_path)
+                    preset_path = f.readline()
+                if os.path.exists(preset_path):
+                    self.preset_path = preset_path
+                    self.initialize_preset(preset_path)
+                else:
+                    self.preset_path = None
             else:
-                preset_dict = {"main": {}, "cameras": {"Default": {}}, "DAQs": {"Default": {}}}
                 self.preset_path = None
         else:
             presets_dir = os.path.join(utils.ROOT_DIR,'presets')
