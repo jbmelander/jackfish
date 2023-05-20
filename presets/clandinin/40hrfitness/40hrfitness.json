@@ -6,17 +6,17 @@
     "cameras": {
         "Fictrac_2x2": {
             "serial_number": "20243355",
-            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/cam_FT_2x2.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/40hrfitness/cam_FT_2x2.json"
         },
         "Fictrac_4x4": {
             "serial_number": "20243355",
-            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/cam_FT_4x4.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/40hrfitness/cam_FT_4x4.json"
         }
     },
     "DAQs": {
         "Server": {
             "serial_number": "440017544",
-            "attrs_json": "/home/clandinin/src/jackfish/presets/MC/daq_440017544.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/40hrfitness/daq_440017544.json"
         }
     }
 }
