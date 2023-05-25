@@ -225,12 +225,17 @@ class FlirCam:
         try:
             # PySpin image contains information about the frame, such as timestamp, gain, exposure, etc.
             image = self.cam.get_image(wait=wait)
-            self.frame = image.GetNDArray()
-            self.frame_ts = image.GetTimeStamp() / 1e9 # in seconds
-            self.frame_ts_cpu = time.time()
-            self.frame_num += 1
+
+            frame_ts_cpu = time.time()            
+            frame = image.GetNDArray()
+            frame_ts = image.GetTimeStamp() / 1e9 # in seconds
+            frame_num = self.frame_num + 1
             
-            return self.frame, self.frame_num, self.frame_ts, self.frame_ts_cpu
+            self.frame_num = frame_num
+            self.frame = frame
+            self.frame_ts = frame_ts
+
+            return frame, frame_num, frame_ts, frame_ts_cpu
         
         except PySpin.SpinnakerException as e:
             # print(f'Error: {e}')
