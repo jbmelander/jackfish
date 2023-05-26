@@ -23,6 +23,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
         self.status = Status.STANDBY
 
+        self.scanrate = 1
+
         # Initialize Labjack
         self.daq = LabJack(serial_number=serial_number, name=device_name)
         self.serial_number = self.daq.serial_number
@@ -52,10 +54,6 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.write_path = ""
 
         # Labjack preview
-        self.preview_slider.setMinimum(0)
-        self.preview_slider.setMaximum(20000)
-        self.preview_slider.sliderReleased.connect(self.set_slider)
-
         self.data = [0]
         preview_plotItem = self.preview.getPlotItem()
         preview_plotItem.setLabel("bottom", "Time [ms]")
@@ -66,6 +64,12 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
         self.preview_timer = QtCore.QTimer()
         self.preview_timer.timeout.connect(self.preview_updater)
+
+        self.preview_slider.setMinimum(2)
+        self.preview_slider.setMaximum(int(self.scanrate * 10)) # 10 seconds of data
+        self.preview_slider.setValue(int(self.scanrate)) # 1 second of data
+        self.preview_slider.sliderReleased.connect(self.set_slider)
+        self.set_slider()
 
         self.update_ui()
 
@@ -216,6 +220,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
                 curve_t = np.arange(0, len(data_to_plot)) / self.scanrate * 1000 # ms
                 self.preview_plotDataItem.setData(curve_t, data_to_plot)
             except:
+                print("Error in preview_updater")
                 curve_t = np.arange(0, len(self.data)) / self.scanrate * 1000 # ms
                 self.preview_plotDataItem.setData(curve_t, self.data)
             self.preview.show() 
