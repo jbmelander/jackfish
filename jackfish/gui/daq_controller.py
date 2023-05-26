@@ -64,8 +64,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.preview.show()
         self.show_preview = False
 
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.preview_updater)
+        self.preview_timer = QtCore.QTimer()
+        self.preview_timer.timeout.connect(self.preview_updater)
 
         self.update_ui()
 
@@ -114,7 +114,7 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         scansPerRead = int(self.scanrate/n_channels)
         if self.status != Status.STANDBY:
             utils.message_window("Error", "Currently recording or previewing.")
-        self.timer.start()
+        self.preview_timer.start()
         if record:
             self.status = Status.RECORDING
             self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, scansPerRead = scansPerRead, dataQ_len_sec=15)
@@ -128,14 +128,14 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
     def stop(self):
         if self.status == Status.STANDBY:
             utils.message_window("Error", "Already on standby.")
-        self.timer.stop()
+        self.preview_timer.stop()
         self.daq.stop_stream()
         self.status = Status.STANDBY
 
         self.update_ui()
 
     def set_write_path(self, dir, file_name=None):
-        self.timer.stop()
+        self.preview_timer.stop()
         if file_name is None:
             file_name = f'daq_{self.daq.name}_{self.daq.serial_number}.jfdaqdata'
         self.write_path = os.path.join(dir, file_name)
@@ -191,11 +191,11 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
 
     def set_slider(self):
         # self.cam_timer.stop()
-        self.timer.stop()
+        self.preview_timer.stop()
 
         self.slider_val = int(self.preview_slider.value())
         # self.cam_timer.start()
-        self.timer.start()
+        self.preview_timer.start()
 
     def set_chan_preview(self):
         self.chan_preview_idx = self.chan_preview_drop.currentIndex()
