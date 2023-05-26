@@ -117,11 +117,11 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.preview_timer.start()
         if record:
             self.status = Status.RECORDING
-            self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, scansPerRead = scansPerRead, dataQ_len_sec=15)
-            # self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15, socket_target=(None,25025))
+            self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, scansPerRead = scansPerRead, preview_queue_len_sec=15)
+            # self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, preview_queue_len_sec=15, socket_target=(None,25025))
         else:
             self.status = Status.PREVIEWING
-            self.daq.start_stream(do_record=False, input_channels=self.input_channels, scanRate=self.scanrate, dataQ_len_sec=15)
+            self.daq.start_stream(do_record=False, input_channels=self.input_channels, scanRate=self.scanrate, preview_queue_len_sec=15)
 
         self.update_ui()
 
@@ -200,17 +200,17 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
     def set_chan_preview(self):
         self.chan_preview_idx = self.chan_preview_drop.currentIndex()
         if self.chan_preview_idx == 0: # None
-            self.daq.stop_collect_dataQ()
+            self.daq.stop_collect_preview_queue()
             self.show_preview = False
         else:
             self.chan_preview_idx -= 1 # Not None; subtract index by 1 to correct for the None
-            self.daq.start_collect_dataQ()
+            self.daq.start_collect_preview_queue()
             self.show_preview = True
 
     def preview_updater(self):
         if self.show_preview:
 
-            self.data = list(self.daq.dataQ)[self.chan_preview_idx:-1:len(self.input_channels)]
+            self.data = list(self.daq.preview_queue)[self.chan_preview_idx:-1:len(self.input_channels)]
             try:
                 data_to_plot = self.data[-self.slider_val:]
                 curve_t = np.arange(0, len(data_to_plot)) / self.scanrate * 1000 # ms

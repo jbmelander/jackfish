@@ -18,8 +18,8 @@ class LabJack():
         self.name = name
         
         # Store initialization arguments
-        self.dataQ = []
-        self.collect_dataQ = False
+        self.preview_queue = []
+        self.collect_preview_queue = False
         self.streaming = False
         
         # Initialize ljm T4/T7 handle
@@ -73,7 +73,7 @@ class LabJack():
             "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
             (self.info[0], self.info[1], self.info[2], ljm.numberToIP(self.info[3]), self.info[4], self.info[5]))
 
-    def start_stream(self, do_record=True, record_filepath="", input_channels={"AIN0": "Input 0", "AIN1": "Input 1"}, scanRate=3000, scansPerRead=1000, dataQ_len_sec=10, socket_target=None):
+    def start_stream(self, do_record=True, record_filepath="", input_channels={"AIN0": "Input 0", "AIN1": "Input 1"}, scanRate=3000, scansPerRead=1000, preview_queue_len_sec=10, socket_target=None):
         self.input_channels = input_channels
         if isinstance(self.input_channels, list):
              self.input_channels = {chan:chan for chan in self.input_channels}
@@ -84,8 +84,8 @@ class LabJack():
 
         self.aScanList = ljm.namesToAddresses(self.n_input_channels, list(self.input_channels.keys()))[0]
 
-        dataQ_len = int(dataQ_len_sec * scanRate * self.n_input_channels)
-        self.dataQ = deque([0]*dataQ_len, maxlen=dataQ_len) #only for visualization; not for storing whole data
+        preview_queue_len = int(preview_queue_len_sec * scanRate * self.n_input_channels)
+        self.preview_queue = deque([0]*preview_queue_len, maxlen=preview_queue_len) #only for visualization; not for storing whole data
 
         self.do_record = do_record
         self.record_filepath = record_filepath
@@ -213,8 +213,8 @@ class LabJack():
                     # self.record_outfile.write(str(data)[1:-1] + "\n") # [1:-1] removes square brackets
                     # self.record_outfile.flush()
                 
-                if self.collect_dataQ:
-                    self.dataQ.extend(data)
+                if self.collect_preview_queue:
+                    self.preview_queue.extend(data)
                  
             except ljm.LJMError:
                 ljme = sys.exc_info()[1]
@@ -230,10 +230,10 @@ class LabJack():
             if self.do_record:
                 self.record_outfile.close()
     
-    def start_collect_dataQ(self):
-        self.collect_dataQ = True
-    def stop_collect_dataQ(self):
-        self.collect_dataQ = False
+    def start_collect_preview_queue(self):
+        self.collect_preview_queue = True
+    def stop_collect_preview_queue(self):
+        self.collect_preview_queue = False
 
     
     def close(self):
