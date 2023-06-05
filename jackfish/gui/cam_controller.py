@@ -3,10 +3,9 @@ import os
 from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication
 
-from jackfish.devices.cameras.flir import FlirCam
 from cam_gui import Ui_CamWindow
 
 from jackfish import utils
@@ -23,13 +22,15 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.attrs_json_path = attrs_json_path
 
         self.status = Status.STANDBY
-        
 
         if serial_number is None: serial_number = 0
 
+        from jackfish.devices.cameras.flir import FlirCam
         self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path, ffmpeg_location=parent.ffmpeg_location)
         self.serial_number = self.cam.serial_number
         
+        icon_path = os.path.join(utils.ROOT_DIR,'assets/icon.png')
+        self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
 
         self.preview_update_timer = QtCore.QTimer()

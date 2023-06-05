@@ -17,7 +17,6 @@ setup(
         'qt5-applications',
         'qt5-tools',
         'simple-pyspin',
-        'spinnaker-python',
         'numpy',
         'matplotlib',
         'labjack-ljm',

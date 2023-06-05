@@ -6,9 +6,9 @@ import time
 from datetime import timedelta
 
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QMessageBox
-from PyQt5.QtGui import QMovie, QPixmap
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QTimer
 from cam_controller import CamUI
 from daq_controller import DAQUI
@@ -22,9 +22,13 @@ class MainUI(QtWidgets.QMainWindow, main_gui.Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainUI, self).__init__(parent)
         self.setupUi(self)
-        
-        image_dir = os.path.join(utils.ROOT_DIR,'assets/pike.jpg')
-        self.label.setPixmap(QPixmap(image_dir))
+
+        icon_path = os.path.join(utils.ROOT_DIR,'assets/icon.png')
+        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle('Jackfish')
+
+        jf_image_path = os.path.join(utils.ROOT_DIR,'assets/pike.jpg')
+        self.label.setPixmap(QPixmap(jf_image_path))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
 

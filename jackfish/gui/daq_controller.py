@@ -5,6 +5,7 @@ import json
 import numpy as np
 
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
 from jackfish.devices.daqs.labjack import LabJack
@@ -30,6 +31,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.serial_number = self.daq.serial_number
 
         ### UI ###
+        icon_path = os.path.join(utils.ROOT_DIR,'assets/icon.png')
+        self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f'DAQ {self.daq.name} ({self.daq.serial_number})')
         # Parse attributes
         self.load_preset_push.clicked.connect(lambda: self.parse_attrs_json(attrs_json_path=None))
