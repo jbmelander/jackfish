@@ -1,5 +1,5 @@
 # jackfish
-actively maintained by [Minseung Choi](https://minseung.com/) and [Joshua B. Melander](https://www.jbmelander.com)
+actively maintained by [Minseung Choi](https://minseung.com/) and [Joshua B. Melander](https://jbmelander.com)
 1. [Installation and Build](#Installation-and-Build)
 2. [Quickstart](#Quickstart)
 3. Contributing
