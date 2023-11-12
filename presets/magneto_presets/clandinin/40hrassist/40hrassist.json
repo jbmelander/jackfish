@@ -1,0 +1,29 @@
+{
+    "main": {
+        "save_dir": "/fastdata/minseung/fortyhr_data",
+        "ffmpeg_location": "/usr/bin",
+        "max_nvenc_sessions": 5
+    },
+    
+    "cameras": {
+        "Left": {
+            "serial_number": "20243354",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/40hrassist/cam_Left.json"
+        },
+        "Top": {
+            "serial_number": "22248111",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/40hrassist/cam_Top_cropped.json"
+        },
+        "Top_View": {
+            "serial_number": "22248111",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/40hrassist/cam_Top_full.json"
+        }
+    },
+
+    "DAQs": {
+        "Main": {
+            "serial_number": "470028243",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/40hrassist/daq_470028243_all_cams.json"
+        }
+    }
+}

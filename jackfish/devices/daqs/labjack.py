@@ -197,8 +197,14 @@ class LabJack():
 
                 if self.socket_target is not None:
                     try:
-                        data_to_send = data # should be changed as appropriate for use
-                        data_to_send = bytes(data_to_send,'utf-8')
+                        data_to_send = np.asarray(data).reshape((-1, self.n_input_channels))
+                        velocity = int(np.sum(np.abs(np.diff(data_to_send[:,4]))))
+                        # print('velocity', velocity)
+                        # should be changed as appropriate for use
+                        message = f"RE, {0}, {velocity}, {t}\n"
+
+                        data_to_send = bytes(message, 'utf-8')
+
                         self.client_socket.sendto(data_to_send,('127.0.0.1',self.port))
                         # self.socket_outfile.write(bytes(str(data_to_send) + "\n"),'utf-8')
                         # self.socket_outfile.flush()

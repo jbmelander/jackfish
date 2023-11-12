@@ -1,0 +1,40 @@
+{
+"camera_attrs": {
+    "PixelFormat": "Mono8",
+
+    "BinningHorizontal": 2,
+    "BinningVertical": 2,
+
+    "ExposureMode": "Timed",
+    "ExposureAuto": "Off",
+    "ExposureTime": 2500.0,
+
+    "Width": 720,
+    "Height": 540,
+
+    "LineSelector": "Line1",
+    "LineMode": "Output",
+    "LineSource": "ExposureActive",
+
+    "GainAuto": "Off",
+    "Gain": 0.0,
+
+    "BlackLevelClampingEnable": false,
+
+    "GammaEnable": false,
+
+    "SharpeningEnable": false,
+    "SharpeningAuto": false,
+
+    "TriggerMode": "On",
+    "TriggerSource": "Line0",
+    "TriggerSelector": "AcquisitionStart",
+    "TriggerActivation": "RisingEdge",
+
+    "AcquisitionFrameRateEnable": true,
+    "AcquisitionFrameRate": 350.0
+    },
+"control_attrs": {
+    "writer_gpu": 1
+    }
+}

@@ -1,0 +1,4 @@
+{
+"read_chs": ["AIN1 <LEFT_PD>", "AIN2 <CENTER_PD>", "AIN4 <ONSCREEN_PD>", "FIO0 <RWA>", "FIO1 <RWB>", "EIO5 <EYECAM>", "EIO0 <NPSTART>", "EIO6 <NPSYNC>"],
+"sample_rate": 5000
+}

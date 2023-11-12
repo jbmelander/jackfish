@@ -1,0 +1,5 @@
+{
+"read_chs": [],
+"sample_rate": 5000,
+"trigger_chs": ["FIO4", "FIO5", "FIO6", "FIO7"]
+}

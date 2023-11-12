@@ -6,18 +6,18 @@
     "cameras": {
         "BodyCam": {
             "serial_number": "20489161",
-            "attrs_json": "/home/dennis/Code/jackfish/presets/JBM/flea.json"
+            "attrs_json": "/home/baccuslab/src/jackfish/presets/JBM/flea.json"
         },
         "EyeTracker": {
             "serial_number": "22248110",
-            "attrs_json": "/home/dennis/Code/jackfish/presets/JBM/grasshopper.json"
+            "attrs_json": "/home/baccuslab/src/jackfish/presets/JBM/grasshopper.json"
         }
     },
 
     "DAQs": {
         "Main": {
             "serial_number": "470022145",
-            "attrs_json": "/home/dennis/Code/jackfish/presets/JBM/daq_470022145.json"
+            "attrs_json": "/home/baccuslab/src/jackfish/presets/JBM/daq_470022145.json"
         }
     }
 }

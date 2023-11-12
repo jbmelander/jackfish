@@ -118,17 +118,23 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         n_channels = len(self.input_channels.keys())
         print(n_channels)
         print('0000')
-        scansPerRead = int(self.scanrate/n_channels)
+        scansPerRead = int(self.scanrate/n_channels*0.1)
+
         if self.status != Status.STANDBY:
             utils.message_window("Error", "Currently recording or previewing.")
         self.preview_timer.start()
         if record:
             self.status = Status.RECORDING
-            self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, scansPerRead = scansPerRead, preview_queue_len_sec=15)
-            # self.daq.start_stream(do_record=record, record_filepath=self.write_path, input_channels=self.input_channels, scanRate=self.scanrate, preview_queue_len_sec=15, socket_target=(None,25025))
+            self.daq.start_stream(do_record=record, record_filepath=self.write_path, 
+                                  input_channels=self.input_channels, 
+                                  scanRate=self.scanrate, scansPerRead = scansPerRead, 
+                                  preview_queue_len_sec=15, socket_target=('127.0.0.1', 33336))
         else:
             self.status = Status.PREVIEWING
-            self.daq.start_stream(do_record=False, input_channels=self.input_channels, scanRate=self.scanrate, preview_queue_len_sec=15)
+            self.daq.start_stream(do_record=False, 
+                                  input_channels=self.input_channels, 
+                                  scanRate=self.scanrate, scansPerRead = scansPerRead, 
+                                  preview_queue_len_sec=15, socket_target=('127.0.0.1', 33336))
 
         self.update_ui()
 
