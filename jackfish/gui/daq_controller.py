@@ -18,7 +18,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
     def __init__(self, serial_number=None, device_name=None, attrs_json_path=None, parent=None, barcode=None):
         super(DAQUI, self).__init__(None)
         self.setupUi(self)
-
+        
+        self.spr = 1000
         self.parent = parent
         self.barcode = barcode
 
@@ -38,6 +39,8 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.load_preset_push.clicked.connect(lambda: self.parse_attrs_json(attrs_json_path=None))
         # Set Labjack Scanrate
         self.sr_edit.editingFinished.connect(self.set_scanrate)
+        # Set Labjack samp_per_read
+        self.spr_edit.editingFinished.connect(self.set_spr)
         # Labjack Scan channels
         self.read_chan_edit.editingFinished.connect(self.set_chans)
         # Set Labjack Trigger channels
@@ -75,6 +78,9 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         self.set_slider()
 
         self.update_ui()
+    
+    def set_spr(self):
+        self.spr= int(self.spr_edit.text())
 
     def parse_attrs_json(self, attrs_json_path=None):
         if attrs_json_path is None:
@@ -118,23 +124,42 @@ class DAQUI(QtWidgets.QFrame, Ui_DAQWindow):
         n_channels = len(self.input_channels.keys())
         print(n_channels)
         print('0000')
-        scansPerRead = int(self.scanrate/n_channels*0.1)
+
+        # Get text in the edit
+        scansPerRead = int(self.spr)
+        port = int(self.port_edit.text())
 
         if self.status != Status.STANDBY:
             utils.message_window("Error", "Currently recording or previewing.")
         self.preview_timer.start()
-        if record:
-            self.status = Status.RECORDING
-            self.daq.start_stream(do_record=record, record_filepath=self.write_path, 
-                                  input_channels=self.input_channels, 
-                                  scanRate=self.scanrate, scansPerRead = scansPerRead, 
-                                  preview_queue_len_sec=15, socket_target=('127.0.0.1', 33336))
+
+
+        if self.ip_checkbox.isChecked():
+            if record:
+                self.status = Status.RECORDING
+                self.daq.start_stream(do_record=record, record_filepath=self.write_path, 
+                                      input_channels=self.input_channels, 
+                                      scanRate=self.scanrate, scansPerRead = scansPerRead, 
+                                      preview_queue_len_sec=15, socket_target=('127.0.0.1', port))
+            else:
+                self.status = Status.PREVIEWING
+                self.daq.start_stream(do_record=False, 
+                                      input_channels=self.input_channels, 
+                                      scanRate=self.scanrate, scansPerRead = scansPerRead, 
+                                      preview_queue_len_sec=15, socket_target=('127.0.0.1', port))
         else:
-            self.status = Status.PREVIEWING
-            self.daq.start_stream(do_record=False, 
-                                  input_channels=self.input_channels, 
-                                  scanRate=self.scanrate, scansPerRead = scansPerRead, 
-                                  preview_queue_len_sec=15, socket_target=('127.0.0.1', 33336))
+            if record:
+                self.status = Status.RECORDING
+                self.daq.start_stream(do_record=record, record_filepath=self.write_path, 
+                                      input_channels=self.input_channels, 
+                                      scanRate=self.scanrate, scansPerRead = scansPerRead, 
+                                      preview_queue_len_sec=15)
+            else:
+                self.status = Status.PREVIEWING
+                self.daq.start_stream(do_record=False, 
+                                      input_channels=self.input_channels, 
+                                      scanRate=self.scanrate, scansPerRead = scansPerRead, 
+                                      preview_queue_len_sec=15)
 
         self.update_ui()
 
