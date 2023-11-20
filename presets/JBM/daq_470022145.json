@@ -1,4 +1,4 @@
 {
-"read_chs": ["AIN1 <LEFT_PD>", "AIN2 <CENTER_PD>", "AIN4 <ONSCREEN_PD>", "FIO0 <RWA>", "FIO1 <RWB>", "EIO5 <EYECAM>", "EIO0 <NPSYNC>", "EIO6 <NPSTART>"],
+"read_chs": ["AIN0 <SQUARE_PD>", "AIN2 <STIM_PD>", "FIO0 <RWA>", "FIO1 <RWB>", "EIO5 <STROBE>", "EIO0 <NPSYNC>", "EIO6 <NPSTART>"],
 "sample_rate": 5000
 }

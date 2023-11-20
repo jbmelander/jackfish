@@ -44,7 +44,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         # self.load_attrs_push.clicked.connect(self.load_attrs)
 
         self.trigger_toggle.stateChanged.connect(self.toggle_trigger)
-        self.trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'On')
+        self.trigger_toggle.setChecked(self.cam.cam.TriggerMode == 'Off')
 
         self.gain_edit.editingFinished.connect(self.edit_gain)
         self.change_gain_display()

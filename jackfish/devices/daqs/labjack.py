@@ -1,7 +1,8 @@
 import numpy as np
 import time
-import matplotlib.pyplot as plt
+import os
 from datetime import datetime
+import matplotlib.pyplot as plt
 import sys
 from labjack import ljm
 from collections import deque
@@ -155,11 +156,19 @@ class LabJack():
                 
                 recording_duration = self.stream_end_time - self.stream_start_time
                 tt = recording_duration.seconds + float(recording_duration.microseconds) / 1000000
+
+                  
                 print("Time taken = %f seconds" % (tt))
                 print("LJM Scan Rate = %f scans/second" % (self.scanRate))
                 print("Timed Scan Rate = %f scans/second" % (self.totScans / tt))
                 print("Timed Sample Rate = %f samples/second" % (self.totScans * self.n_input_channels / tt))
                 print("Skipped scans = %0.0f" % (self.totSkip / self.n_input_channels))
+
+                with open(os.path.expanduser('~/.config/labjack/scanrates_{}.txt'.format(datetime.now())), 'a') as scanfile:
+                    scanfile.write('LJM scan rate = ' + str(self.scanRate) + '\n')
+                    scanfile.write('Timed scan rate = ' + str(self.totScans / tt) + '\n')
+                    scanfile.write('Timed sample rate = ' + str(self.totScans * self.n_input_channels / tt) + '\n')
+                    scanfile.write('Skipped scans = ' + str(self.totSkip / self.n_input_channels) + '\n')
 
             except ljm.LJMError:
                 ljme = sys.exc_info()[1]
@@ -183,7 +192,6 @@ class LabJack():
                 scans = len(data) / self.n_input_channels
                 self.totScans += scans
 
-                print(time.time()-t)
                 t = time.time()
 
                 # Count the skipped samples which are indicated by -9999 values. Missed
