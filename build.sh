@@ -10,3 +10,6 @@ pyuic5 -o $JACKFISH_DIR/jackfish/gui/main_gui.py $JACKFISH_DIR/jackfish/gui/main
 pyuic5 -o $JACKFISH_DIR/jackfish/gui/review_gui.py $JACKFISH_DIR/jackfish/gui/review_gui.ui
 pyuic5 -o $JACKFISH_DIR/jackfish/gui/cam_gui.py $JACKFISH_DIR/jackfish/gui/cam_gui.ui
 pyuic5 -o $JACKFISH_DIR/jackfish/gui/daq_gui.py $JACKFISH_DIR/jackfish/gui/daq_gui.ui
+
+echo "Build complete"
+sleep 1

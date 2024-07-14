@@ -11,10 +11,9 @@
 
     "Width": 360,
     "Height": 270,
-    
-    "LineSelector": "Line1",
-    "LineMode": "Output",
-    "LineSource": "ExposureActive",
+
+    "LineSelector": "Line3",
+    "LineMode": "Input",
 
     "GainAuto": "Off",
     "Gain": 0.0,
@@ -28,8 +27,9 @@
 
     "TriggerMode": "On", 
     "TriggerSource": "Line3",
-    "TriggerSelector": "AcquisitionStart",
+    "TriggerSelector": "FrameStart",
     "TriggerActivation": "RisingEdge",
+    "TriggerOverlap": "ReadOut",
 
     "AcquisitionFrameRateEnable": true,
     "AcquisitionFrameRate": 200.0

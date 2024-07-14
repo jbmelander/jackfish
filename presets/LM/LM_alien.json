@@ -1,26 +1,26 @@
 {
     "main": {
-        "save_dir": "/home/giocomo/jackfish_data/",
+        "save_dir": "/home/giocomo/data/jackfish_data/",
         "ffmpeg_location": "/usr/bin",
         "max_nvenc_sessions": 5
     },
     
     "cameras": {
         "Pupilcam": {
-            "serial_number": "23175592",
-            "attrs_json": "/home/giocomo/src/jackfish/presets/LM/cam_23175592.json"
+            "serial_number": "23211830",
+            "attrs_json": "/home/giocomo/src/jackfish/presets/LM/cam_23211830.json"
         },
-        "Body cam": {
-            "serial_number": "20137671",
-            "attrs_json": "/home/giocomo/src/jackfish/presets/LM/cam_20137671.json"
+        "zoom": {
+            "serial_number": "23199179",
+            "attrs_json": "/home/giocomo/src/jackfish/presets/LM/cam_23199179.json"
         },
-        "Body cam L": {
+        "Body cam secondary": {
+            "serial_number": "23169306",
+            "attrs_json": "/home/giocomo/src/jackfish/presets/LM/cam_23169306.json"
+        },
+        "Body cam L primary": {
             "serial_number": "23211829",
             "attrs_json": "/home/giocomo/src/jackfish/presets/LM/cam_23211829.json"
-        },
-        "Color cam": {
-            "serial_number": "23175601",
-            "attrs_json": "/home/giocomo/src/jackfish/presets/LM/cam_23175601.json"
         }
     },
     "DAQs": {
