@@ -5,13 +5,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 # import cv2
+
+from PyQt5.QtCore import QThread, pyqtSignal
+
 import skvideo
 import skvideo.io
 import json
 from simple_pyspin import Camera
 import PySpin
 
-class FlirCam:
+class FlirCam(QThread):
+    # custom signal that a new frame is available
+    new_frame_signal = pyqtSignal(bool)
+
     def __init__(self, serial_number=0, attrs_json_fn=None, ffmpeg_location='/usr/bin'):
         '''
         serial_number: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.
@@ -234,6 +240,9 @@ class FlirCam:
             self.frame_num = frame_num
             self.frame = frame
             self.frame_ts = frame_ts
+
+            # Emit the signal with the new QImage
+            self.new_frame_signal.emit(True)
 
             return frame, frame_num, frame_ts, frame_ts_cpu
         
