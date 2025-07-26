@@ -26,15 +26,19 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if serial_number is None: serial_number = 0
 
         from jackfish.devices.cameras.flir import FlirCam
-        self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path, ffmpeg_location=parent.ffmpeg_location)
+        self.cam = FlirCam(serial_number=serial_number, 
+                           attrs_json_fn=attrs_json_path, 
+                           ffmpeg_location=parent.ffmpeg_location, 
+                           parent=self)
         self.serial_number = self.cam.serial_number
         
         icon_path = os.path.join(utils.ROOT_DIR,'assets/icon.png')
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
 
-        self.preview_update_timer = QtCore.QTimer()
-        self.preview_update_timer.timeout.connect(self.preview_updater)
+        # self.preview_update_timer = QtCore.QTimer()
+        # self.preview_update_timer.timeout.connect(self.preview_updater)
+        self.cam.new_frame_signal.connect(self.preview_updater)
 
         self.frame_num_preview = 0
 
@@ -78,7 +82,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if self.status != Status.STANDBY:
             utils.message_window("Error", "Currently recording or previewing.")
         self.frame_num_preview = 0
-        self.preview_update_timer.start()
+        # self.preview_update_timer.start()
 
         # Start rec/preview before camera, so that no frames are missed.
         if record:
@@ -98,7 +102,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
     def stop(self):
         if self.status == Status.STANDBY:
             utils.message_window("Error", "Already on standby.")
-        self.preview_update_timer.stop()
+        # self.preview_update_timer.stop()
 
         # Stop rec/preview after camera, so that no frames are missed.
         self.cam.stop()
@@ -121,7 +125,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.fr_edit.setText(f'{fr:.02f}')
 
     def set_write_path(self, dir, file_name=None):
-        self.preview_update_timer.stop()
+        # self.preview_update_timer.stop()
         if file_name is None:
             file_name = f'cam_{self.cam.serial_number}.mp4'
         self.cam.set_video_out_path(os.path.join(dir, file_name))
