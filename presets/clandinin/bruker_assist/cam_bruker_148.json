@@ -7,10 +7,10 @@
     
     "ExposureMode": "Timed",
     "ExposureAuto": "Off",
-    "ExposureTime": 2500.0,
+    "ExposureTime": 7000.0,
     
-    "Width": 720,
-    "Height": 540,
+    "Width": 1440,
+    "Height": 1080,
     
     "LineSelector": "Line1",
     "LineMode": "Output",
@@ -26,7 +26,7 @@
     "SharpnessEnabled": false,
     "SharpnessAuto": "Off",
     
-    "TriggerMode": "On",
+    "TriggerMode": "Off",
     "TriggerSource": "Line3",
     "TriggerSelector": "FrameStart",
     "TriggerActivation": "RisingEdge",

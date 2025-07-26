@@ -7,12 +7,12 @@
     
     "ExposureMode": "Timed",
     "ExposureAuto": "Off",
-    "ExposureTime": 2500.0,
+    "ExposureTime": 2100.0,
     
     "Width": 720,
     "Height": 540,
     
-    "LineSelector": "Line1",
+    "LineSelector": "Line2",
     "LineMode": "Output",
     "LineSource": "ExposureActive",
     
@@ -33,6 +33,6 @@
     
     "AcquisitionFrameRateAuto": "Off",
     "AcquisitionFrameRateEnabled": true,
-    "AcquisitionFrameRate": 200.0
+    "AcquisitionFrameRate": 130.0
     }
 }
