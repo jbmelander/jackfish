@@ -26,7 +26,10 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if serial_number is None: serial_number = 0
 
         from jackfish.devices.cameras.flir import FlirCam
-        self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path, ffmpeg_location=parent.ffmpeg_location)
+        self.cam = FlirCam(serial_number=serial_number, 
+                           attrs_json_fn=attrs_json_path, 
+                           ffmpeg_location=parent.ffmpeg_location, 
+                           parent=self)
         self.serial_number = self.cam.serial_number
         
         icon_path = os.path.join(utils.ROOT_DIR,'assets/icon.png')
