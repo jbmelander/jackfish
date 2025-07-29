@@ -730,7 +730,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Freeze</string>
+     <string>Trigger Mode</string>
     </property>
     <property name="checked">
      <bool>false</bool>

@@ -3,7 +3,7 @@ import os
 from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtWidgets import QApplication
 
 from cam_gui import Ui_CamWindow
@@ -33,11 +33,18 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f'Camera {device_name} ({self.cam.serial_number})')
 
-        # self.preview_update_timer = QtCore.QTimer()
-        # self.preview_update_timer.timeout.connect(self.preview_updater)
+        # Timer for regular preview updates
+        self.preview_update_timer = QtCore.QTimer()
+        self.preview_update_timer.timeout.connect(self.preview_updater)
+        
+        # Connect to frame signal for on-demand updates
         self.cam.new_frame_signal.connect(self.preview_updater)
 
         self.frame_num_preview = 0
+        
+        # Preview update mode: 'signal' or 'timer'
+        self.preview_update_mode = 'signal'
+        self.preview_update_interval = 33  # Default 30 Hz (1000/30 ≈ 33ms)
 
         # self.init_push.setCheckable(True)
         # self.init_push.clicked.connect(self.init_cam)
@@ -68,7 +75,93 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.preview_toggle.stateChanged.connect(self.toggle_preview)
         self.toggle_preview()
 
+        # Add preview update mode controls
+        self.setup_preview_controls()
+
         self.resizeEvent(None)
+
+    def setup_preview_controls(self):
+        """Add UI controls for preview update mode and interval"""
+        # Position the controls above the pachanoi image (which starts at y=208)
+        # Update mode toggle
+        self.timer_mode_toggle = QtWidgets.QCheckBox("Use Timer Mode", self.control_frame)
+        self.timer_mode_toggle.setGeometry(30, 100, 141, 21)
+        font = QFont()
+        font.setPointSize(11)
+        self.timer_mode_toggle.setFont(font)
+        self.timer_mode_toggle.setChecked(False)
+        self.timer_mode_toggle.stateChanged.connect(self.toggle_update_mode)
+        
+        # Update interval label and input
+        self.interval_label = QtWidgets.QLabel("Rate (Hz):", self.control_frame)
+        self.interval_label.setGeometry(30, 125, 70, 21)
+        self.interval_label.setFont(font)
+        
+        self.interval_edit = QtWidgets.QLineEdit(self.control_frame)
+        self.interval_edit.setGeometry(100, 125, 50, 21)
+        self.interval_edit.setFont(font)
+        self.interval_edit.setText("30")
+        self.interval_edit.returnPressed.connect(self.change_update_interval)
+        
+        # Initially disable interval controls since signal mode is default
+        self.interval_label.setEnabled(False)
+        self.interval_edit.setEnabled(False)
+        
+        # Make sure controls are visible
+        self.timer_mode_toggle.show()
+        self.interval_label.show()
+        self.interval_edit.show()
+
+    def toggle_update_mode(self):
+        """Toggle between signal-based and timer-based preview updates"""
+        use_timer = self.timer_mode_toggle.isChecked()
+        
+        if use_timer:
+            # Switch to timer mode
+            self.preview_update_mode = 'timer'
+            # Disconnect signal-based updates
+            try:
+                self.cam.new_frame_signal.disconnect(self.preview_updater)
+            except TypeError:
+                pass  # Already disconnected
+            
+            # Enable timer controls
+            self.interval_label.setEnabled(True)
+            self.interval_edit.setEnabled(True)
+            
+            # Start timer if preview is on and we're running
+            if self.preview_on and self.status != Status.STANDBY:
+                self.preview_update_timer.start(self.preview_update_interval)
+        else:
+            # Switch to signal mode
+            self.preview_update_mode = 'signal'
+            # Stop timer
+            self.preview_update_timer.stop()
+            
+            # Disable timer controls
+            self.interval_label.setEnabled(False)
+            self.interval_edit.setEnabled(False)
+            
+            # Reconnect signal-based updates
+            self.cam.new_frame_signal.connect(self.preview_updater)
+
+    def change_update_interval(self):
+        """Change the timer update interval based on input frequency"""
+        try:
+            frequency = float(self.interval_edit.text())
+            if frequency > 0:
+                self.preview_update_interval = int(1000 / frequency)  # Convert Hz to ms
+                
+                # Restart timer with new interval if it's running
+                if self.preview_update_timer.isActive():
+                    self.preview_update_timer.stop()
+                    self.preview_update_timer.start(self.preview_update_interval)
+            else:
+                raise ValueError("Frequency must be positive")
+        except ValueError:
+            # Reset to previous valid value
+            freq = 1000 / self.preview_update_interval
+            self.interval_edit.setText(f"{freq:.1f}")
 
     def init_cam(self):
         if self.cam is not None:
@@ -79,7 +172,6 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if self.status != Status.STANDBY:
             utils.message_window("Error", "Currently recording or previewing.")
         self.frame_num_preview = 0
-        # self.preview_update_timer.start()
 
         # Start rec/preview before camera, so that no frames are missed.
         if record:
@@ -94,12 +186,19 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
             self.status = Status.PREVIEWING
         self.cam.start()
 
+        # Start timer if in timer mode and preview is on
+        if self.preview_update_mode == 'timer' and self.preview_on:
+            self.preview_update_timer.start(self.preview_update_interval)
+
         self.update_ui()
 
     def stop(self):
         if self.status == Status.STANDBY:
             utils.message_window("Error", "Already on standby.")
-        # self.preview_update_timer.stop()
+
+        # Stop timer if running
+        if self.preview_update_timer.isActive():
+            self.preview_update_timer.stop()
 
         # Stop rec/preview after camera, so that no frames are missed.
         self.cam.stop()
@@ -134,6 +233,17 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
 
     def toggle_preview(self):
         self.preview_on = self.preview_toggle.isChecked()
+        
+        # Handle timer based on preview state and mode
+        if self.preview_update_mode == 'timer':
+            if self.preview_on and self.status != Status.STANDBY:
+                # Start timer if preview is on and we're running
+                if not self.preview_update_timer.isActive():
+                    self.preview_update_timer.start(self.preview_update_interval)
+            else:
+                # Stop timer if preview is off
+                if self.preview_update_timer.isActive():
+                    self.preview_update_timer.stop()
 
     def toggle_trigger(self):
         self.cam.cam.TriggerMode = 'On' if self.trigger_toggle.isChecked() else 'Off'
@@ -185,10 +295,14 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         self.hist.setLevels(min_level, max_level)
 
     def preview_updater(self):
-        if self.preview_on and self.cam.frame_num > self.frame_num_preview:
+        # Check if preview is enabled and we have frames to display
+        if not self.preview_on:
+            return
+        
+        if hasattr(self.cam, 'frame_num') and self.cam.frame_num > self.frame_num_preview:
             self.preview.clear()
             self.preview.setImage(self.cam.frame.T, autoLevels=False, levels=self.levels, autoHistogramRange=False)
-            self.preview.setLevels(self.levels[0],self.levels[1])
+            self.preview.setLevels(self.levels[0], self.levels[1])
             self.frame_num_preview = self.cam.frame_num
 
     def resizeEvent(self, event):
