@@ -6,13 +6,36 @@
     "cameras": {
         "364": {
             "serial_number": "18384364",
-            "attrs_json": "/home/clandininlab/lib/jackfish/presets/clandinin/bruker_assist/cam_bruker_364.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_364.json"
         },
         "364_ft": {
             "serial_number": "18384364",
-            "attrs_json": "/home/clandininlab/lib/jackfish/presets/clandinin/bruker_assist/cam_bruker_364_ft.json"
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_364_ft.json"
+        },
+        "364_ft_strobe": {
+            "serial_number": "18384364",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_364_ft_strobe.json"
+        },
+        "364_ft_strobe_MC": {
+            "serial_number": "18384364",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_364_ft_strobe_mc.json"
+        },
+        "364_ft_strobe_DT": {
+            "serial_number": "18384364",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_364_ft_strobe_trig.json"
+        },
+        "364_ft_yw": {
+            "serial_number": "18384364",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_364_ft_yw.json"
+        },
+        "148": {
+            "serial_number": "21077148",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_148.json"
+        },
+        "148_AS": {
+            "serial_number": "21077148",
+            "attrs_json": "/home/clandinin/src/jackfish/presets/clandinin/bruker_assist/cam_bruker_148_AS.json"
         }
-
     },
     "DAQs": {
     }

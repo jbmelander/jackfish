@@ -12,7 +12,7 @@
     "Width": 720,
     "Height": 540,
     
-    "LineSelector": "Line1",
+    "LineSelector": "Line2",
     "LineMode": "Output",
     "LineSource": "ExposureActive",
     
@@ -28,7 +28,7 @@
     
     "TriggerMode": "On",
     "TriggerSource": "Line3",
-    "TriggerSelector": "FrameStart",
+    "TriggerSelector": "AcquisitionStart",
     "TriggerActivation": "RisingEdge",
     
     "AcquisitionFrameRateAuto": "Off",

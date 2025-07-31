@@ -18,10 +18,12 @@ class FlirCam(QThread):
     # custom signal that a new frame is available
     new_frame_signal = pyqtSignal(bool)
 
-    def __init__(self, serial_number=0, attrs_json_fn=None, ffmpeg_location='/usr/bin'):
+    def __init__(self, serial_number=0, attrs_json_fn=None, ffmpeg_location='/usr/bin', parent=None):
         '''
         serial_number: int or str (defalult: 0) If an int, the index of the camera to acquire. If a string, the serial number of the camera.
         '''
+        super().__init__(parent)
+
         self.cam = Camera(index=serial_number)
         self.cam.init()
         self.serial_number = self.get_cam_serial_number()

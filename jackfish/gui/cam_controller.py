@@ -26,7 +26,7 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         if serial_number is None: serial_number = 0
 
         from jackfish.devices.cameras.flir import FlirCam
-        self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path, ffmpeg_location=parent.ffmpeg_location)
+        self.cam = FlirCam(serial_number=serial_number, attrs_json_fn=attrs_json_path, ffmpeg_location=parent.ffmpeg_location, parent=self)
         self.serial_number = self.cam.serial_number
         
         icon_path = os.path.join(utils.ROOT_DIR,'assets/icon.png')
@@ -84,8 +84,8 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         """Add UI controls for preview update mode and interval"""
         # Position the controls above the pachanoi image (which starts at y=208)
         # Update mode toggle
-        self.timer_mode_toggle = QtWidgets.QCheckBox("Use Timer Mode", self.control_frame)
-        self.timer_mode_toggle.setGeometry(30, 100, 141, 21)
+        self.timer_mode_toggle = QtWidgets.QCheckBox("Preview Timer Mode", self.control_frame)
+        self.timer_mode_toggle.setGeometry(30, 310, 170, 21)
         font = QFont()
         font.setPointSize(11)
         self.timer_mode_toggle.setFont(font)
@@ -94,11 +94,11 @@ class CamUI(QtWidgets.QFrame, Ui_CamWindow):
         
         # Update interval label and input
         self.interval_label = QtWidgets.QLabel("Rate (Hz):", self.control_frame)
-        self.interval_label.setGeometry(30, 125, 70, 21)
+        self.interval_label.setGeometry(30, 330, 70, 21)
         self.interval_label.setFont(font)
         
         self.interval_edit = QtWidgets.QLineEdit(self.control_frame)
-        self.interval_edit.setGeometry(100, 125, 50, 21)
+        self.interval_edit.setGeometry(100, 330, 50, 21)
         self.interval_edit.setFont(font)
         self.interval_edit.setText("30")
         self.interval_edit.returnPressed.connect(self.change_update_interval)
